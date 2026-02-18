@@ -60,7 +60,7 @@ Scope:
 - docs/SSOT/STATE.md
 
 Links:
-- PR: <fill-after-pr-created>
+- PR: https://github.com/Hello-Pork-Belly/1click/pull/1
 
 ## 2026-02-18 — D-009: 1click minimal bootstrap import policy
 
@@ -84,7 +84,7 @@ Version / release policy:
 - No release in this PR; release/tag actions remain a later explicit step under normal tag/release governance.
 
 Links:
-- PR: <fill-after-pr-created>
+- PR: https://github.com/Hello-Pork-Belly/1click/pull/1
 
 ## Template
 ### YYYY-MM-DD — <Decision Title>

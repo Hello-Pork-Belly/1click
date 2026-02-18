@@ -66,7 +66,7 @@ Parallel rule: only one active task unless Commander explicitly documents an app
     `docs/SSOT/一键安装构思.txt`, `docs/SSOT/一键安装流程机制.txt`
   - DoD verification command: `make check`
   - PASS criteria: command exits with code `0`
-  - PR URL: `<fill-after-pr-created>`
+  - PR URL: `https://github.com/Hello-Pork-Belly/1click/pull/1`
 - T-RRC-001: Build Reality Snapshot A0 from remote (`main/tag/open PR/actions`) before opening the next implementation task (Tracking: https://github.com/Hello-Pork-Belly/horizon-openai/pulls, Evidence pending: `gh` is unavailable in current environment).
 
 ## Next (Phase 5 aligned roadmap)
