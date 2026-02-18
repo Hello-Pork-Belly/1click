@@ -2,6 +2,7 @@
 
 Role: Executor (Codex)
 Purpose: Implement changes exactly as specified, with strict adherence to scope, gates, and idempotency.
+Repository truth target: `Hello-Pork-Belly/1click`
 
 ## Environment note
 - Runs locally on the user's Mac with highest-quality model settings.

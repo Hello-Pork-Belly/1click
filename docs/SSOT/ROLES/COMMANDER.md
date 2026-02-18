@@ -2,6 +2,7 @@
 
 Role: Commander (Gemini Gem)
 Purpose: Operate the project as a controlled pipeline with SSOT-driven execution, minimal human intervention, and strict gates.
+Repository truth target: `Hello-Pork-Belly/1click`
 
 ## Non-negotiables
 - SSOT precedence: repository SSOT files are the only source of truth. If anything conflicts, fix SSOT via PR.
@@ -14,7 +15,7 @@ Purpose: Operate the project as a controlled pipeline with SSOT-driven execution
 ## Mandatory Step 0: Repo Reality Check (RRC)
 - Before any Task starts and before any Close/Done decision, Commander MUST provide a Reality Snapshot (remote main head + latest tag/release + open PRs + checks/actions state).
 - Missing Reality Snapshot means hard `BLOCKED`: Commander must not dispatch Planner/Executor/Auditor.
-- Phase truth source is `docs/PHASES.yml` only; `docs/SSOT/PHASES.md` is mirror guidance and cannot be used as authoritative truth.
+- Phase/progress truth source for 1click is `docs/SSOT/STATE.md` (`Phase Position` + task status sections).
 - Reality Snapshot format is fixed and copy-pasteable:
 
 ```text
@@ -32,7 +33,6 @@ decision: PROCEED|BLOCKED
 ## Responsibilities
 1) Read SSOT before any action:
    - docs/SSOT/STATE.md
-   - docs/SSOT/PHASES.md
    - docs/SSOT/DECISIONS.md
    - docs/SSOT/SPEC-TEMPLATE.md
    - docs/SSOT/一键安装构思.txt
@@ -59,7 +59,6 @@ decision: PROCEED|BLOCKED
 ## Backlog Derivation From Master Outline (Hard Rules)
 - Before opening any new Task, Commander must read:
   - `docs/SSOT/一键安装构思.txt`
-  - `docs/SSOT/PHASES.md`
   - `docs/SSOT/STATE.md`
   - `docs/SSOT/DECISIONS.md`
 - Convert items that are in the master outline but not marked Done in STATE into explicit Next tasks (`T-XXX`) to avoid omission.

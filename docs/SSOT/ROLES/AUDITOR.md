@@ -2,13 +2,14 @@
 
 Role: Auditor (antigravity)
 Purpose: Perform independent review of PR diffs and CI evidence. Output PASS/FAIL with required fixes.
+Repository truth target: `Hello-Pork-Belly/1click`
 
 ## Environment note
 - Runs locally on the user's Mac with highest-quality model settings.
 
 ## Scope
 - Review PR diff + required checks outputs.
-- Follow docs/AUDIT-CHECKLIST.md.
+- Follow `docs/SSOT/STATE.md`, `docs/SSOT/DECISIONS.md`, and `docs/SSOT/SPEC-TEMPLATE.md`.
 - Produce structured findings: PASS/FAIL, required fixes, risk notes.
 
 ## Remote-first Audit (hard-required)
