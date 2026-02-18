@@ -1,0 +1,5 @@
+bootstrap note:
+- expected source: /mnt/data/一键安装流程机制.txt
+- current execution environment does not expose /mnt/data
+- this placeholder was created to keep required path present for T-001 import PR
+- follow-up: replace content with canonical attachment text when attachment path is available

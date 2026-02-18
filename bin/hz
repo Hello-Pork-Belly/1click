@@ -1,0 +1,888 @@
+#!/bin/bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# shellcheck source=lib/logging.sh
+. "${REPO_ROOT}/lib/logging.sh"
+# shellcheck source=lib/cli_core.sh
+. "${REPO_ROOT}/lib/cli_core.sh"
+# shellcheck source=lib/recipe_loader.sh
+. "${REPO_ROOT}/lib/recipe_loader.sh"
+# shellcheck source=lib/inventory.sh
+. "${REPO_ROOT}/lib/inventory.sh"
+
+hz__apply_global_flags() {
+  ARGS_OUT=()
+  local a v
+  for a in "$@"; do
+    case "$a" in
+      -v|--verbose)
+        LOG_LEVEL="DEBUG"
+        HZ_DEBUG="1"
+        ;;
+      -q|--quiet)
+        LOG_LEVEL="ERROR"
+        ;;
+      --dry-run)
+        HZ_DRY_RUN="1"
+        ;;
+      --dry-run=*)
+        v="${a#--dry-run=}"
+        HZ_DRY_RUN="${v}"
+        ;;
+      *)
+        ARGS_OUT+=("$a")
+        ;;
+    esac
+  done
+  export LOG_LEVEL
+  export HZ_DEBUG="${HZ_DEBUG:-0}"
+  export HZ_DRY_RUN="${HZ_DRY_RUN:-0}"
+}
+
+hz__parse_install_args() {
+  RECIPE_NAME=""
+  HZ_HOST=""
+  HZ_TARGET_INPUT=""
+  HZ_LOCAL_MODE="0"
+  HZ_HEADLESS="0"
+
+  local a
+  while [[ $# -gt 0 ]]; do
+    a="$1"
+    case "$a" in
+      --host=*) HZ_HOST="${a#--host=}"; shift ;;
+      --host) shift; HZ_HOST="${1:-}"; shift || true ;;
+      --target=*) HZ_TARGET_INPUT="${a#--target=}"; shift ;;
+      --target) shift; HZ_TARGET_INPUT="${1:-}"; shift || true ;;
+      --local-mode) HZ_LOCAL_MODE="1"; shift ;;
+      --headless) HZ_HEADLESS="1"; shift ;;
+      --rolling) shift; : "${1:-}"; shift || true ;;
+      --rolling=*) shift ;;
+      --pause) shift; : "${1:-}"; shift || true ;;
+      --pause=*) shift ;;
+      --timeout) shift; : "${1:-}"; shift || true ;;
+      --timeout=*) shift ;;
+      --) shift; break ;;
+      -*) log_error "unknown flag for install: ${a}"; return 1 ;;
+      *)
+        if [[ -z "$RECIPE_NAME" ]]; then
+          RECIPE_NAME="$a"
+        else
+          log_error "unexpected extra arg for install: ${a}"
+          return 1
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  [[ -n "$RECIPE_NAME" ]] || return 1
+  return 0
+}
+
+hz__should_record() {
+  local cmd="${1:-}"
+  [[ "${HZ_NO_RECORD:-0}" == "1" ]] && return 1
+  case "$cmd" in
+    install|diagnose|doctor|run) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+hz__record_target_label() {
+  local fallback
+  fallback="$(hostname -s 2>/dev/null || echo localhost)"
+  if [[ -n "${HZ_TARGET_INPUT:-}" ]]; then
+    echo "${HZ_TARGET_INPUT}"
+  elif [[ -n "${HZ_HOST:-}" ]]; then
+    echo "${HZ_HOST}"
+  else
+    echo "${fallback}"
+  fi
+}
+
+hz__run_with_recording() {
+  local target_label="$1"
+  local cmd_label="$2"
+  shift 2
+
+  local logfile
+  logfile="$(hz_record_prepare "$target_label" "$cmd_label")"
+
+  log_info "recording: ${logfile}"
+
+  local had_errexit=0
+  [[ $- == *e* ]] && had_errexit=1
+  set +e
+
+  "$@" \
+    > >(tee -a "$logfile") \
+    2> >(tee -a "$logfile" >&2)
+  local rc=$?
+
+  (( had_errexit == 1 )) && set -e
+  return "$rc"
+}
+
+hz__cmd_ping() {
+  local target=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --target) target="${2:-}"; shift 2 ;;
+      --target=*) target="${1#*=}"; shift ;;
+      -h|--help)
+        echo "Usage: hz ping --target user@host|alias"
+        return 0
+        ;;
+      *)
+        echo "Unknown argument for ping: $1" >&2
+        echo "Usage: hz ping --target user@host|alias" >&2
+        return 1
+        ;;
+    esac
+  done
+
+  if [[ -z "${target}" ]]; then
+    echo "ping: missing --target" >&2
+    echo "Usage: hz ping --target user@host|alias" >&2
+    return 1
+  fi
+
+  if declare -F inventory_resolve_target >/dev/null 2>&1; then
+    inventory_resolve_target "${target}" || return 1
+    target="${HZ_RESOLVED_TARGET:-$target}"
+  fi
+
+  if ! command -v ssh_test >/dev/null 2>&1; then
+    echo "ping: ssh transport not available (ssh_test not found)" >&2
+    return 1
+  fi
+
+  log_info "ping: testing ssh connectivity to target=${target}"
+  if ssh_test "${target}"; then
+    log_info "ping: ok"
+    return 0
+  else
+    local rc=$?
+    log_error "ping: failed (rc=${rc})"
+    return "${rc}"
+  fi
+}
+
+hz__cmd_inventory() {
+  # Usage:
+  #   hz inventory resolve <target>
+  # Examples:
+  #   hz inventory resolve @all-nodes   -> prints "host-a host-b"
+  #   hz inventory resolve web01        -> prints "web01" (idempotent)
+  local action="${1:-}"
+  shift || true
+
+  case "${action}" in
+    resolve)
+      local target="${1:-}"
+      if [[ -z "${target}" ]]; then
+        echo "Usage: hz inventory resolve <@group|target>" >&2
+        return 1
+      fi
+
+      if [[ "${target}" == @* ]]; then
+        inventory_resolve_group "${target}"
+        return $?
+      fi
+
+      # Idempotent behavior per T-025: non-group targets are echoed back.
+      printf '%s\n' "${target}"
+      return 0
+      ;;
+    ""|-h|--help|help)
+      cat <<'EOF'
+Usage:
+  hz inventory resolve <@group|target>
+
+Notes:
+  - If target starts with '@', it is treated as a group alias and expanded via inventory/groups/<name>.yml
+  - Otherwise the target is echoed back (idempotent). This is intentional for T-025 verification.
+EOF
+      return 0
+      ;;
+    *)
+      echo "Unknown inventory action: ${action}" >&2
+      echo "Try: hz inventory --help" >&2
+      return 1
+      ;;
+  esac
+}
+
+hz__cmd_notify() {
+  # Usage:
+  #   hz notify --title <t> --message <m> [--status INFO|SUCCESS|FAILURE|WARN]
+  local title=""
+  local message=""
+  local status="INFO"
+  local arg
+
+  while [[ $# -gt 0 ]]; do
+    arg="$1"
+    case "${arg}" in
+      --title)
+        shift
+        title="${1:-}"
+        ;;
+      --title=*)
+        title="${arg#--title=}"
+        ;;
+      --message)
+        shift
+        message="${1:-}"
+        ;;
+      --message=*)
+        message="${arg#--message=}"
+        ;;
+      --status)
+        shift
+        status="${1:-INFO}"
+        ;;
+      --status=*)
+        status="${arg#--status=}"
+        ;;
+      -h|--help)
+        echo "Usage: hz notify --title <t> --message <m> [--status INFO|SUCCESS|FAILURE|WARN]"
+        return 0
+        ;;
+      *)
+        echo "Unknown notify arg: ${arg}" >&2
+        echo "Usage: hz notify --title <t> --message <m> [--status INFO|SUCCESS|FAILURE|WARN]" >&2
+        return 1
+        ;;
+    esac
+    shift || true
+  done
+
+  if [[ -z "${title}" ]]; then
+    echo "notify: --title is required" >&2
+    return 1
+  fi
+  if [[ -z "${message}" ]]; then
+    echo "notify: --message is required" >&2
+    return 1
+  fi
+
+  if ! command -v notify_send >/dev/null 2>&1; then
+    echo "notify: notify_send not available (lib/notify.sh not sourced)" >&2
+    return 1
+  fi
+
+  notify_send "${title}" "${message}" "${status}"
+  return 0
+}
+
+hz__cmd_report() {
+  local sub="${1:-}"
+  shift || true
+
+  case "${sub}" in
+    html)
+      if ! command -v html_render_report >/dev/null 2>&1; then
+        log_error "report: html renderer not available (lib/html_renderer.sh not sourced)"
+        return 1
+      fi
+
+      local in=""
+      local out=""
+      local latest="0"
+      local arg
+      while [[ $# -gt 0 ]]; do
+        arg="$1"
+        case "${arg}" in
+          --latest)
+            latest="1"
+            ;;
+          --out)
+            shift
+            out="${1:-}"
+            ;;
+          --out=*)
+            out="${arg#--out=}"
+            ;;
+          -h|--help)
+            cat <<'EOF'
+Usage:
+  hz report html --latest [--out <output.html>]
+  hz report html <path/to/report.jsonl> [--out <output.html>]
+EOF
+            return 0
+            ;;
+          *)
+            if [[ -z "${in}" ]]; then
+              in="${arg}"
+            else
+              log_error "report html: unexpected argument: ${arg}"
+              return 1
+            fi
+            ;;
+        esac
+        shift || true
+      done
+
+      if [[ "${latest}" == "1" ]]; then
+        in="$(html_find_latest_jsonl)" || {
+          log_error "report html: no *.report.jsonl found under records/"
+          return 1
+        }
+      fi
+
+      [[ -n "${in}" ]] || {
+        log_error "report html: missing input (use --latest or provide jsonl path)"
+        return 1
+      }
+
+      if [[ -z "${out}" ]]; then
+        out="${in%.jsonl}.html"
+      fi
+
+      log_info "report: rendering html: ${in} -> ${out}"
+      html_render_report "${in}" "${out}"
+      return $?
+      ;;
+    ""|-h|--help|help)
+      cat <<'EOF'
+Usage:
+  hz report html --latest [--out <output.html>]
+  hz report html <path/to/report.jsonl> [--out <output.html>]
+EOF
+      return 0
+      ;;
+    *)
+      log_error "Unknown report subcommand: ${sub}"
+      return 1
+      ;;
+  esac
+}
+
+hz__cmd_secret() {
+  local action="${1:-}"
+  shift || true
+
+  case "${action}" in
+    gen-key)
+      crypto_gen_key
+      return $?
+      ;;
+    encrypt)
+      if [[ $# -gt 0 ]]; then
+        crypto_encrypt_string "$*"
+      else
+        crypto_encrypt_string ""
+      fi
+      return $?
+      ;;
+    decrypt)
+      if [[ $# -gt 0 ]]; then
+        crypto_decrypt_string "$*"
+      else
+        crypto_decrypt_string ""
+      fi
+      return $?
+      ;;
+    ""|-h|--help|help)
+      cat <<'EOF'
+Usage:
+  hz secret gen-key
+  hz secret encrypt "<plaintext>"
+  hz secret decrypt "HZENC:..."
+
+Notes:
+  - HZ_SECRET_KEY is required for encrypt/decrypt.
+  - Input/output format uses HZENC:<base64>.
+EOF
+      return 0
+      ;;
+    *)
+      log_error "Unknown secret action: ${action}"
+      return 1
+      ;;
+  esac
+}
+
+hz__cmd_completion() {
+  local shell="${1:-}"
+  if ! command -v hz_completion_print >/dev/null 2>&1; then
+    log_error "completion: generator not available (lib/completion.sh not sourced)"
+    return 1
+  fi
+  hz_completion_print "${shell}"
+  return $?
+}
+
+hz__cmd_cron() {
+  local sub="${1:-}"
+  shift || true
+
+  local arg
+  case "${sub}" in
+    list)
+      cron_list_tasks
+      return $?
+      ;;
+    add)
+      local name=""
+      local schedule=""
+      local user="root"
+      local cmd=""
+
+      while [[ $# -gt 0 ]]; do
+        arg="$1"
+        case "${arg}" in
+          --name)
+            shift
+            name="${1:-}"
+            ;;
+          --name=*)
+            name="${arg#--name=}"
+            ;;
+          --schedule)
+            shift
+            schedule="${1:-}"
+            ;;
+          --schedule=*)
+            schedule="${arg#--schedule=}"
+            ;;
+          --user)
+            shift
+            user="${1:-root}"
+            ;;
+          --user=*)
+            user="${arg#--user=}"
+            ;;
+          --cmd)
+            shift
+            cmd="${1:-}"
+            ;;
+          --cmd=*)
+            cmd="${arg#--cmd=}"
+            ;;
+          -h|--help)
+            echo 'Usage: hz cron add --name <name> --schedule "<cron_expr>" --user <user> --cmd "<command>"'
+            return 0
+            ;;
+          *)
+            echo "Unknown cron add arg: ${arg}" >&2
+            echo 'Usage: hz cron add --name <name> --schedule "<cron_expr>" --user <user> --cmd "<command>"' >&2
+            return 1
+            ;;
+        esac
+        shift || true
+      done
+
+      cron_add_task "${name}" "${schedule}" "${user}" "${cmd}"
+      return $?
+      ;;
+    remove)
+      local name=""
+      while [[ $# -gt 0 ]]; do
+        arg="$1"
+        case "${arg}" in
+          --name)
+            shift
+            name="${1:-}"
+            ;;
+          --name=*)
+            name="${arg#--name=}"
+            ;;
+          -h|--help)
+            echo 'Usage: hz cron remove --name <name>'
+            return 0
+            ;;
+          *)
+            echo "Unknown cron remove arg: ${arg}" >&2
+            echo 'Usage: hz cron remove --name <name>' >&2
+            return 1
+            ;;
+        esac
+        shift || true
+      done
+
+      cron_remove_task "${name}"
+      return $?
+      ;;
+    ""|-h|--help|help)
+      cat <<'EOF'
+Usage:
+  hz cron list
+  hz cron add --name <name> --schedule "<cron_expr>" --user <user> --cmd "<command>"
+  hz cron remove --name <name>      (requires sudo/root)
+
+Notes:
+  - System cron file: /etc/cron.d/hz-tasks
+  - Run with sudo: sudo ./bin/hz cron ...
+EOF
+      return 0
+      ;;
+    *)
+      echo "Unknown cron subcommand: ${sub}" >&2
+      echo "Try: hz cron --help" >&2
+      return 1
+      ;;
+  esac
+}
+
+hz__cmd_watch() {
+  local sub="${1:-run}"
+  shift || true
+
+  local heal_flag="0"
+  local schedule="*/5 * * * *"
+  local user="root"
+  local name="hz-watchdog"
+  local arg
+
+  case "${sub}" in
+    -h|--help|help)
+      cat <<'EOF'
+Usage:
+  hz watch run [--heal]
+  hz watch install [--schedule "<cron_expr>"] [--user <user>] [--name <taskname>] [--heal]
+
+Notes:
+  - Default schedule: */5 * * * *
+  - install requires sudo/root (writes /etc/cron.d/hz-tasks via hz cron)
+  - --heal enables limited self-healing (v1: nginx restart heuristic)
+EOF
+      return 0
+      ;;
+  esac
+
+  while [[ $# -gt 0 ]]; do
+    arg="$1"
+    case "${arg}" in
+      --heal)
+        heal_flag="1"
+        ;;
+      --schedule)
+        shift
+        schedule="${1:-*/5 * * * *}"
+        ;;
+      --schedule=*)
+        schedule="${arg#--schedule=}"
+        ;;
+      --user)
+        shift
+        user="${1:-root}"
+        ;;
+      --user=*)
+        user="${arg#--user=}"
+        ;;
+      --name)
+        shift
+        name="${1:-hz-watchdog}"
+        ;;
+      --name=*)
+        name="${arg#--name=}"
+        ;;
+      -h|--help)
+        cat <<'EOF'
+Usage:
+  hz watch run [--heal]
+  hz watch install [--schedule "<cron_expr>"] [--user <user>] [--name <taskname>] [--heal]
+
+Notes:
+  - Default schedule: */5 * * * *
+  - install requires sudo/root (writes /etc/cron.d/hz-tasks via hz cron)
+  - --heal enables limited self-healing (v1: nginx restart heuristic)
+EOF
+        return 0
+        ;;
+      *)
+        echo "Unknown watch arg: ${arg}" >&2
+        echo "Try: hz watch --help" >&2
+        return 1
+        ;;
+    esac
+    shift || true
+  done
+
+  case "${sub}" in
+    run|once)
+      export HZ_HEAL="${heal_flag}"
+      watch_run_cycle
+      return $?
+      ;;
+    install)
+      export HZ_HEAL="${heal_flag}"
+      watch_install_cron "${schedule}" "${user}" "${name}"
+      return $?
+      ;;
+    *)
+      echo "Unknown watch subcommand: ${sub}" >&2
+      echo "Try: hz watch --help" >&2
+      return 1
+      ;;
+  esac
+}
+
+hz__maybe_orchestrate_install_group() {
+  # Args: <recipe> [install_args...]
+  local recipe="${1:-}"
+  shift || true
+  HZ_GROUP_HANDLED=0
+
+  local target_input=""
+  local host_override=""
+  local -a rest=()
+  local arg
+
+  while [[ $# -gt 0 ]]; do
+    arg="$1"
+    case "${arg}" in
+      --target)
+        shift
+        target_input="${1:-}"
+        ;;
+      --target=*)
+        target_input="${arg#--target=}"
+        ;;
+      --host)
+        shift
+        host_override="${1:-}"
+        ;;
+      --host=*)
+        host_override="${arg#--host=}"
+        ;;
+      --rolling)
+        shift
+        export HZ_ROLLING_BATCH="${1:-}"
+        ;;
+      --rolling=*)
+        export HZ_ROLLING_BATCH="${arg#--rolling=}"
+        ;;
+      --pause)
+        shift
+        export HZ_ROLLING_PAUSE="${1:-}"
+        ;;
+      --pause=*)
+        export HZ_ROLLING_PAUSE="${arg#--pause=}"
+        ;;
+      --timeout)
+        shift
+        export HZ_TIMEOUT="${1:-}"
+        ;;
+      --timeout=*)
+        export HZ_TIMEOUT="${arg#--timeout=}"
+        ;;
+      *)
+        rest+=("${arg}")
+        ;;
+    esac
+    shift || true
+  done
+
+  # Only handle @group
+  [[ "${target_input}" == @* ]] || return 1
+  HZ_GROUP_HANDLED=1
+
+  if ! command -v inventory_resolve_group >/dev/null 2>&1; then
+    log_error "Group target provided (${target_input}) but inventory_resolve_group() is missing (T-025 not merged?)"
+    return 2
+  fi
+
+  local targets
+  targets="$(inventory_resolve_group "${target_input}")" || return $?
+  if [[ -z "${targets}" ]]; then
+    log_error "Group ${target_input} resolved to empty host list"
+    return 2
+  fi
+
+  if ! command -v orchestrate_execute >/dev/null 2>&1; then
+    log_error "Group target provided (${target_input}) but orchestrator is unavailable (missing lib/orchestrator.sh)"
+    return 2
+  fi
+
+  log_info "Detected group target ${target_input}; spawning parallel installs (HZ_MAX_JOBS=${HZ_MAX_JOBS:-5})"
+  log_debug "Resolved ${target_input} -> ${targets}"
+
+  hz__orch_worker_install() {
+    local member="${1:?missing target}"
+    shift || true
+    local recipe_inner="${1:?missing recipe}"
+    shift || true
+    local host_override_inner="${1:-}"
+    shift || true
+
+    local host_for_member="${host_override_inner:-${member}}"
+
+    # Child process: run a single-target install. --target is concrete host, so
+    # group orchestration is not re-entered.
+    "${0}" install "${recipe_inner}" "$@" --target "${member}" --host "${host_for_member}"
+  }
+
+  local -a orch_args=("${recipe}" "${host_override}")
+  if [[ "${#rest[@]}" -gt 0 ]]; then
+    orch_args+=("${rest[@]}")
+  fi
+
+  # T-028: aggregated reporting for group operations.
+  export HZ_REPORT=1
+  export HZ_REPORT_LABEL="group_${target_input#@}_install_${recipe}"
+  export HZ_REPORT_CMD="install:${recipe}"
+
+  orchestrate_execute "${targets}" hz__orch_worker_install "${orch_args[@]}"
+  return $?
+}
+
+hz__dispatch_install() {
+  export HZ_HOST
+  export HZ_LOCAL_MODE
+  export HZ_HEADLESS
+
+  # Remote dispatch sits inside recording wrapper when enabled.
+  if [[ -n "${HZ_TARGET_INPUT:-}" && "${HZ_LOCAL_MODE:-0}" != "1" ]]; then
+    if ! declare -F remote_execute_recipe >/dev/null 2>&1; then
+      log_error "install: remote runner not available (missing lib/remote_runner.sh)"
+      return 2
+    fi
+    remote_execute_recipe "${RECIPE_NAME}" "${HZ_TARGET_INPUT}" "${HZ_HOST:-}"
+    return $?
+  fi
+
+  hz_recipe_install "${RECIPE_NAME}"
+  return $?
+}
+
+main() {
+  hz__apply_global_flags "$@"
+  set -- "${ARGS_OUT[@]}"
+
+  hz_validate_dry_run || return 1
+
+  local cmd="${1:-}"
+  case "${cmd}" in
+    ""|help|-h|--help)
+      hz_usage
+      return 0
+      ;;
+    version|--version)
+      hz_read_version
+      return 0
+      ;;
+    check)
+      shift || true
+      hz_run_check
+      return $?
+      ;;
+    diagnose|doctor)
+      shift || true
+      if hz__should_record "diagnose"; then
+        hz__run_with_recording "$(hostname -s 2>/dev/null || echo localhost)" "diagnose" \
+          bash "${REPO_ROOT}/tools/diagnostics/run.sh" "$@"
+        return $?
+      fi
+      bash "${REPO_ROOT}/tools/diagnostics/run.sh" "$@"
+      return $?
+      ;;
+    ping)
+      shift || true
+      hz__cmd_ping "$@"
+      return $?
+      ;;
+    cron)
+      shift || true
+      hz__cmd_cron "$@"
+      return $?
+      ;;
+    watch)
+      shift || true
+      hz__cmd_watch "$@"
+      return $?
+      ;;
+    notify)
+      shift || true
+      hz__cmd_notify "$@"
+      return $?
+      ;;
+    report)
+      shift || true
+      hz__cmd_report "$@"
+      return $?
+      ;;
+    secret)
+      shift || true
+      hz__cmd_secret "$@"
+      return $?
+      ;;
+    completion)
+      shift || true
+      hz__cmd_completion "$@"
+      return $?
+      ;;
+    inventory)
+      shift || true
+      hz__cmd_inventory "$@"
+      return $?
+      ;;
+    install)
+      shift || true
+
+      # T-026: group target parallel orchestrator
+      local rc=0
+      HZ_GROUP_HANDLED=0
+      hz__maybe_orchestrate_install_group "$@" || rc=$?
+      if [[ "${HZ_GROUP_HANDLED:-0}" == "1" ]]; then
+        return "${rc}"
+      fi
+      if [[ "${rc}" -ne 1 ]]; then
+        return "${rc}"
+      fi
+
+      if ! hz__parse_install_args "$@"; then
+        hz_usage
+        return 1
+      fi
+
+      local record_target record_cmd
+      record_target="$(hz__record_target_label)"
+      record_cmd="install-${RECIPE_NAME}"
+
+      if hz__should_record "install"; then
+        hz__run_with_recording "${record_target}" "${record_cmd}" hz__dispatch_install
+        return $?
+      fi
+
+      hz__dispatch_install
+      return $?
+      ;;
+    recipe)
+      shift || true
+      case "${1:-}" in
+        list) hz_list_targets "recipes"; return 0 ;;
+        "") hz_usage; return 1 ;;
+        *)
+          [[ $# -ge 2 ]] || { hz_usage; return 1; }
+          hz_run_target "recipes" "$1" "$2"
+          return $?
+          ;;
+      esac
+      ;;
+    module)
+      shift || true
+      case "${1:-}" in
+        list) hz_list_targets "modules"; return 0 ;;
+        "") hz_usage; return 1 ;;
+        *)
+          [[ $# -ge 2 ]] || { hz_usage; return 1; }
+          hz_run_target "modules" "$1" "$2"
+          return $?
+          ;;
+      esac
+      ;;
+    *)
+      log_error "invalid subcommand: ${cmd}"
+      hz_usage
+      return 1
+      ;;
+  esac
+}
+
+main "$@"
