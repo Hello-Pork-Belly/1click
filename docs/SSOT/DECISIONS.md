@@ -3,6 +3,24 @@
 Record any decision that changes behavior, contract, security, or workflow.
 Format: date + decision + rationale + scope + links.
 
+## 2026-02-18 — D-010: 1click truth boundary
+Decision:
+- `Hello-Pork-Belly/1click` is the only source of truth for active policy/process in this repository.
+- Imported historical records may be retained for traceability, but they cannot override current 1click SSOT.
+Rationale:
+- Prevent policy drift after cross-repo bootstrap import.
+- Keep operational decisions auditable against one canonical repo.
+Scope:
+- docs/SSOT/STATE.md
+- docs/SSOT/DECISIONS.md
+- docs/SSOT/ROLES/*.md
+Links:
+- PR #<n>, Issue #<n>
+
+## History / Provenance (source only, not truth)
+- Imported from `Hello-Pork-Belly/horizon-openai` as provenance only; not a source of truth for `1click`.
+- Legacy imported records in this file are **Not applicable to 1click** unless re-ratified by a 1click PR.
+
 ## 2026-02-13 — SSOT bootstrap
 Decision:
 - Establish SSOT files: STATE.md / DECISIONS.md / SPEC-TEMPLATE.md
@@ -65,7 +83,7 @@ Links:
 ## 2026-02-18 — D-009: 1click minimal bootstrap import policy
 
 Decision:
-- Import only the minimal runnable framework + SSOT docs from `horizon-openai` into `1click`.
+- Import only the minimal runnable framework + SSOT docs into `1click`.
 - Keep the import strictly allowlist-based (no full-repo mirroring, no history migration).
 - Forbid `archive/`, `upstream*`, `snapshot*` content from entering the active tree in this bootstrap.
 

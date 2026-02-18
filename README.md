@@ -7,23 +7,18 @@ Horizon 是一个“契约驱动（Contract-First）”的无代理（Agentless�
 从源码仓库安装（推荐）：
 
 ```bash
-git clone https://github.com/Hello-Pork-Belly/horizon-openai.git
-cd horizon-openai
+git clone https://github.com/Hello-Pork-Belly/1click.git
+cd 1click
 ./bin/hz version
 ```
 
 一键安装（适合服务器）：
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/Hello-Pork-Belly/horizon-openai/main/install.sh | bash
-hz version
-```
+> 当前 `Hello-Pork-Belly/1click` 未提供 `install.sh`；请使用源码安装流程。
 
 可选：安装指定版本（tag）：
 
-```bash
-HZ_INSTALL_REF=v1.0.0 curl -fsSL https://raw.githubusercontent.com/Hello-Pork-Belly/horizon-openai/main/install.sh | bash
-```
+> 当前 `Hello-Pork-Belly/1click` 未提供 `install.sh`，该步骤暂不适用。
 
 ## 快速上手
 
