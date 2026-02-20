@@ -37,6 +37,7 @@ Scope:
 
 Links:
 - PR: https://github.com/Hello-Pork-Belly/1click/pull/4
+- PR: https://github.com/Hello-Pork-Belly/1click/pull/5
 
 ## History / Provenance (source only, not truth)
 - Imported from `Hello-Pork-Belly/horizon-openai` as provenance only; not a source of truth for `1click`.
