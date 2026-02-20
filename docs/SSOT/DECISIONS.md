@@ -39,6 +39,22 @@ Links:
 - PR: https://github.com/Hello-Pork-Belly/1click/pull/4
 - PR: https://github.com/Hello-Pork-Belly/1click/pull/5
 
+## 2026-02-21 — D-012: Tags evidence transport for audit reproducibility
+Decision:
+- Tags evidence MUST be collected via HTTPS `git ls-remote` or GitHub API.
+- SSH-based tag queries are not acceptable audit evidence for this repository.
+
+Rationale:
+- Ensure reproducible evidence collection in environments without SSH key routing.
+- Eliminate transport-dependent failures from SSOT snapshot updates.
+
+Scope:
+- docs/SSOT/STATE.md (Reality Snapshot A0 evidence commands)
+- docs/SSOT/DECISIONS.md
+
+Links:
+- Context PR: https://github.com/Hello-Pork-Belly/1click/pull/6
+
 ## History / Provenance (source only, not truth)
 - Imported from `Hello-Pork-Belly/horizon-openai` as provenance only; not a source of truth for `1click`.
 - Legacy imported records in this file are **Not applicable to 1click** unless re-ratified by a 1click PR.
