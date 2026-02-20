@@ -52,7 +52,7 @@ Scope:
 - docs/SSOT/DECISIONS.md
 
 Links:
-- Context PR: https://github.com/Hello-Pork-Belly/1click/pull/5
+- Context PR: https://github.com/Hello-Pork-Belly/1click/pull/6
 
 ## History / Provenance (source only, not truth)
 - Imported from `Hello-Pork-Belly/horizon-openai` as provenance only; not a source of truth for `1click`.
