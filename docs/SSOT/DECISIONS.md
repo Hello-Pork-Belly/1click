@@ -15,7 +15,8 @@ Scope:
 - docs/SSOT/DECISIONS.md
 - docs/SSOT/ROLES/*.md
 Links:
-- PR #<n>, Issue #<n>
+- PR: https://github.com/Hello-Pork-Belly/1click/pull/2
+- PR: https://github.com/Hello-Pork-Belly/1click/pull/3
 
 ## History / Provenance (source only, not truth)
 - Imported from `Hello-Pork-Belly/horizon-openai` as provenance only; not a source of truth for `1click`.
@@ -29,7 +30,7 @@ Rationale:
 Scope:
 - Repository-wide process
 Links:
-- PR #<n>, Issue #<n>
+- Provenance only; imported bootstrap record without verifiable 1click PR link.
 
 ## 2026-02-15 — D-001 Auto-merge Strategy
 Decision:
@@ -58,7 +59,7 @@ Rollback:
 - Delete `.github/workflows/auto-merge.yml` and revert this decision entry.
 
 Links:
-- PR #<n>, Issue #<n>
+- Provenance only; imported policy record not applicable to current 1click workflow reality.
 
 ## 2026-02-18 — D-008: SSOT reality alignment (phase truth + workflow policy wording)
 
@@ -103,17 +104,6 @@ Version / release policy:
 
 Links:
 - PR: https://github.com/Hello-Pork-Belly/1click/pull/1
-
-## Template
-### YYYY-MM-DD — <Decision Title>
-Decision:
-- <bullet>
-Rationale:
-- <bullet>
-Scope:
-- <paths/modules affected>
-Links:
-- PR #<n>, Issue #<n>
 
 ## 2026-02-15 — D-002: Directory Structure Standard
 
