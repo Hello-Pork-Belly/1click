@@ -37,6 +37,7 @@ Scope:
 
 Links:
 - PR: https://github.com/Hello-Pork-Belly/1click/pull/4
+- PR: https://github.com/Hello-Pork-Belly/1click/pull/5
 
 ## 2026-02-21 — D-012: Tags evidence transport for audit reproducibility
 Decision:
