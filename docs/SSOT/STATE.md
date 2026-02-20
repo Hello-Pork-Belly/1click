@@ -8,9 +8,9 @@ Owner: Pork-Belly
 ## Reality Snapshot A0 (remote)
 
 - Repository: https://github.com/Hello-Pork-Belly/1click
-- Captured at: 2026-02-20T11:05:16Z
-- main HEAD: `3dd393da7aeacfc7a9377abb68181e1d4f827057`
-  - https://github.com/Hello-Pork-Belly/1click/commit/3dd393da7aeacfc7a9377abb68181e1d4f827057
+- Captured at: 2026-02-20T11:48:06Z
+- main HEAD: `49a089a58f0d579db7f805049eae8e8f9e9ba701` (expected `49a089a`, actual `49a089a58f0d579db7f805049eae8e8f9e9ba701`)
+  - https://github.com/Hello-Pork-Belly/1click/commit/49a089a58f0d579db7f805049eae8e8f9e9ba701
 - PR #1: https://github.com/Hello-Pork-Belly/1click/pull/1
   - merged: true (`state=MERGED`, `mergedAt=2026-02-18T11:12:57Z`)
   - base/head: `cd31d44d65a671ca05100ff63b55581c07027a1f` / `ab7c28c65e5ddee34a820acf38b142be2f400e31`
@@ -30,13 +30,22 @@ Owner: Pork-Belly
   - merged: true (`state=MERGED`, `mergedAt=2026-02-20T10:42:07Z`)
   - merge commit: `3dd393da7aeacfc7a9377abb68181e1d4f827057`
     - https://github.com/Hello-Pork-Belly/1click/commit/3dd393da7aeacfc7a9377abb68181e1d4f827057
-  - main updated to merge commit `3dd393d...` (A0 snapshot now covers PR #1/#2/#3/#4)
+  - main updated to merge commit `3dd393d...`
+- PR #5: https://github.com/Hello-Pork-Belly/1click/pull/5
+  - merged: true (`state=MERGED`, `mergedAt=2026-02-20T11:18:53Z`)
+  - base/head: `3dd393da7aeacfc7a9377abb68181e1d4f827057` / `871326a3ecc0331fd8c5eb84160170c3097f13f6`
+  - merge commit: `49a089a58f0d579db7f805049eae8e8f9e9ba701`
+    - https://github.com/Hello-Pork-Belly/1click/commit/49a089a58f0d579db7f805049eae8e8f9e9ba701
+  - main updated to merge commit `49a089a...` (A0 snapshot now covers PR #1/#2/#3/#4/#5)
 - Actions / Workflows:
-  - `gh run list -R Hello-Pork-Belly/1click --limit 20` returned no rows.
+  - `gh api "repos/Hello-Pork-Belly/1click/contents/.github/workflows?ref=main"` returned `404 Not Found`.
+  - `gh run list -R Hello-Pork-Belly/1click --limit 20` returned no rows (`no workflows / no runs`).
   - workflows tree URL: https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows
 - Releases / Tags:
-  - `gh release list -R Hello-Pork-Belly/1click --limit 20` returned no rows.
-  - latest tag: none (`gh api repos/Hello-Pork-Belly/1click/tags?per_page=10`)
+  - `gh release list -R Hello-Pork-Belly/1click --limit 50` returned no rows.
+  - Tag evidence MUST use HTTPS/API; SSH tag queries are not acceptable for audit reproducibility.
+  - `git ls-remote --tags https://github.com/Hello-Pork-Belly/1click.git | head -n 20` returned no rows (no tags).
+  - `gh api "repos/Hello-Pork-Belly/1click/tags?per_page=10" --jq '.[] | {name:.name, sha:.commit.sha}'` returned no rows.
 
 ## Phase Position
 
@@ -52,7 +61,7 @@ Owner: Pork-Belly
   - Merge commit: https://github.com/Hello-Pork-Belly/1click/commit/aac4c6c11f406bce69f6db05f1ce421c64ec1f36
   - DoD verification at merge time: `make check` exit `0`
 
-- A0 snapshot closeout now includes merged facts for PR #1/#2/#3/#4 (latest main aligned).
+- A0 snapshot closeout now includes merged facts for PR #1/#2/#3/#4/#5 (latest main aligned).
 
 - Legacy imported Done/PR history moved out of truth surface:
   - `docs/SSOT/provenance/legacy-done-list.md`
