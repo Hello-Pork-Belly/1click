@@ -18,6 +18,26 @@ Links:
 - PR: https://github.com/Hello-Pork-Belly/1click/pull/2
 - PR: https://github.com/Hello-Pork-Belly/1click/pull/3
 
+## 2026-02-20 — D-011: Temporary no-checks equivalent merge gate
+Decision:
+- Current repository reality is `no workflows / no required checks` on GitHub Actions.
+- Until CI/required checks are introduced, merges MUST satisfy an equivalent evidence gate:
+  - PR description includes an Evidence Pack with PR URL, merge commit evidence, Actions/workflows status evidence, and release/tag status evidence.
+  - `make check` (or repository-defined minimal verification command) output and exit code are attached.
+  - RRC/Snapshot keeper updates `docs/SSOT/STATE.md` after merge so A0 stays aligned with remote main and merged PR facts.
+- This is a temporary policy and will be superseded by a future decision when CI/required checks are introduced.
+
+Rationale:
+- Keep merge quality auditable without inventing non-existent checks.
+- Avoid false statements such as \"checks green\" when checks are not configured.
+
+Scope:
+- docs/SSOT/DECISIONS.md
+- docs/SSOT/STATE.md
+
+Links:
+- PR: https://github.com/Hello-Pork-Belly/1click/pull/4
+
 ## History / Provenance (source only, not truth)
 - Imported from `Hello-Pork-Belly/horizon-openai` as provenance only; not a source of truth for `1click`.
 - Legacy imported records in this file are **Not applicable to 1click** unless re-ratified by a 1click PR.
