@@ -1,0 +1,21 @@
+# docs/PHASES.yml is the only truth for phases in 1click.
+version: 1
+repo: Hello-Pork-Belly/1click
+truth_file: docs/PHASES.yml
+
+phases:
+  - id: PLAN
+    name: Planning
+    description: Define scope, constraints, and acceptance criteria.
+  - id: IMPLEMENT
+    name: Implementation
+    description: Execute approved changes within file allowlist and risk bounds.
+  - id: VERIFY
+    name: Verification
+    description: Validate with remote reality checks and required evidence.
+  - id: RELEASE
+    name: Release
+    description: Merge, publish evidence pack, and close loop.
+
+current_phase: VERIFY
+updated_at: 2026-02-20

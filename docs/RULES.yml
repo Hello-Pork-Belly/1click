@@ -1,0 +1,38 @@
+# Minimal enforceable rules for 1click.
+version: 1
+repo: Hello-Pork-Belly/1click
+
+truth_sources:
+  phases: docs/PHASES.yml
+  state: docs/SSOT/STATE.md
+
+hard_gates:
+  forbidden_main_tree_entries:
+    description: Forbidden archive/snapshot/upstream/vendor dump content in active tree.
+    deny_patterns:
+      - '^archive(/|$)'
+      - '^upstream[^/]*'
+      - '^snapshot[^/]*'
+      - '^vendor-dump[^/]*'
+      - '^backup[^/]*'
+    pass_condition: No files/directories in main tree match deny patterns.
+    fail_condition: Any match blocks merge.
+    audit_commands:
+      - "find . -maxdepth 3 -type d \\( -name 'archive' -o -name 'archive*' -o -name 'upstream*' -o -name 'snapshot*' -o -name 'vendor-dump*' -o -name 'backup*' \\) -print"
+      - "find . -maxdepth 3 -type f \\( -name '*upstream*' -o -name '*snapshot*' -o -name '*vendor-dump*' -o -name '*backup*' \\) -print"
+
+  ssot_reality_gate:
+    description: STATE must reference remote-verifiable PR/commit URLs and align with PHASES truth.
+    pass_condition:
+      - docs/SSOT/STATE.md includes remote URLs for main head and active closure PRs.
+      - docs/PHASES.yml exists and current_phase is coherent with STATE phase position.
+    fail_condition: Missing truth files or unverifiable status claims.
+
+policy:
+  docs_only_pr_allowlist_example:
+    - docs/SSOT/STATE.md
+    - docs/PHASES.yml
+    - docs/RULES.yml
+    - docs/AUDIT-CHECKLIST.md
+    - docs/SSOT/一键安装流程机制.txt
+    - docs/SSOT/provenance/**

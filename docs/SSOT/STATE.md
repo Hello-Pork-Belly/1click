@@ -1,75 +1,50 @@
 # Project State Ledger (SSOT)
 
-This file is the single source of truth for project progress. Update this file via PR whenever work starts/finishes.
+This file is the single source of truth for project progress in 1click.
 
-Last updated: 2026-02-18  
+Last updated: 2026-02-20
 Owner: Pork-Belly
+
+## Reality Snapshot A0 (remote)
+
+- Repository: https://github.com/Hello-Pork-Belly/1click
+- Captured at: 2026-02-20T09:37:57Z
+- main HEAD: `f8417212878ffce5d042b07b9cb84d633bd46300`
+  - https://github.com/Hello-Pork-Belly/1click/commit/f8417212878ffce5d042b07b9cb84d633bd46300
+- PR #1: https://github.com/Hello-Pork-Belly/1click/pull/1
+  - merged: true (`state=MERGED`, `mergedAt=2026-02-18T11:12:57Z`)
+  - base/head: `cd31d44d65a671ca05100ff63b55581c07027a1f` / `ab7c28c65e5ddee34a820acf38b142be2f400e31`
+  - merge commit: `aac4c6c11f406bce69f6db05f1ce421c64ec1f36`
+    - https://github.com/Hello-Pork-Belly/1click/commit/aac4c6c11f406bce69f6db05f1ce421c64ec1f36
+- Actions / Workflows:
+  - `gh run list -R Hello-Pork-Belly/1click --limit 20` returned no rows.
+  - workflows tree URL: https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows
+- Releases / Tags:
+  - `gh release list -R Hello-Pork-Belly/1click --limit 20` returned no rows.
+  - latest tag: none (`gh api repos/Hello-Pork-Belly/1click/tags?per_page=10`)
 
 ## Phase Position
 
-- Current Phase: Phase 5 (Operations & Interface)
-- Phase reference: `docs/PHASES.yml`
-- Progress rule: all status claims must match `docs/PHASES.yml` + this file.
+- Current Phase: `VERIFY`
+- Phase truth source: `docs/PHASES.yml`
+- Progress truth source: `docs/SSOT/STATE.md`
 
 ## Done (merged tasks)
 
-- (2026-02-13) SSOT bootstrap
-- (2026-02-15) T-004 CLI Skeleton (hz) (PR: https://github.com/Hello-Pork-Belly/1click/pull/63)
-- (2026-02-15) T-005 Recipe Runner (hz install) (PR: https://github.com/Hello-Pork-Belly/1click/pull/64)
-- (2026-02-15) T-006 Inventory Integration (PR: https://github.com/Hello-Pork-Belly/1click/pull/65)
-- (2026-02-15) T-007 Unified Logging & Verbosity (PR: https://github.com/Hello-Pork-Belly/1click/pull/66)
-- (2026-02-15) T-008 Port security-host Recipe (PR: https://github.com/Hello-Pork-Belly/1click/pull/67)
-- (2026-02-15) T-009 Port ols-wp Stack (PR: https://github.com/Hello-Pork-Belly/1click/pull/68)
-- (2026-02-15) T-010 Port ols-wp-maintenance Recipe (PR: https://github.com/Hello-Pork-Belly/1click/pull/69)
-- (2026-02-15) T-011 Port Lite Stacks (PR: https://github.com/Hello-Pork-Belly/1click/pull/70)
-- (2026-02-15) T-012 Port hub-data Recipe (PR: https://github.com/Hello-Pork-Belly/1click/pull/71)
-- (2026-02-15) T-013 Port hub-main Recipe (PR: https://github.com/Hello-Pork-Belly/1click/pull/72)
-- (2026-02-15) T-014 Port mail-gateway Recipe (PR: https://github.com/Hello-Pork-Belly/1click/pull/73)
-- (2026-02-15) T-015 Port backup-rclone Recipe (PR: https://github.com/Hello-Pork-Belly/1click/pull/74)
-- (2026-02-15) T-016 Diagnostics & Baseline Engine (PR: https://github.com/Hello-Pork-Belly/1click/pull/75)
-- (2026-02-15) T-017 System Unification & Release v0.2.0 (PR: https://github.com/Hello-Pork-Belly/1click/pull/76)
-- (2026-02-16) T-018 Phase 2 Detailed Plan (Remote Horizon) (PR: https://github.com/Hello-Pork-Belly/1click/pull/78)
-- (2026-02-16) T-019 SSH Transport Layer (PR: https://github.com/Hello-Pork-Belly/1click/pull/79)
-- (2026-02-16) T-020 Remote Inventory & Target Selection (PR: https://github.com/Hello-Pork-Belly/1click/pull/80)
-- (2026-02-16) T-021 Session Recording (Run Records) (PR: https://github.com/Hello-Pork-Belly/1click/pull/81)
-- (2026-02-17) T-022 Remote Runner Implementation (PR: https://github.com/Hello-Pork-Belly/1click/pull/82)
-- (2026-02-17) T-023 Phase 2 Closure & Release v0.3.0 (PR: https://github.com/Hello-Pork-Belly/1click/pull/83)
-- (2026-02-17) T-024 Phase 3 Detailed Plan (Fleet Orchestration) (PR: https://github.com/Hello-Pork-Belly/1click/pull/85)
-- (2026-02-17) T-025 Group Inventory System (PR: https://github.com/Hello-Pork-Belly/1click/pull/86)
-- (2026-02-17) T-026 Parallel Orchestrator (PR: https://github.com/Hello-Pork-Belly/1click/pull/87)
-- (2026-02-17) T-027 Rolling Updates (PR: https://github.com/Hello-Pork-Belly/1click/pull/88)
-- (2026-02-18) T-028 Aggregated Reporting Engine (PR: https://github.com/Hello-Pork-Belly/1click/pull/91)
-- (2026-02-18) T-029 UX Hardening (timeouts, interrupt handling, partial report on Ctrl-C) (PR: https://github.com/Hello-Pork-Belly/1click/pull/93)
-- (2026-02-18) T-030 Phase 3 Closure Gate (DoD consolidation + workflow hygiene closure) (PR: https://github.com/Hello-Pork-Belly/1click/pull/94)
-- (2026-02-17) T-031 Phase 4 Planning (Autonomous Horizon) (PR: https://github.com/Hello-Pork-Belly/1click/pull/96)
-- (2026-02-17) T-032 Notification Layer: Done (PR: https://github.com/Hello-Pork-Belly/1click/pull/97)
-- (2026-02-17) T-033 Cron Manager: Done (PR: https://github.com/Hello-Pork-Belly/1click/pull/97)
-- (2026-02-17) T-034 Watchdog / Self-Healing: Done (PR: https://github.com/Hello-Pork-Belly/1click/pull/97)
-- (2026-02-17) T-035 Phase 4 Closure & Release v0.5.0: Done (PR: https://github.com/Hello-Pork-Belly/1click/pull/98)
-- (2026-02-17) T-036 Phase 5 Detailed Plan (Operations & Interface): Done (PR: https://github.com/Hello-Pork-Belly/1click/pull/100)
-- (2026-02-17) T-037 HTML Reports (`hz report html`): Done (PR: https://github.com/Hello-Pork-Belly/1click/pull/101)
-- (2026-02-17) T-038 Secret Management (`hz secret encrypt/decrypt`): Done (PR: https://github.com/Hello-Pork-Belly/1click/pull/101)
-- (2026-02-17) T-039 UX Polish (completion + installer + docs refresh): Done (Commit: https://github.com/Hello-Pork-Belly/1click/commit/59f6e07)
-- (2026-02-17) T-040 Final Release v1.0.0 (closure + tag): Done (Commit: https://github.com/Hello-Pork-Belly/1click/commit/59f6e07)
+- T-001 Import core framework + SSOT minimal set into 1click
+  - Status: Done (moved from Doing to Done based on remote reality)
+  - PR: https://github.com/Hello-Pork-Belly/1click/pull/1
+  - Merge commit: https://github.com/Hello-Pork-Belly/1click/commit/aac4c6c11f406bce69f6db05f1ce421c64ec1f36
+  - DoD verification at merge time: `make check` exit `0`
+
+- Legacy imported Done/PR history moved out of truth surface:
+  - `docs/SSOT/provenance/legacy-done-list.md`
+  - Provenance only; not source of truth for 1click.
 
 ## Doing
 
-Parallel rule: only one active task unless Commander explicitly documents an approved parallel exception with risk split.
-- T-001: Import core framework + SSOT minimal set into 1click
-  - Source import SHA (provenance only): `6a57271bc4304cc48655af09624e2af1c23a7e9e`
-  - Imported paths (allowlist reference):
-    `bin/`, `lib/`, `modules/`, `recipes/`, `inventory/`, `tools/`,
-    `Makefile`, `README.md`, `VERSION`, `LICENSE`,
-    `docs/SSOT/STATE.md`, `docs/SSOT/DECISIONS.md`, `docs/SSOT/SPEC-TEMPLATE.md`,
-    `docs/SSOT/ROLES/COMMANDER.md`, `docs/SSOT/ROLES/PLANNER.md`,
-    `docs/SSOT/ROLES/EXECUTOR.md`, `docs/SSOT/ROLES/AUDITOR.md`,
-    `docs/SSOT/一键安装构思.txt`, `docs/SSOT/一键安装流程机制.txt`
-  - DoD verification command: `make check`
-  - PASS criteria: command exits with code `0`
-  - PR URL: `https://github.com/Hello-Pork-Belly/1click/pull/1`
-- T-RRC-001: Build Reality Snapshot A0 from remote (`main/tag/open PR/actions`) before opening the next implementation task (Tracking: https://github.com/Hello-Pork-Belly/1click/pulls, Evidence pending: `gh` is unavailable in current environment).
+- none
 
-## Next (Phase 5 aligned roadmap)
+## Next
 
-- T-041: Phase 6 planning kickoff after T-RRC-001 remote reality snapshot is captured and linked (Tracking: https://github.com/Hello-Pork-Belly/1click/pulls).
-- T-001b: Workflow hygiene follow-up for historical Actions noise (Tracking: https://github.com/Hello-Pork-Belly/1click/actions, capture run URLs in next RRC).
+- T-A0-001 Keep A0 snapshot current on every merge (main HEAD / PR links / Actions / Releases evidence).
