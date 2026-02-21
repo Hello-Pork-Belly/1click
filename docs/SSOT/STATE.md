@@ -8,11 +8,11 @@ Owner: Pork-Belly
 ## Reality Snapshot A0 (remote)
 
 - Repository: https://github.com/Hello-Pork-Belly/1click
-- Captured at: 2026-02-21T11:11:56Z
-- main_head: `f10c402e37182f6b45657116b6fc4d488f28e97e`
-  - commit/main URL: https://github.com/Hello-Pork-Belly/1click/commit/main
-  - commit/sha URL: https://github.com/Hello-Pork-Belly/1click/commit/f10c402e37182f6b45657116b6fc4d488f28e97e
-- Merged PR facts (#1-#14):
+- Captured at: 2026-02-21T12:16:53Z
+- main_head: `35842befecd6780f440e243858f629e8ed75cc61`
+  - commit/main URL: https://github.com/Hello-Pork-Belly/1click/commit/main (symbolic pointer)
+  - commit/sha URL: https://github.com/Hello-Pork-Belly/1click/commit/35842befecd6780f440e243858f629e8ed75cc61
+- Merged PR facts (#1-#15):
   - PR #1: https://github.com/Hello-Pork-Belly/1click/pull/1
     - mergedAt: `2026-02-18T11:12:57Z`
     - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/aac4c6c11f406bce69f6db05f1ce421c64ec1f36
@@ -55,8 +55,15 @@ Owner: Pork-Belly
   - PR #14: https://github.com/Hello-Pork-Belly/1click/pull/14
     - mergedAt: `2026-02-21T10:53:08Z`
     - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/f10c402e37182f6b45657116b6fc4d488f28e97e
+  - PR #15: https://github.com/Hello-Pork-Belly/1click/pull/15
+    - mergedAt: `2026-02-21T11:14:04Z`
+    - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/35842befecd6780f440e243858f629e8ed75cc61
   - remote-first precedence: use `git ls-remote refs/heads/main`, `gh api repos/<repo>/commits/main`, and `gh pr view`.
   - if UI rendering and command outputs differ, SSOT follows command outputs plus PR evidence pack.
+  - hard evidence summary (captured at this snapshot):
+    - `git ls-remote https://github.com/Hello-Pork-Belly/1click.git refs/heads/main` -> `35842befecd6780f440e243858f629e8ed75cc61 refs/heads/main`
+    - `gh api repos/Hello-Pork-Belly/1click/commits/main --jq .sha` -> `35842befecd6780f440e243858f629e8ed75cc61`
+    - `gh pr view 9 --repo Hello-Pork-Belly/1click --json number,state,mergedAt,mergeCommit,url` -> `#9 state=MERGED mergedAt=2026-02-21T08:42:10Z mergeCommit=16d76c4b99c45339899ffadf9760d7e1d87fc5f3`
 - Actions / Workflows:
   - Actions page: https://github.com/Hello-Pork-Belly/1click/actions
   - `.github/workflows` missing (404): https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows (repository has no workflow files)
