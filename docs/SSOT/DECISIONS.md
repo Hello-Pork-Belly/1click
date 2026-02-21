@@ -55,6 +55,33 @@ Scope:
 Links:
 - Context PR: https://github.com/Hello-Pork-Belly/1click/pull/6
 
+## 2026-02-21 — D-013: Incident governance for PR #8 conflict-marker merge
+Decision:
+- Record incident: PR #8 is merged and points to merge commit `b16d5b96931c1622cb58783420751de7cb455942`.
+- Treat conflict-marker artifacts as high-risk output that MUST NOT enter `main`.
+- Manual merges that bypass review gate intent are prohibited, even when repository has no required checks configured.
+- If conflict-marker artifacts are detected in `main` history:
+  - immediately open a revert/fix PR (or use reset/force-fix only under explicit admin emergency policy),
+  - record incident evidence and remediation links in SSOT (`STATE.md` + `DECISIONS.md`).
+
+Rationale:
+- Preserve auditability and prevent broken/ambiguous repository truth caused by unresolved merge artifacts.
+- Keep governance explicit while CI/required-checks are not yet enforced by platform policy.
+
+Evidence (remote/local):
+- PR #8: https://github.com/Hello-Pork-Belly/1click/pull/8
+- Commit: https://github.com/Hello-Pork-Belly/1click/commit/b16d5b96931c1622cb58783420751de7cb455942
+- `git merge-base --is-ancestor b16d5b96931c1622cb58783420751de7cb455942 main` => `ancestor_exit=0`
+- `git show -m --first-parent b16d5b96931c1622cb58783420751de7cb455942 | rg -n '<<<<<<<|=======|>>>>>>>'` => non-empty matches
+
+Scope:
+- docs/SSOT/DECISIONS.md
+- docs/SSOT/STATE.md
+
+Links:
+- Incident PR: https://github.com/Hello-Pork-Belly/1click/pull/8
+- Incident commit: https://github.com/Hello-Pork-Belly/1click/commit/b16d5b96931c1622cb58783420751de7cb455942
+
 ## History / Provenance (source only, not truth)
 - Imported from `Hello-Pork-Belly/horizon-openai` as provenance only; not a source of truth for `1click`.
 - Legacy imported records in this file are **Not applicable to 1click** unless re-ratified by a 1click PR.
