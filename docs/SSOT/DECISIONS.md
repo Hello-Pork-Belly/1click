@@ -60,6 +60,9 @@ Decision:
 - Record incident: PR #8 is merged and points to merge commit `b16d5b96931c1622cb58783420751de7cb455942`.
 - Treat conflict-marker artifacts as high-risk output that MUST NOT enter `main`.
 - Manual merges that bypass review gate intent are prohibited, even when repository has no required checks configured.
+- Hard pre-merge check for SSOT repair PRs is mandatory:
+  - `grep -R '<<<<<<<\\|>>>>>>>\\|=======' docs/SSOT/STATE.md`
+  - expected result: no output (exit code `1`) before merge.
 - If conflict-marker artifacts are detected in `main` history:
   - immediately open a revert/fix PR (or use reset/force-fix only under explicit admin emergency policy),
   - record incident evidence and remediation links in SSOT (`STATE.md` + `DECISIONS.md`).

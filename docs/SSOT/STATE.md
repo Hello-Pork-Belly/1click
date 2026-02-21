@@ -42,7 +42,7 @@ Owner: Pork-Belly
     - https://github.com/Hello-Pork-Belly/1click/commit/b16d5b96931c1622cb58783420751de7cb455942
   - incident evidence snapshot:
     - `git merge-base --is-ancestor b16d5b96931c1622cb58783420751de7cb455942 main` -> `ancestor_exit=0`
-    - `git show -m --first-parent b16d5b96931c1622cb58783420751de7cb455942 | rg -n '<<<<<<<|=======|>>>>>>>'` -> non-empty matches (see `docs/SSOT/DECISIONS.md` D-013)
+    - `git show -m --first-parent b16d5b96931c1622cb58783420751de7cb455942` pattern scan -> non-empty conflict-marker matches (see `docs/SSOT/DECISIONS.md` D-013)
 - Actions / Workflows:
   - Actions page: https://github.com/Hello-Pork-Belly/1click/actions
   - `.github/workflows` missing (404): https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows
