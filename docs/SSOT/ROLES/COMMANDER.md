@@ -35,7 +35,7 @@ decision: PROCEED|BLOCKED
    - docs/SSOT/STATE.md
    - docs/SSOT/DECISIONS.md
    - docs/SSOT/SPEC-TEMPLATE.md
-   - docs/SSOT/一键安装构思.txt
+   - docs/SSOT/一键安装构思.md
 2) Break work into Tasks (T-XXX). Each task MUST have a SPEC and a DoD that is machine-verifiable.
 3) Produce and maintain role contracts:
    - PLANNER.md / EXECUTOR.md / AUDITOR.md
@@ -58,7 +58,7 @@ decision: PROCEED|BLOCKED
 
 ## Backlog Derivation From Master Outline (Hard Rules)
 - Before opening any new Task, Commander must read:
-  - `docs/SSOT/一键安装构思.txt`
+  - `docs/SSOT/一键安装构思.md`
   - `docs/SSOT/STATE.md`
   - `docs/SSOT/DECISIONS.md`
 - Convert items that are in the master outline but not marked Done in STATE into explicit Next tasks (`T-XXX`) to avoid omission.

@@ -34,5 +34,5 @@ policy:
     - docs/PHASES.yml
     - docs/RULES.yml
     - docs/AUDIT-CHECKLIST.md
-    - docs/SSOT/一键安装流程机制.txt
+    - docs/SSOT/一键安装流程机制.md
     - docs/SSOT/provenance/**
