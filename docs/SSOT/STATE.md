@@ -8,18 +8,11 @@ Owner: Pork-Belly
 ## Reality Snapshot A0 (remote)
 
 - Repository: https://github.com/Hello-Pork-Belly/1click
-codex/chore/ssot-a0-update-pr5c
-- Captured at: 2026-02-20T12:36:19Z
-- main HEAD: `49a089a58f0d579db7f805049eae8e8f9e9ba701`
-=======
-codex/chore/ssot-a0-update-pr5b
-- Captured at: 2026-02-20T12:11:55Z
-=======
-- Captured at: 2026-02-20T11:48:06Z
-main
-- main HEAD: `49a089a58f0d579db7f805049eae8e8f9e9ba701` (expected `49a089a`, actual `49a089a58f0d579db7f805049eae8e8f9e9ba701`)
-main
-  - https://github.com/Hello-Pork-Belly/1click/commit/49a089a58f0d579db7f805049eae8e8f9e9ba701
+- Captured at: 2026-02-21T08:26:29Z
+- main HEAD: `b16d5b96931c1622cb58783420751de7cb455942`
+  - https://github.com/Hello-Pork-Belly/1click/commit/b16d5b96931c1622cb58783420751de7cb455942
+  - expected clean anchor from PR #5: `49a089a58f0d579db7f805049eae8e8f9e9ba701`
+  - actual main advanced to `b16d5b9...` after PR #8 merge
 - PR #1: https://github.com/Hello-Pork-Belly/1click/pull/1
   - merged: true (`state=MERGED`, `mergedAt=2026-02-18T11:12:57Z`)
   - base/head: `cd31d44d65a671ca05100ff63b55581c07027a1f` / `ab7c28c65e5ddee34a820acf38b142be2f400e31`
@@ -39,54 +32,28 @@ main
   - merged: true (`state=MERGED`, `mergedAt=2026-02-20T10:42:07Z`)
   - merge commit: `3dd393da7aeacfc7a9377abb68181e1d4f827057`
     - https://github.com/Hello-Pork-Belly/1click/commit/3dd393da7aeacfc7a9377abb68181e1d4f827057
-  - main updated to merge commit `3dd393d...`
 - PR #5: https://github.com/Hello-Pork-Belly/1click/pull/5
   - merged: true (`state=MERGED`, `mergedAt=2026-02-20T11:18:53Z`)
-codex/chore/ssot-a0-update-pr5c
   - merge commit: `49a089a58f0d579db7f805049eae8e8f9e9ba701` (`49a089a`)
     - https://github.com/Hello-Pork-Belly/1click/commit/49a089a58f0d579db7f805049eae8e8f9e9ba701
-  - main updated to merge commit `49a089a...` (A0 snapshot now covers PR #1/#2/#3/#4/#5)
+- PR #8: https://github.com/Hello-Pork-Belly/1click/pull/8
+  - merged: true (`state=MERGED`, `mergedAt=2026-02-20T12:49:47Z`)
+  - merge commit: `b16d5b96931c1622cb58783420751de7cb455942` (`b16d5b9`)
+    - https://github.com/Hello-Pork-Belly/1click/commit/b16d5b96931c1622cb58783420751de7cb455942
+  - incident evidence snapshot:
+    - `git merge-base --is-ancestor b16d5b96931c1622cb58783420751de7cb455942 main` -> `ancestor_exit=0`
+    - `git show -m --first-parent b16d5b96931c1622cb58783420751de7cb455942` pattern scan -> non-empty conflict-marker matches (see `docs/SSOT/DECISIONS.md` D-013)
 - Actions / Workflows:
   - Actions page: https://github.com/Hello-Pork-Belly/1click/actions
-  - `.github/workflows` is missing (404): https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows
-  - `gh api "repos/Hello-Pork-Belly/1click/contents/.github/workflows?ref=main"` returned `404 Not Found`.
-  - `gh run list -R Hello-Pork-Belly/1click --limit 20` returned no rows (`getting started / no runs`).
-=======
-codex/chore/ssot-a0-update-pr5b
-=======
-  - base/head: `3dd393da7aeacfc7a9377abb68181e1d4f827057` / `871326a3ecc0331fd8c5eb84160170c3097f13f6`
-main
-  - merge commit: `49a089a58f0d579db7f805049eae8e8f9e9ba701`
-    - https://github.com/Hello-Pork-Belly/1click/commit/49a089a58f0d579db7f805049eae8e8f9e9ba701
-  - main updated to merge commit `49a089a...` (A0 snapshot now covers PR #1/#2/#3/#4/#5)
-- Actions / Workflows:
-codex/chore/ssot-a0-update-pr5b
-  - Actions page: https://github.com/Hello-Pork-Belly/1click/actions
-  - `gh api "repos/Hello-Pork-Belly/1click/contents/.github/workflows?ref=main"` returned `404 Not Found` (workflows missing).
-  - `gh run list -R Hello-Pork-Belly/1click --limit 20` returned no rows (`no runs`).
-main
-  - workflows tree URL: https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows
+  - `.github/workflows` missing (404): https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows
+  - `gh api "repos/Hello-Pork-Belly/1click/contents/.github/workflows?ref=main"` -> `404 Not Found`
+  - `gh run list -R Hello-Pork-Belly/1click --limit 20` -> no rows (`no workflows / no runs`)
 - Releases / Tags:
   - Releases page: https://github.com/Hello-Pork-Belly/1click/releases
-  - `gh release list -R Hello-Pork-Belly/1click --limit 50` returned no rows.
-codex/chore/ssot-a0-update-pr5c
-  - Tags evidence uses HTTPS/API only (SSH is not used for SSOT audit evidence):
-    - `git ls-remote --tags https://github.com/Hello-Pork-Belly/1click.git | head -n 20` -> no rows
-    - `gh api "repos/Hello-Pork-Belly/1click/tags?per_page=10" --jq '.[] | {name:.name, sha:.commit.sha}'` -> no rows
-=======
-  - Tags evidence method (NO SSH): use HTTPS/API only.
-  - `git ls-remote --tags https://github.com/Hello-Pork-Belly/1click.git | head -n 20` returned no rows.
-=======
-  - `gh api "repos/Hello-Pork-Belly/1click/contents/.github/workflows?ref=main"` returned `404 Not Found`.
-  - `gh run list -R Hello-Pork-Belly/1click --limit 20` returned no rows (`no workflows / no runs`).
-  - workflows tree URL: https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows
-- Releases / Tags:
-  - `gh release list -R Hello-Pork-Belly/1click --limit 50` returned no rows.
-  - Tag evidence MUST use HTTPS/API; SSH tag queries are not acceptable for audit reproducibility.
-  - `git ls-remote --tags https://github.com/Hello-Pork-Belly/1click.git | head -n 20` returned no rows (no tags).
-main
-  - `gh api "repos/Hello-Pork-Belly/1click/tags?per_page=10" --jq '.[] | {name:.name, sha:.commit.sha}'` returned no rows.
-main
+  - `gh release list -R Hello-Pork-Belly/1click --limit 50` -> no rows
+  - tags evidence transport: HTTPS/API only (SSH not used for SSOT audit)
+  - `git ls-remote --tags https://github.com/Hello-Pork-Belly/1click.git | head -n 20` -> no rows
+  - `gh api "repos/Hello-Pork-Belly/1click/tags?per_page=10" --jq '.[] | {name:.name, sha:.commit.sha}'` -> no rows
 
 ## Phase Position
 
@@ -102,7 +69,7 @@ main
   - Merge commit: https://github.com/Hello-Pork-Belly/1click/commit/aac4c6c11f406bce69f6db05f1ce421c64ec1f36
   - DoD verification at merge time: `make check` exit `0`
 
-- A0 snapshot closeout now includes merged facts for PR #1/#2/#3/#4/#5 (latest main aligned).
+- A0 snapshot now records merged facts and remote reality including PR #5 anchor and PR #8 governance incident.
 
 - Legacy imported Done/PR history moved out of truth surface:
   - `docs/SSOT/provenance/legacy-done-list.md`
