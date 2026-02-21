@@ -8,9 +8,9 @@ Owner: Pork-Belly
 ## Reality Snapshot A0 (remote)
 
 - Repository: https://github.com/Hello-Pork-Belly/1click
-- Captured at: 2026-02-21T09:12:27Z
-- main_head: `16d76c4b99c45339899ffadf9760d7e1d87fc5f3`
-  - commit/main URL: https://github.com/Hello-Pork-Belly/1click/commit/16d76c4b99c45339899ffadf9760d7e1d87fc5f3
+- Captured at: 2026-02-21T10:12:03Z
+- main_head: `7d0f3de285dc29e29fc1ec57a3159d7112ce1d26`
+  - commit/main URL: https://github.com/Hello-Pork-Belly/1click/commit/main
 - Merged PR facts (#1-#9):
   - PR #1: https://github.com/Hello-Pork-Belly/1click/pull/1
     - mergedAt: `2026-02-18T11:12:57Z`
