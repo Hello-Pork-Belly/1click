@@ -61,7 +61,7 @@ Decision:
 - Treat conflict-marker artifacts as high-risk output that MUST NOT enter `main`.
 - Manual merges that bypass review gate intent are prohibited, even when repository has no required checks configured.
 - Hard pre-merge check for SSOT repair PRs is mandatory:
-  - `grep -R '<<<<<<<\\|>>>>>>>\\|=======' docs/SSOT/STATE.md`
+  - `grep -R '<conflict-markers>' docs/SSOT/STATE.md` (match unresolved merge markers)
   - expected result: no output (exit code `1`) before merge.
 - If conflict-marker artifacts are detected in `main` history:
   - immediately open a revert/fix PR (or use reset/force-fix only under explicit admin emergency policy),
@@ -75,7 +75,7 @@ Evidence (remote/local):
 - PR #8: https://github.com/Hello-Pork-Belly/1click/pull/8
 - Commit: https://github.com/Hello-Pork-Belly/1click/commit/b16d5b96931c1622cb58783420751de7cb455942
 - `git merge-base --is-ancestor b16d5b96931c1622cb58783420751de7cb455942 main` => `ancestor_exit=0`
-- `git show -m --first-parent b16d5b96931c1622cb58783420751de7cb455942 | rg -n '<<<<<<<|=======|>>>>>>>'` => non-empty matches
+- `git show -m --first-parent b16d5b96931c1622cb58783420751de7cb455942 | rg -n '<conflict-markers>'` => non-empty matches
 
 Scope:
 - docs/SSOT/DECISIONS.md
@@ -84,6 +84,30 @@ Scope:
 Links:
 - Incident PR: https://github.com/Hello-Pork-Belly/1click/pull/8
 - Incident commit: https://github.com/Hello-Pork-Belly/1click/commit/b16d5b96931c1622cb58783420751de7cb455942
+
+## 2026-02-22 — D-014: Sentinel Contract (Repo Sentinel v2)
+Decision:
+- Repo Sentinel contract truth file is `docs/SSOT/ROLES/SENTINEL.md`.
+- Snapshot governance is milestone-gated (phase change / release tag / security policy change / governance change), not every-merge head chasing.
+- `post_merge_main_head` is the acceptance truth field; `main_head` is compatibility alias and must equal `post_merge_main_head`.
+- Evidence Pack consumption rules for Sentinel/auditing require hard-truth command outputs:
+  - `git ls-remote https://github.com/Hello-Pork-Belly/1click.git refs/heads/main`
+  - `gh api repos/Hello-Pork-Belly/1click/commits/main --jq .sha`
+  - `gh pr view <N> -R Hello-Pork-Belly/1click --json number,state,mergedAt,mergeCommit,url`
+  - Optional merged list for context: `gh pr list --state merged -R Hello-Pork-Belly/1click -L 20`
+
+Rationale:
+- Remove ambiguity and stop UI/cache-driven drift by binding Sentinel decisions to command-verifiable evidence.
+- Keep snapshot updates auditable and event-driven instead of creating per-merge churn.
+
+Scope:
+- docs/SSOT/ROLES/SENTINEL.md
+- docs/SSOT/STATE.md
+- docs/SSOT/DECISIONS.md
+- docs/SSOT/ROLES/COMMANDER.md
+
+Rollback:
+- `git revert <merge_commit_sha>`
 
 ## History / Provenance (source only, not truth)
 - Imported from `Hello-Pork-Belly/horizon-openai` as provenance only; not a source of truth for `1click`.
