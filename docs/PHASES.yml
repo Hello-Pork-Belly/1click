@@ -1,4 +1,5 @@
 # docs/PHASES.yml is the only truth for phases in 1click.
+# updated_at only changes when current_phase changes.
 version: 1
 repo: Hello-Pork-Belly/1click
 truth_file: docs/PHASES.yml
