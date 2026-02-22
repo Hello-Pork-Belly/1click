@@ -8,13 +8,13 @@ Owner: Pork-Belly
 ## Reality Snapshot A0 (remote)
 
 - Repository: https://github.com/Hello-Pork-Belly/1click
-- Captured at: 2026-02-22T08:15:13Z
-main_head: `d4d8477fd06c7c7ae394b3078560effbe0688e65`
+- Captured at: 2026-02-22T08:42:03Z
+main_head: `c9ac15022a6b537245d885294957c68ec677ce17`
   - commit/main URL: https://github.com/Hello-Pork-Belly/1click/commit/main (symbolic pointer)
-  - commit/sha URL: https://github.com/Hello-Pork-Belly/1click/commit/d4d8477fd06c7c7ae394b3078560effbe0688e65
-  - pre_merge_main_head: `6ad01bc8e5a8d3692518f3bc01ae3fdf6d0ea3ea`
-  - post_merge_main_head: `d4d8477fd06c7c7ae394b3078560effbe0688e65`
-- Merged PR facts (#1-#19):
+  - commit/sha URL: https://github.com/Hello-Pork-Belly/1click/commit/c9ac15022a6b537245d885294957c68ec677ce17
+  - pre_merge_main_head: `d4d8477fd06c7c7ae394b3078560effbe0688e65`
+  - post_merge_main_head: `c9ac15022a6b537245d885294957c68ec677ce17`
+- Merged PR facts (#1-#20):
   - PR #1: https://github.com/Hello-Pork-Belly/1click/pull/1
     - mergedAt: `2026-02-18T11:12:57Z`
     - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/aac4c6c11f406bce69f6db05f1ce421c64ec1f36
@@ -72,25 +72,29 @@ main_head: `d4d8477fd06c7c7ae394b3078560effbe0688e65`
   - PR #19: https://github.com/Hello-Pork-Belly/1click/pull/19
     - mergedAt: `2026-02-22T07:28:58Z`
     - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/d4d8477fd06c7c7ae394b3078560effbe0688e65
+  - PR #20: https://github.com/Hello-Pork-Belly/1click/pull/20
+    - mergedAt: `2026-02-22T08:16:23Z`
+    - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/c9ac15022a6b537245d885294957c68ec677ce17
   - remote-first precedence: use `git ls-remote refs/heads/main`, `gh api repos/<repo>/commits/main`, and `gh pr view`.
   - if UI rendering and command outputs differ, SSOT follows command outputs plus PR evidence pack.
   - hard evidence summary (verbatim):
-    - (1) `git ls-remote https://github.com/Hello-Pork-Belly/1click.git refs/heads/main`
-      ```text
-      d4d8477fd06c7c7ae394b3078560effbe0688e65	refs/heads/main
-      ```
-    - (2) `gh api repos/Hello-Pork-Belly/1click/commits/main --jq .sha`
-      ```text
-      d4d8477fd06c7c7ae394b3078560effbe0688e65
-      ```
-    - (3) `gh pr view 18 --repo Hello-Pork-Belly/1click --json number,state,mergedAt,mergeCommit,url`
-      ```json
-      {"mergeCommit":{"oid":"6ad01bc8e5a8d3692518f3bc01ae3fdf6d0ea3ea"},"mergedAt":"2026-02-22T07:24:42Z","number":18,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/18"}
-      ```
-    - (4) `gh pr view 19 --repo Hello-Pork-Belly/1click --json number,state,mergedAt,mergeCommit,url`
-      ```json
-      {"mergeCommit":{"oid":"d4d8477fd06c7c7ae394b3078560effbe0688e65"},"mergedAt":"2026-02-22T07:28:58Z","number":19,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/19"}
-      ```
+    ```text
+    (1)
+
+    c9ac15022a6b537245d885294957c68ec677ce17	refs/heads/main
+
+    (2)
+
+    c9ac15022a6b537245d885294957c68ec677ce17
+
+    (3)
+
+    {"mergeCommit":{"oid":"c9ac15022a6b537245d885294957c68ec677ce17"},"mergedAt":"2026-02-22T08:16:23Z","number":20,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/20"}
+
+    (4)
+
+    {"mergeCommit":{"oid":"d4d8477fd06c7c7ae394b3078560effbe0688e65"},"mergedAt":"2026-02-22T07:28:58Z","number":19,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/19"}
+    ```
 - Actions / Workflows:
   - Actions page: https://github.com/Hello-Pork-Belly/1click/actions
   - `.github/workflows` missing (404): https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows (repository has no workflow files)
