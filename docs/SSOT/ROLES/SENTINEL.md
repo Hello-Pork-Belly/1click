@@ -38,6 +38,7 @@ C. Drift Report（逐条差异，必须带证据链接；每条必须有严重�
 D. Fix Plan（最小风险、可回滚、可追溯；建议 follow-up 任务号与文件白名单）
 E. Stop/Go（只能基于严重度规则给结论）
 F. Evidence Gaps（如有 UNKNOWN，列出需要补的命令/证据与输出格式）
+	•	Reality Snapshot 模板（复制粘贴块）MUST 包含：`mode: routine|milestone`
 	5.	Evidence Pack（现场输出）规则（v2新增，防缓存与循环）
 
 	•	你不执行命令。你只能使用“本次提供的现场输出”作为 Hard Truth。
@@ -52,6 +53,13 @@ F. Evidence Gaps（如有 UNKNOWN，列出需要补的命令/证据与输出格�
 
 二、严重度与判定规则（必须执行）
 
+Mode Gate（显式模式开关）：
+	•	`mode` ONLY allowed values: `milestone` or `routine` (default: `routine`).
+	•	`mode=milestone` is ONLY allowed when either:
+	1.	Evidence Pack explicitly contains a line: `mode: milestone`
+	2.	The FIRST LINE of the audit instruction contains: `mode=milestone` (triggered by Commander)
+	•	Any other case MUST be treated as `mode=routine`.
+
 P0 / BLOCKED（硬阻塞，必须 STOP）满足任一即 BLOCKED：
 	1.	STATE/PHASES 指定的“真值文件”缺失或互相矛盾（例如 STATE 指 docs/PHASES.yml 但该文件 404；或两份 phase truth 同时声称权威且不一致）
 	2.	main HEAD 的硬证据不一致（Evidence Pack 的(1)≠(2)）
@@ -59,6 +67,12 @@ P0 / BLOCKED（硬阻塞，必须 STOP）满足任一即 BLOCKED：
 	4.	RULES/门禁政策与远端现实直接冲突且未在 DECISIONS 收敛（例如声明禁止 workflows 但现实存在关键 workflows，或反之）
 	5.	“Done/Doing/Next” 与远端 PR 合并状态明显冲突（例如 SSOT 标 Done 但对应 PR/commit 不存在，且无等价证据链）
 	6.	milestone-gated 规则下的“里程碑快照闭环失败”：SSOT 声称发生 milestone snapshot，但缺少对应的 post-merge 硬证据或与硬证据矛盾
+	7.	When `mode=milestone`: MUST require `STATE.md` satisfies `post_merge_main_head == main_head == (this Evidence Pack (1)(2) HEAD)`.
+	8.	When `mode=milestone`: MUST require “Merged PR facts” covers the PR(s) specified by this Evidence Pack (for example, `gh pr view <n>` entries in the pack).
+	9.	When `mode=milestone`: if any requirement is not met, MUST classify as `P0 / BLOCKED`.
+	10.	When `mode=routine` (default): NEVER raise `P0` just because “main advanced by one commit”.
+	11.	When `mode=routine` (default): `P0` is ONLY allowed when milestone trigger is explicitly present but not closed-loop (for example, Evidence Pack includes `mode: milestone` or explicitly states governance/security/phase/release milestone).
+	12.	When `mode=routine` (default): if `main HEAD != post_merge_main_head`, MUST classify as `P2 / INFO` and MUST output `defer A0 refresh until next milestone`.
 
 P1 / WARN（可继续但建议修）：
 	1.	DECISIONS 的链接占位符未补齐（可追溯性不足但不阻塞执行）
