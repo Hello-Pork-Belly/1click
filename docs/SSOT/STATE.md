@@ -8,13 +8,20 @@ Owner: Pork-Belly
 ## Reality Snapshot A0 (remote)
 
 - Repository: https://github.com/Hello-Pork-Belly/1click
-- Captured at: 2026-02-22T08:42:03Z
-main_head: `c9ac15022a6b537245d885294957c68ec677ce17`
+- Snapshot Semantics (milestone-gated):
+  - `pre_merge_main_head` = pre-merge hard truth (`git ls-remote refs/heads/main` == `gh api repos/<repo>/commits/main`).
+  - `post_merge_main_head` = post-merge hard truth (`git ls-remote refs/heads/main` == `gh api repos/<repo>/commits/main`).
+  - `main_head` is the compatibility alias and is defined as `post_merge_main_head` (`main_head == post_merge_main_head`).
+  - Sentinel/auditor check runs only on milestone snapshot events and verifies `post_merge_main_head == current ls-remote == current gh api`.
+  - Milestone triggers: phase change / release tag / security policy change / governance change.
+  - Snapshot refresh is no longer required for every merge; ordinary docs-only fixes do not force A0 refresh unless they change gates/rules/milestone status.
+- Captured at: 2026-02-22T08:45:58Z
+  - pre_merge_main_head: `c9ac15022a6b537245d885294957c68ec677ce17`
+  - post_merge_main_head: `5519829601523e6e95f7cec069242664908b1d57`
+main_head: `5519829601523e6e95f7cec069242664908b1d57`
   - commit/main URL: https://github.com/Hello-Pork-Belly/1click/commit/main (symbolic pointer)
-  - commit/sha URL: https://github.com/Hello-Pork-Belly/1click/commit/c9ac15022a6b537245d885294957c68ec677ce17
-  - pre_merge_main_head: `d4d8477fd06c7c7ae394b3078560effbe0688e65`
-  - post_merge_main_head: `c9ac15022a6b537245d885294957c68ec677ce17`
-- Merged PR facts (#1-#20):
+  - commit/sha URL: https://github.com/Hello-Pork-Belly/1click/commit/5519829601523e6e95f7cec069242664908b1d57
+- Merged PR facts (#1-#21):
   - PR #1: https://github.com/Hello-Pork-Belly/1click/pull/1
     - mergedAt: `2026-02-18T11:12:57Z`
     - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/aac4c6c11f406bce69f6db05f1ce421c64ec1f36
@@ -75,26 +82,20 @@ main_head: `c9ac15022a6b537245d885294957c68ec677ce17`
   - PR #20: https://github.com/Hello-Pork-Belly/1click/pull/20
     - mergedAt: `2026-02-22T08:16:23Z`
     - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/c9ac15022a6b537245d885294957c68ec677ce17
+  - PR #21: https://github.com/Hello-Pork-Belly/1click/pull/21
+    - mergedAt: `2026-02-22T08:43:09Z`
+    - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/5519829601523e6e95f7cec069242664908b1d57
   - remote-first precedence: use `git ls-remote refs/heads/main`, `gh api repos/<repo>/commits/main`, and `gh pr view`.
   - if UI rendering and command outputs differ, SSOT follows command outputs plus PR evidence pack.
-  - hard evidence summary (verbatim):
-    ```text
-    (1)
-
-    c9ac15022a6b537245d885294957c68ec677ce17	refs/heads/main
-
-    (2)
-
-    c9ac15022a6b537245d885294957c68ec677ce17
-
-    (3)
-
-    {"mergeCommit":{"oid":"c9ac15022a6b537245d885294957c68ec677ce17"},"mergedAt":"2026-02-22T08:16:23Z","number":20,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/20"}
-
-    (4)
-
-    {"mergeCommit":{"oid":"d4d8477fd06c7c7ae394b3078560effbe0688e65"},"mergedAt":"2026-02-22T07:28:58Z","number":19,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/19"}
-    ```
+  - hard evidence summary (post-merge evidence, example):
+    - `git ls-remote https://github.com/Hello-Pork-Belly/1click.git refs/heads/main`
+      ```text
+      5519829601523e6e95f7cec069242664908b1d57	refs/heads/main
+      ```
+    - `gh api repos/Hello-Pork-Belly/1click/commits/main --jq .sha`
+      ```text
+      5519829601523e6e95f7cec069242664908b1d57
+      ```
 - Actions / Workflows:
   - Actions page: https://github.com/Hello-Pork-Belly/1click/actions
   - `.github/workflows` missing (404): https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows (repository has no workflow files)
@@ -137,4 +138,5 @@ main_head: `c9ac15022a6b537245d885294957c68ec677ce17`
 
 ## Next
 
-- T-A0-001 Keep A0 snapshot current on every merge (main HEAD / PR links / Actions / Releases evidence).
+- T-A0-001 Keep A0 snapshot current on every milestone (phase change / release tag / security policy change / governance change).
+  - Ordinary docs-only fixes do not force A0 refresh unless they change gates/rules/milestone status.
