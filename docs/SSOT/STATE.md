@@ -16,13 +16,13 @@ Owner: Pork-Belly
   - Sentinel/auditor check runs only on milestone snapshot events and verifies `post_merge_main_head == current ls-remote == current gh api`.
   - Milestone triggers: phase change / release tag / security policy change / governance change.
   - Snapshot refresh is no longer required for every merge; ordinary docs-only fixes do not force A0 refresh unless they change gates/rules/milestone status.
-- Captured at: 2026-02-22T09:46:03Z
-  - pre_merge_main_head: `14f54675507e14474af9933eb0116dd27d77473f`
-  - post_merge_main_head: `953d3fc5700dc423d37fab5a0b6823adcb48b208`
-main_head: `953d3fc5700dc423d37fab5a0b6823adcb48b208`
+- Captured at: 2026-02-22T10:14:33Z
+  - pre_merge_main_head: `953d3fc5700dc423d37fab5a0b6823adcb48b208`
+  - post_merge_main_head: `aed69ee7e0d8157c339b716a817b2e8d77caedd7`
+main_head: `aed69ee7e0d8157c339b716a817b2e8d77caedd7`
   - commit/main URL: https://github.com/Hello-Pork-Belly/1click/commit/main (symbolic pointer)
-  - commit/sha URL: https://github.com/Hello-Pork-Belly/1click/commit/953d3fc5700dc423d37fab5a0b6823adcb48b208
-- Merged PR facts (#1-#23):
+  - commit/sha URL: https://github.com/Hello-Pork-Belly/1click/commit/aed69ee7e0d8157c339b716a817b2e8d77caedd7
+- Merged PR facts (#1-#24):
   - PR #1: https://github.com/Hello-Pork-Belly/1click/pull/1
     - mergedAt: `2026-02-18T11:12:57Z`
     - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/aac4c6c11f406bce69f6db05f1ce421c64ec1f36
@@ -92,30 +92,25 @@ main_head: `953d3fc5700dc423d37fab5a0b6823adcb48b208`
   - PR #23: https://github.com/Hello-Pork-Belly/1click/pull/23
     - mergedAt: `2026-02-22T09:32:17Z`
     - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/953d3fc5700dc423d37fab5a0b6823adcb48b208
+  - PR #24: https://github.com/Hello-Pork-Belly/1click/pull/24
+    - mergedAt: `2026-02-22T09:47:20Z`
+    - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/aed69ee7e0d8157c339b716a817b2e8d77caedd7
   - remote-first precedence: use `git ls-remote refs/heads/main`, `gh api repos/<repo>/commits/main`, and `gh pr view`.
   - if UI rendering and command outputs differ, SSOT follows command outputs plus PR evidence pack.
   - hard evidence summary (post-merge evidence, verbatim):
     ```text
     (1)
 
-    953d3fc5700dc423d37fab5a0b6823adcb48b208	refs/heads/main
+    aed69ee7e0d8157c339b716a817b2e8d77caedd7	refs/heads/main
 
     (2)
 
-    953d3fc5700dc423d37fab5a0b6823adcb48b208
+    aed69ee7e0d8157c339b716a817b2e8d77caedd7
+
+    (3)
+
+    {"mergeCommit":{"oid":"aed69ee7e0d8157c339b716a817b2e8d77caedd7"},"mergedAt":"2026-02-22T09:47:20Z","number":24,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/24"}
     ```
-    - `gh pr view 23 -R Hello-Pork-Belly/1click --json number,state,mergedAt,mergeCommit,url`
-      ```json
-      {"mergeCommit":{"oid":"953d3fc5700dc423d37fab5a0b6823adcb48b208"},"mergedAt":"2026-02-22T09:32:17Z","number":23,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/23"}
-      ```
-    - `gh pr view 22 -R Hello-Pork-Belly/1click --json number,state,mergedAt,mergeCommit,url`
-      ```json
-      {"mergeCommit":{"oid":"14f54675507e14474af9933eb0116dd27d77473f"},"mergedAt":"2026-02-22T09:00:42Z","number":22,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/22"}
-      ```
-    - `gh pr view 21 -R Hello-Pork-Belly/1click --json number,state,mergedAt,mergeCommit,url`
-      ```json
-      {"mergeCommit":{"oid":"5519829601523e6e95f7cec069242664908b1d57"},"mergedAt":"2026-02-22T08:43:09Z","number":21,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/21"}
-      ```
 - Actions / Workflows:
   - Actions page: https://github.com/Hello-Pork-Belly/1click/actions
   - `.github/workflows` missing (404): https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows (repository has no workflow files)
