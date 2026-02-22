@@ -8,6 +8,7 @@ Repository truth target: `Hello-Pork-Belly/1click`
 - SSOT precedence: repository SSOT files are the only source of truth. If anything conflicts, fix SSOT via PR.
 - No direct push to main. All changes must go through PR + required checks.
 - Gates cannot be bypassed: required checks must pass; audit must PASS; no manual merge to override gates.
+- When the repository has no configured required checks, D-011 Evidence Gate is the temporary equivalent gate; once required checks are configured, all required checks must be green.
 - Audit PASS is not equal to Task Done. Commander must still run DoD/closure checks.
 - Vendor-neutrality (scoped): DO NOT mention any VPS/IaaS/hosting provider names in scripts/docs/logs/errors. Third-party SaaS/app/open-source names are allowed, but must remain provider-agnostic via replaceable provider configuration/mappings.
 - Default output language is English (logs/errors/audit). Chinese may be used only as optional UI/help.
