@@ -158,3 +158,32 @@ main_head: `ef0724a428e0ad245231cc71678061ccfa0c7795`
 
 - T-A0-001 Keep A0 snapshot current on every milestone (phase change / release tag / security policy change / governance change).
   - Ordinary docs-only fixes do not force A0 refresh unless they change gates/rules/milestone status.
+
+## Reality Snapshot RRC-ROUTINE (2026-02-23T09:30:24Z)
+
+mode: routine
+This routine snapshot does NOT trigger A0 refresh; A0 remains milestone-gated (unchanged).
+
+```text
+mode: routine
+(1)
+efa1666c9fb605419b5fe46d062b021f0f8a9efd	refs/heads/main
+(2)
+efa1666c9fb605419b5fe46d062b021f0f8a9efd
+(3a)
+28	chore(ssot): add SSOT entrypoints + evidence pack template	codex/chore/add-ssot-entrypoints	MERGED	2026-02-23T09:08:23Z
+27	chore(sentinel): add mode gate to stop head-chasing in routine RRC	codex/chore/sentinel-v2-mode-gate	MERGED	2026-02-22T10:48:00Z
+26	chore(ssot): sync A0 snapshot to ef0724 (PR#25)	codex/chore/ssot-a0-sync-ef0724	MERGED	2026-02-22T10:26:14Z
+(3b)
+{"mergeCommit":{"oid":"efa1666c9fb605419b5fe46d062b021f0f8a9efd"},"mergedAt":"2026-02-23T09:08:32Z","number":28,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/28"}
+(3b)
+{"mergeCommit":{"oid":"29c910f0c533b3067396591646617429e20dda00"},"mergedAt":"2026-02-22T10:48:11Z","number":27,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/27"}
+(3b)
+{"mergeCommit":{"oid":"3787e9155c3404fdec3b38c1afda9d8abb1e2ee5"},"mergedAt":"2026-02-22T10:26:21Z","number":26,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/26"}
+(4)
+(5)
+(6)
+(7a)
+(7b)
+[]
+```
