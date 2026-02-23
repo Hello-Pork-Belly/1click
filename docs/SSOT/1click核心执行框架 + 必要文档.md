@@ -1,5 +1,3 @@
-
-
 # 1click：导入范围（核心执行框架 + 必要文档）
 
 目标：在新仓库“1click”从零重建时，仅导入“能跑起来的核心执行框架”和“必须的流程/SSOT文档”。
@@ -30,11 +28,13 @@
 二、必要文档（必须导入，作为新仓库的“事实源与门禁合同”）
 
 A) SSOT（Single Source of Truth）
-- docs/SSOT/一键安装构思.md（总纲）
-- 一键安装流程机制.md（流程机制模板；含哨兵/门禁/证据包/回滚）
+- docs/SSOT/一键安装构思.txt（总纲）
+- docs/SSOT/INDEX.md（SSOT 入口索引：列出全部真值文件、用途、以及“唯一真值指向”）
+- docs/SSOT/一键安装流程机制.txt（流程机制模板；含哨兵/门禁/证据包/回滚）
 - docs/SSOT/STATE.md（Done/Doing/Next；唯一进度账本）
 - docs/SSOT/DECISIONS.md（关键决策与契约记录）
 - docs/SSOT/SPEC-TEMPLATE.md（任务规格模板：Inputs/Files/DoD/Rollback/Exit codes）
+- docs/BASELINE.md（硬要求清单：支持矩阵/第三方白名单/备份口径/日志口径/危险操作确认；作为门禁依据）
 
 B) ROLES 合同（四角色 + 哨兵）
 - docs/SSOT/ROLES/COMMANDER.md
@@ -43,14 +43,16 @@ B) ROLES 合同（四角色 + 哨兵）
 - docs/SSOT/ROLES/AUDITOR.md（常规审计；必须远端核验 + Workflow Hygiene）
 
 C) Phase 真值（必须唯一化）
-- docs/PHASES.yml（推荐作为唯一 phase truth）
-- 说明：若保留 docs/SSOT/PHASES.md，则必须标注为镜像/Deprecated 并指向 docs/PHASES.yml；不得形成双真值。
+- docs/SSOT/PHASES.yml（推荐作为唯一 phase truth）
+- 说明：若保留 docs/SSOT/PHASES.md，则必须标注为镜像/Deprecated 并指向 docs/SSOT/PHASES.yml；不得形成双真值。
 
 D) PR 证据模板
 - .github/pull_request_template.md（强制 Evidence + Linked SPEC + Reality Snapshot）
 
 E) 仓库规则（与门禁一致）
 - docs/RULES.yml（路径白名单/禁改区/auto-merge 策略等；必须与现实 workflows 策略一致）
+- required checks 名称集合必须固定在 docs/SSOT/DECISIONS.md（或 RULES.yml）并长期稳定；允许新增，但删除/改名视为高风险变更。
+- 供应链门禁必须可自动验证：第三方二进制下载必须带 sha256/签名校验与版本锁定；Actions/依赖升级必须记录并接受审计。
 
 三、明确不导入（禁止项）
 
@@ -63,8 +65,11 @@ E) 仓库规则（与门禁一致）
 四、导入后必须满足的“初始化门禁”（提醒：不是本步做，但这是验收标准）
 
 - SSOT 真值唯一（PHASES/STATE/DECISIONS 不冲突）
+- SSOT 可发现：docs/SSOT/INDEX.md 能一键定位全部真值文件与入口。
 - Workflow Hygiene：Actions 无噪音红叉（含 No jobs were run）
 - PR/审计流程可跑通：required checks + 审计 PASS
+- Release Blockers 可触发且可验收：命中高风险变更时，必须按 docs/SSOT/一键安装流程机制.txt 的加严门槛执行（双人审计/远端演练/证据加码/Commander 签字），且无绕过路径。
+- 供应链门禁可跑通：下载校验/版本锁定/依赖升级审计在 required checks 中可复现且无绕过路径。
 - 哨兵能输出：Reality Snapshot + SSOT Snapshot + Drift Report + Fix Plan
 
 （EOF）
