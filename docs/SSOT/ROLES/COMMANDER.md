@@ -103,3 +103,15 @@ decision: PROCEED|BLOCKED
 - Risk level and rollback notes
 - Merge conditions (required checks + audit PASS)
 - Closure decision (`Done` or `Doing`) with any required follow-up Task IDs
+
+## Closure Declaration (Task/Epic completion declaration)
+- Trigger condition: when a Task/Epic DoD is satisfied and related PR(s) are merged, Commander MUST emit a Closure Declaration in the same post-merge round and MUST write a matching entry to `docs/SSOT/STATE.md` under `Closure / Done ledger`.
+- PASS is NOT Done. Done is ONLY true when `Closure / Done ledger` contains a closure entry plus a `commander_done_declaration` for that Task/Epic.
+- Closure Declaration template (fixed order):
+  - `Task ID:`
+  - `DoD satisfied:` yes/no (MUST be `yes` to declare Done)
+  - `Related PR(s):` <PR URL list>
+  - `Merge commit SHA:` <sha> (<commit URL>)
+  - `Rollback:` `git revert <merge_commit_sha>`
+  - `Done declared_at:` <UTC timestamp>
+- STATE write-back MUST use the same field names as `Closure / Done ledger`: `task_id`, `closed_at`, `closure_pr`, `closure_merge_commit`, `commander_done_declaration`.

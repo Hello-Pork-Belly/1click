@@ -55,3 +55,8 @@ Executor completion report MUST include all fields below. Any missing item is FA
 - Evidence: `make ci` (or `make check`) passing.
 - Clear PR description linking to the SPEC and DoD outputs (no sensitive data).
 - Completion report MUST be submitted as an Executor Evidence Pack and meet all required fields above.
+
+## Epic execution report requirements
+- For Epic tasks, Executor MUST report progress and results subtask-by-subtask using the Planner subtask IDs.
+- PR description and Executor Evidence Pack MUST include evidence and rollback for every subtask.
+- Larger allowlist is permitted only if it exactly matches the Planner Epic allowlist; any out-of-allowlist change is FAIL.

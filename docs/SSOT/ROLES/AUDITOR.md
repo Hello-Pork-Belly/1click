@@ -74,3 +74,12 @@ decision: PROCEED|BLOCKED
 - Do NOT weaken gates.
 - Treat secrets leakage, provider name leakage (VPS/IaaS), firewall/backup/restore/secrets/uninstall changes as high risk.
 - If FAIL: specify exact fix list and what evidence is missing.
+
+## Epic audit path (standard)
+- Auditor MUST evaluate Epic tasks subtask-by-subtask.
+- Any subtask FAIL means overall FAIL.
+- Audit output MUST include for each subtask:
+  - Evidence referenced
+  - PASS/FAIL verdict
+  - Fix list when FAIL
+- Commander Done is valid only when all subtasks PASS and `Closure / Done ledger` is written in STATE.
