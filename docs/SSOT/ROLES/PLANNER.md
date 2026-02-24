@@ -39,3 +39,12 @@ Repository truth target: `Hello-Pork-Belly/1click`
 - Expanding scope beyond the requested task
 - “Maybe/it depends” without a concrete decision and criteria
 - Introducing provider lock-in or mentioning VPS/IaaS provider names
+
+## Epic Task spec (large-scope but auditable)
+- Epic scope is allowed when task granularity is larger, but Planner MUST keep one theme and explicit allowlist boundaries.
+- Epic SPEC MUST include Subtasks with stable IDs. Each subtask MUST define:
+  - DoD
+  - Evidence requirements (links/commands/output format)
+  - Rollback
+- Planner MUST include an overall Epic DoD and a risk declaration (P0/P1/P2) before execution begins.
+- Any path outside the declared allowlist is FAIL.

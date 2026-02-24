@@ -187,3 +187,25 @@ efa1666c9fb605419b5fe46d062b021f0f8a9efd
 (7b)
 []
 ```
+
+## Closure / Done ledger
+
+- Semantic rules:
+  - PASS is NOT Done.
+  - Done is true ONLY when this ledger contains a closure record and a `commander_done_declaration`.
+  - Any model/conversation MUST use this ledger as the source of truth to decide whether work is finished.
+  - This PR is mode:routine for contract/rule updates only; ordinary docs-only rule updates do NOT trigger A0 refresh and A0 remains milestone-gated.
+
+- Required fields per Task/Epic closure:
+  - `task_id`
+  - `closed_at` (UTC)
+  - `closure_pr` (PR URL)
+  - `closure_merge_commit` (SHA + commit URL)
+  - `commander_done_declaration` (one line that includes Task ID / DoD satisfied / rollback / declared_at)
+
+- Example entry (template):
+  - `task_id`: `T-XYZ`
+  - `closed_at`: `YYYY-MM-DDTHH:MM:SSZ`
+  - `closure_pr`: `https://github.com/Hello-Pork-Belly/1click/pull/<N>`
+  - `closure_merge_commit`: `<sha> (https://github.com/Hello-Pork-Belly/1click/commit/<sha>)`
+  - `commander_done_declaration`: `Task ID: T-XYZ | DoD satisfied: yes | Related PR(s): <PR URL> | Merge commit SHA: <sha> | Rollback: git revert <sha> | Done declared_at: YYYY-MM-DDTHH:MM:SSZ`
