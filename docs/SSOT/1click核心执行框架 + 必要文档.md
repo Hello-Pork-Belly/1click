@@ -27,10 +27,10 @@
 
 二、必要文档（必须导入，作为新仓库的“事实源与门禁合同”）
 
-A) SSOT（Single Source of Truth）
-- docs/SSOT/一键安装构思.txt（总纲）
-- docs/SSOT/INDEX.md（SSOT 入口索引：列出全部真值文件、用途、以及“唯一真值指向”）
-- docs/SSOT/一键安装流程机制.txt（流程机制模板；含哨兵/门禁/证据包/回滚）
+- docs/SSOT/一键安装构思.md（总纲；canonical）
+- docs/SSOT/START-HERE.md（SSOT 入口索引：列出真值文件、用途、以及“唯一真值指向”）
+- docs/SSOT/EVIDENCE-PACK.template.md（Evidence Pack 模板：verbatim 证据块结构）
+- docs/SSOT/一键安装流程机制.md（流程机制模板；含哨兵/门禁/证据包/回滚；canonical）
 - docs/SSOT/STATE.md（Done/Doing/Next；唯一进度账本）
 - docs/SSOT/DECISIONS.md（关键决策与契约记录）
 - docs/SSOT/SPEC-TEMPLATE.md（任务规格模板：Inputs/Files/DoD/Rollback/Exit codes）
@@ -43,8 +43,8 @@ B) ROLES 合同（四角色 + 哨兵）
 - docs/SSOT/ROLES/AUDITOR.md（常规审计；必须远端核验 + Workflow Hygiene）
 
 C) Phase 真值（必须唯一化）
-- docs/SSOT/PHASES.yml（推荐作为唯一 phase truth）
-- 说明：若保留 docs/SSOT/PHASES.md，则必须标注为镜像/Deprecated 并指向 docs/SSOT/PHASES.yml；不得形成双真值。
+- docs/PHASES.yml（唯一 phase truth）
+- 说明：若保留 docs/SSOT/PHASES.md，则必须标注为镜像/Deprecated 并指向 docs/PHASES.yml；不得形成双真值。
 
 D) PR 证据模板
 - .github/pull_request_template.md（强制 Evidence + Linked SPEC + Reality Snapshot）
