@@ -109,6 +109,37 @@ Scope:
 Rollback:
 - `git revert <merge_commit_sha>`
 
+## 2026-02-27 — D-015: CI + required checks + auto-merge governance baseline
+Decision:
+- CI baseline is now active on `main` via `.github/workflows/ci.yml` with stable check context `ci`.
+- Branch protection on `main` MUST require status check `ci` (`strict=true`) before merge.
+- Repository setting `allow_auto_merge=true` is enabled.
+- Auto-merge enablement workflow (`.github/workflows/enable-auto-merge.yml`) MAY enable auto-merge on eligible PRs, but MUST NOT bypass required checks or audit gates.
+- D-011 temporary no-checks gate is superseded for merge eligibility when required check `ci` is active; Evidence Pack remains mandatory for audit traceability.
+
+Rationale:
+- Replace temporary no-checks operating mode with enforceable platform checks.
+- Keep merge automation while preserving explicit audit evidence and rollback paths.
+
+Scope:
+- .github/workflows/ci.yml
+- .github/workflows/enable-auto-merge.yml
+- docs/SSOT/DECISIONS.md
+- docs/SSOT/STATE.md
+- docs/RULES.yml
+
+Links:
+- PR #37: https://github.com/Hello-Pork-Belly/1click/pull/37
+- PR #38: https://github.com/Hello-Pork-Belly/1click/pull/38
+- Branch protection API evidence: `required_status_checks.contexts=["ci"]`
+- Repo settings API evidence: `allow_auto_merge=true`
+
+Rollback:
+- `git revert <PR37_merge_commit_sha>`
+- `git revert <PR38_merge_commit_sha>`
+- `gh api -X PATCH repos/Hello-Pork-Belly/1click -f allow_auto_merge=false`
+- Reconfigure branch protection to remove required context `ci` (or delete protection per admin policy).
+
 ## History / Provenance (source only, not truth)
 - Imported from `Hello-Pork-Belly/horizon-openai` as provenance only; not a source of truth for `1click`.
 - Legacy imported records in this file are **Not applicable to 1click** unless re-ratified by a 1click PR.

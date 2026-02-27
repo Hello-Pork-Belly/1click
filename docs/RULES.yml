@@ -29,6 +29,15 @@ hard_gates:
     fail_condition: Missing truth files or unverifiable status claims.
 
 policy:
+  workflow_domain:
+    allowed_workflow_files:
+      - .github/workflows/ci.yml
+      - .github/workflows/enable-auto-merge.yml
+    required_status_checks:
+      - ci
+    auto_merge_allowed: true
+    note: Workflow edits remain restricted and must be explicitly allowlisted by task scope.
+
   docs_only_pr_allowlist_example:
     - docs/SSOT/STATE.md
     - docs/PHASES.yml
