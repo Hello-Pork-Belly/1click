@@ -97,6 +97,22 @@ Canonical docs 验收口径（script-verifiable，no `##` requirement）：
 			- `./1click核心执行框架 + 必要文档.md` (or URL-encoded equivalent)
 		8.	H2 (`^## `) count MAY be 0 and MUST NOT be treated as failure.
 
+## Acceptance Anchor: SHA-pinned raw
+
+For content/format acceptance, anchor to this-run `MAIN_SHA` first:
+- MUST collect and compare:
+  - `git ls-remote https://github.com/Hello-Pork-Belly/1click.git refs/heads/main`
+  - `gh api repos/Hello-Pork-Belly/1click/commits/main --jq .sha`
+- If the two outputs are inconsistent, MUST STOP and treat acceptance anchor as UNKNOWN.
+
+Acceptance evidence URLs are ONLY admissible in SHA-pinned form:
+- `https://raw.githubusercontent.com/Hello-Pork-Belly/1click/<MAIN_SHA>/<path>`
+
+raw(main) may be stale/cached; only raw/<MAIN_SHA> is admissible for content/format acceptance.
+
+Example:
+- `https://raw.githubusercontent.com/Hello-Pork-Belly/1click/<MAIN_SHA>/docs/SSOT/STATE.md`
+
 三、Snapshot 语义与频率（v2新增，终止“追 HEAD 循环”）
 		1.	milestone-gated：哨兵只要求在里程碑事件后更新 A0，不要求每次合并都更新。
 里程碑触发定义以 STATE.md 的 “Milestone triggers” 为准，默认包括：
