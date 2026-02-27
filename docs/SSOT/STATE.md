@@ -209,3 +209,24 @@ efa1666c9fb605419b5fe46d062b021f0f8a9efd
   - `closure_pr`: `https://github.com/Hello-Pork-Belly/1click/pull/<N>`
   - `closure_merge_commit`: `<sha> (https://github.com/Hello-Pork-Belly/1click/commit/<sha>)`
   - `commander_done_declaration`: `Task ID: T-XYZ | DoD satisfied: yes | Related PR(s): <PR URL> | Merge commit SHA: <sha> | Rollback: git revert <sha> | Done declared_at: YYYY-MM-DDTHH:MM:SSZ`
+
+## Reality Snapshot RRC-ROUTINE (2026-02-25T11:45:15Z)
+mode: routine
+(1)
+a7dfefa223c12d5b4380556a14f5e960a0446817	refs/heads/main
+(2)
+a7dfefa223c12d5b4380556a14f5e960a0446817
+(3a)
+33	chore(ssot): remove legacy txt placeholders and fix md references	codex/chore/remove-legacy-txt-placeholders	MERGED	2026-02-25T10:54:09Z
+32	chore(ssot): overwrite canonical docs md from attachments (routine)	codex/chore/canon-md-overwrite-20260225	MERGED	2026-02-25T08:47:48Z
+31	chore(ssot): add closure declaration + epic task rules	codex/chore/closure-ledger-epic-rules	MERGED	2026-02-24T11:16:41Z
+(3b)
+{"mergeCommit":{"oid":"6827005b774a1af605b6e4cd5b4b73dc36fe571f"},"mergedAt":"2026-02-24T11:16:52Z","number":31,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/31"}
+{"mergeCommit":{"oid":"df12b433c054e44333486eb8c3e10f0678b8dd97"},"mergedAt":"2026-02-25T08:47:57Z","number":32,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/32"}
+{"mergeCommit":{"oid":"a7dfefa223c12d5b4380556a14f5e960a0446817"},"mergedAt":"2026-02-25T10:59:06Z","number":33,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/33"}
+(4)
+(5)
+(6)
+(7a)
+(7b)
+[]
