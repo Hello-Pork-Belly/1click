@@ -229,4 +229,35 @@ a7dfefa223c12d5b4380556a14f5e960a0446817
 (6)
 (7a)
 (7b)
+[]## Reality Snapshot RRC-ROUTINE (2026-02-27T09:32:53Z)
+
+mode: routine
+This routine snapshot does NOT trigger A0 refresh; A0 remains milestone-gated (unchanged).
+
+```text
+mode: routine
+(1)
+55bfb556d079f6f40c89bea8f078853a46acac2e	refs/heads/main
+(2)
+55bfb556d079f6f40c89bea8f078853a46acac2e
+(3a)
+34	chore(ssot): add routine RRC evidence pack (2026-02-25T11:45:15Z)	codex/chore/rrc-routine-20260225	MERGED	2026-02-27T09:21:32Z
+33	chore(ssot): remove legacy txt placeholders and fix md references	codex/chore/remove-legacy-txt-placeholders	MERGED	2026-02-25T10:54:09Z
+32	chore(ssot): overwrite canonical docs md from attachments (routine)	codex/chore/canon-md-overwrite-20260225	MERGED	2026-02-25T08:47:48Z
+(3b)
+{"mergeCommit":{"oid":"55bfb556d079f6f40c89bea8f078853a46acac2e"},"mergedAt":"2026-02-27T09:22:16Z","number":34,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/34"}
+(3b)
+{"mergeCommit":{"oid":"a7dfefa223c12d5b4380556a14f5e960a0446817"},"mergedAt":"2026-02-25T10:59:06Z","number":33,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/33"}
+(3b)
+{"mergeCommit":{"oid":"df12b433c054e44333486eb8c3e10f0678b8dd97"},"mergedAt":"2026-02-25T08:47:57Z","number":32,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/32"}
+(4)
+
+(5)
+
+(6)
+
+(7a)
+
+(7b)
 []
+```
