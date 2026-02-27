@@ -120,3 +120,35 @@ P2 / INFO（记录即可）：
 	•	required checks 结果链接（如有；无则明确“no workflows/no runs”）
 	•	Actions run URL（如有；无则明确“no workflows/no runs”）
 	•	tag/release 证据或查询命令输出摘要
+
+## Emergency Reset (RRC-RESET)
+
+Purpose: recover from drift. This is a deterministic reset that forces the run to re-anchor on SSOT + this-run Evidence Pack.
+
+Trigger phrase (copy-paste): `RRC-RESET`
+
+When `RRC-RESET` is invoked, the responder MUST:
+1) Stop all ongoing reasoning/assumptions and re-anchor to raw(main) SSOT.
+2) Read in this order:
+   - docs/SSOT/START-HERE.md (raw main)
+   - docs/SSOT/ROLES/SENTINEL.md (raw main)
+   - docs/SSOT/DECISIONS.md (raw main)
+   - docs/SSOT/STATE.md (raw main)
+3) Treat EVERYTHING outside this-run Evidence Pack as UNKNOWN (especially main HEAD / PR states / tags / releases / actions).
+4) Require this-run Evidence Pack (verbatim) at minimum:
+   (1) git ls-remote ... refs/heads/main
+   (2) gh api .../commits/main --jq .sha
+   And if needed by the task: (3a)(3b)(4)(5)(6)(7a)(7b) per template.
+5) Re-output using the fixed structure:
+   A. Reality Snapshot (mode + Hard Truth only)
+   B. SSOT Snapshot (raw citations)
+   C. Drift (severity per mode)
+   D. Fix Plan (docs-only first)
+   E. Stop/Go
+   F. Evidence Gaps (missing commands)
+
+Mode rules still apply:
+- mode=routine: MUST NOT demand A0 refresh; if main_head != post_merge_main_head => P2/INFO + fixed sentence.
+- mode=milestone: MUST close the A0 loop and require Hard Truth closure.
+
+Fixed sentence (routine): `defer A0 refresh until next milestone`.

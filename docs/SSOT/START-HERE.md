@@ -18,3 +18,10 @@ Hard Truth 只认 **本次 Evidence Pack 的原样命令输出**（verbatim outp
 - [一键安装流程机制](./一键安装流程机制.md)
 - [一键安装构思](./一键安装构思.md)
 - [1click核心执行框架 + 必要文档](./1click核心执行框架%20+%20必要文档.md)
+
+## Emergency Reset (RRC-RESET)
+
+If any conversation/model appears to drift, type: `RRC-RESET`.
+
+Then immediately follow the Sentinel contract:
+- `docs/SSOT/ROLES/SENTINEL.md` (raw main)
