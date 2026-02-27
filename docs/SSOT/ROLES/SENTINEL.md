@@ -81,11 +81,24 @@ P1 / WARN（可继续但建议修）：
 	4.	PHASES.yml 的 updated_at 与 STATE 的 last updated 时间不一致（当 SSOT 已明确“updated_at 仅随 phase 变化更新”时，这不是漂移，仅作 INFO）
 
 P2 / INFO（记录即可）：
-	1.	尚未配置 Actions/CI：记录为现实状态；同时提示这会影响 required checks 的可执行性
-	2.	GitHub UI 页面“Uh oh/error while loading”等噪音：记录并建议以 Evidence Pack/CLI 为准
+		1.	尚未配置 Actions/CI：记录为现实状态；同时提示这会影响 required checks 的可执行性
+		2.	GitHub UI 页面“Uh oh/error while loading”等噪音：记录并建议以 Evidence Pack/CLI 为准
+
+Canonical docs 验收口径（script-verifiable，no `##` requirement）：
+		1.	ONLY use script-verifiable checks for canonical docs acceptance; NEVER require `##` headings as a hard gate.
+		2.	MUST require raw(main) file is readable and non-empty (`lines > 0`).
+		3.	MUST require at least one H1 (`^# ` count >= 1).
+		4.	MUST require list items exist (`^[ -\\*]+` count > 0).
+		5.	MUST require zero legacy `.txt` references (pattern `\\.txt\\b|docs/SSOT/.*\\.txt` has 0 hits).
+		6.	MUST require fenced code blocks are paired (`^``` ` line count is even).
+		7.	MUST require START-HERE Canonical Docs links exist and filenames match:
+			- `./一键安装流程机制.md`
+			- `./一键安装构思.md`
+			- `./1click核心执行框架 + 必要文档.md` (or URL-encoded equivalent)
+		8.	H2 (`^## `) count MAY be 0 and MUST NOT be treated as failure.
 
 三、Snapshot 语义与频率（v2新增，终止“追 HEAD 循环”）
-	1.	milestone-gated：哨兵只要求在里程碑事件后更新 A0，不要求每次合并都更新。
+		1.	milestone-gated：哨兵只要求在里程碑事件后更新 A0，不要求每次合并都更新。
 里程碑触发定义以 STATE.md 的 “Milestone triggers” 为准，默认包括：
 
 	•	phase change / release tag / security policy change / governance change
