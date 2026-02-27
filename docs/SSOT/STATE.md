@@ -2,13 +2,13 @@
 
 This file is the single source of truth for project progress in 1click.
 
-Last updated: 2026-02-22
+Last updated: 2026-02-27
 Owner: Pork-Belly
 
 ## Reality Snapshot A0 (remote)
 
 - Repository: https://github.com/Hello-Pork-Belly/1click
-- Milestone: governance change (PR #23)
+- Milestone: CI governance change (PR #37 / PR #38)
 - Snapshot Semantics (milestone-gated):
   - `pre_merge_main_head` = pre-merge hard truth (`git ls-remote refs/heads/main` == `gh api repos/<repo>/commits/main`).
   - `post_merge_main_head` = post-merge hard truth (`git ls-remote refs/heads/main` == `gh api repos/<repo>/commits/main`).
@@ -16,13 +16,13 @@ Owner: Pork-Belly
   - Sentinel/auditor check runs only on milestone snapshot events and verifies `post_merge_main_head == current ls-remote == current gh api`.
   - Milestone triggers: phase change / release tag / security policy change / governance change.
   - Snapshot refresh is no longer required for every merge; ordinary docs-only fixes do not force A0 refresh unless they change gates/rules/milestone status.
-- Captured at: 2026-02-22T10:25:23Z
-  - pre_merge_main_head: `aed69ee7e0d8157c339b716a817b2e8d77caedd7`
-  - post_merge_main_head: `ef0724a428e0ad245231cc71678061ccfa0c7795`
-main_head: `ef0724a428e0ad245231cc71678061ccfa0c7795`
+- Captured at: 2026-02-27T10:52:25Z
+  - pre_merge_main_head: `750a37ba1aa8e08c0820d344bde8513b32133eff`
+  - post_merge_main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
+main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
   - commit/main URL: https://github.com/Hello-Pork-Belly/1click/commit/main (symbolic pointer)
-  - commit/sha URL: https://github.com/Hello-Pork-Belly/1click/commit/ef0724a428e0ad245231cc71678061ccfa0c7795
-- Merged PR facts (#1-#25):
+  - commit/sha URL: https://github.com/Hello-Pork-Belly/1click/commit/daf4b51c260bbfe8184fdec06aa277fb063d54e5
+- Merged PR facts (baseline #1-#25 + CI milestone PRs):
   - PR #1: https://github.com/Hello-Pork-Belly/1click/pull/1
     - mergedAt: `2026-02-18T11:12:57Z`
     - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/aac4c6c11f406bce69f6db05f1ce421c64ec1f36
@@ -98,27 +98,45 @@ main_head: `ef0724a428e0ad245231cc71678061ccfa0c7795`
   - PR #25: https://github.com/Hello-Pork-Belly/1click/pull/25
     - mergedAt: `2026-02-22T10:15:15Z`
     - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/ef0724a428e0ad245231cc71678061ccfa0c7795
+  - PR #37: https://github.com/Hello-Pork-Belly/1click/pull/37
+    - mergedAt: `2026-02-27T10:50:16Z`
+    - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/750a37ba1aa8e08c0820d344bde8513b32133eff
+  - PR #38: https://github.com/Hello-Pork-Belly/1click/pull/38
+    - mergedAt: `2026-02-27T10:52:25Z`
+    - merge commit: https://github.com/Hello-Pork-Belly/1click/commit/daf4b51c260bbfe8184fdec06aa277fb063d54e5
   - remote-first precedence: use `git ls-remote refs/heads/main`, `gh api repos/<repo>/commits/main`, and `gh pr view`.
   - if UI rendering and command outputs differ, SSOT follows command outputs plus PR evidence pack.
   - hard evidence summary (post-merge evidence, verbatim):
     ```text
     (1)
 
-    ef0724a428e0ad245231cc71678061ccfa0c7795	refs/heads/main
+    daf4b51c260bbfe8184fdec06aa277fb063d54e5	refs/heads/main
 
     (2)
 
-    ef0724a428e0ad245231cc71678061ccfa0c7795
+    daf4b51c260bbfe8184fdec06aa277fb063d54e5
 
     (3)
 
-    {"mergeCommit":{"oid":"ef0724a428e0ad245231cc71678061ccfa0c7795"},"mergedAt":"2026-02-22T10:15:15Z","number":25,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/25"}
+    {"mergeCommit":{"oid":"750a37ba1aa8e08c0820d344bde8513b32133eff"},"mergedAt":"2026-02-27T10:50:16Z","number":37,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/37"}
+
+    (4)
+
+    {"mergeCommit":{"oid":"daf4b51c260bbfe8184fdec06aa277fb063d54e5"},"mergedAt":"2026-02-27T10:52:25Z","number":38,"state":"MERGED","url":"https://github.com/Hello-Pork-Belly/1click/pull/38"}
+
+    (5)
+
+    {"allow_auto_merge":true}
+
+    (6)
+
+    {"contexts":["ci"],"strict":true}
     ```
 - Actions / Workflows:
   - Actions page: https://github.com/Hello-Pork-Belly/1click/actions
-  - `.github/workflows` missing (404): https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows (repository has no workflow files)
-  - `gh api "repos/Hello-Pork-Belly/1click/contents/.github/workflows?ref=main"` -> `404 Not Found`
-  - `gh run list -R Hello-Pork-Belly/1click --limit 20` -> no rows (`no workflows / no runs`)
+  - Workflows tree: https://github.com/Hello-Pork-Belly/1click/tree/main/.github/workflows
+  - workflow files on main: `.github/workflows/ci.yml`, `.github/workflows/enable-auto-merge.yml`
+  - `gh run list -R Hello-Pork-Belly/1click --limit 10` shows successful `ci` runs for PR #37 and PR #38 (no red/noise runs in this milestone evidence set).
 - Releases / Tags:
   - Releases page: https://github.com/Hello-Pork-Belly/1click/releases
   - `gh release list -R Hello-Pork-Belly/1click --limit 50` -> no rows
@@ -155,6 +173,17 @@ main_head: `ef0724a428e0ad245231cc71678061ccfa0c7795`
 - none
 
 ## Next
+
+- T-CI-001 Establish CI + Required Checks + Auto-merge Enablement.
+  - DoD (machine-verifiable):
+    - `.github/workflows/ci.yml` exists on main and produces stable PR check name `ci`.
+    - branch protection on `main` requires status check context `ci` (`strict=true`).
+    - repository `allow_auto_merge=true` and `.github/workflows/enable-auto-merge.yml` enables auto-merge (does not bypass checks).
+    - Actions hygiene: successful `ci` runs for PR #37/#38; no red/noise runs in milestone evidence set.
+  - Milestone hard evidence references:
+    - PR #37: https://github.com/Hello-Pork-Belly/1click/pull/37
+    - PR #38: https://github.com/Hello-Pork-Belly/1click/pull/38
+    - post-merge hard truth for milestone snapshot: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`.
 
 - T-A0-001 Keep A0 snapshot current on every milestone (phase change / release tag / security policy change / governance change).
   - Ordinary docs-only fixes do not force A0 refresh unless they change gates/rules/milestone status.
