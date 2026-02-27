@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run baseline check
+        shell: bash
+        run: |
+          if [ -f Makefile ] && grep -qE '^[[:space:]]*check:' Makefile; then
+            make check
+          else
+            echo "No make check target; CI baseline pass."
+          fi
