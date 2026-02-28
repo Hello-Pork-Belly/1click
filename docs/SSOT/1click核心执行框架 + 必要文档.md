@@ -34,6 +34,7 @@
 - docs/SSOT/STATE.md（Done/Doing/Next；唯一进度账本）
 - docs/SSOT/DECISIONS.md（关键决策与契约记录）
 - docs/SSOT/SPEC-TEMPLATE.md（任务规格模板：Inputs/Files/DoD/Rollback/Exit codes）
+- docs/SSOT/JOURNAL.md（auto, append-only；新对话接手必读，配合 STATE/DECISIONS 做漂移归因）
 - docs/BASELINE.md（硬要求清单：支持矩阵/第三方白名单/备份口径/日志口径/危险操作确认；作为门禁依据）
 
 B) ROLES 合同（四角色 + 哨兵）
@@ -53,6 +54,10 @@ E) 仓库规则（与门禁一致）
 - docs/RULES.yml（路径白名单/禁改区/auto-merge 策略等；必须与现实 workflows 策略一致）
 - required checks 名称集合必须固定在 docs/SSOT/DECISIONS.md（或 RULES.yml）并长期稳定；允许新增，但删除/改名视为高风险变更。
 - 供应链门禁必须可自动验证：第三方二进制下载必须带 sha256/签名校验与版本锁定；Actions/依赖升级必须记录并接受审计。
+
+F) JOURNAL 自动机制（必须启用）
+- hooks + 脚本：`.githooks/post-commit` 与 `scripts/journal_append.sh` 自动追加 `docs/SSOT/JOURNAL.md`（append-only）。
+- JOURNAL 旧条目禁止手工修改；如需记录操作者身份，统一映射为 `Pork- Belly`（不得出现 `freeman`）。
 
 三、明确不导入（禁止项）
 
