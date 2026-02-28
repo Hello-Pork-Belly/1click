@@ -36,6 +36,7 @@
 - docs/SSOT/SPEC-TEMPLATE.md（任务规格模板：Inputs/Files/DoD/Rollback/Exit codes）
 - docs/SSOT/JOURNAL.md（auto, append-only；新对话接手必读，配合 STATE/DECISIONS 做漂移归因）
 - docs/BASELINE.md（硬要求清单：支持矩阵/第三方白名单/备份口径/日志口径/危险操作确认；作为门禁依据）
+- docs/SSOT/EVIDENCE/（RRC 证据产物落盘目录；用于保存每次 Evidence Pack 文件，不计入固定必读集合）
 
 B) ROLES 合同（四角色 + 哨兵）
 - docs/SSOT/ROLES/COMMANDER.md
@@ -58,6 +59,18 @@ E) 仓库规则（与门禁一致）
 F) JOURNAL 自动机制（必须启用）
 - hooks + 脚本：`.githooks/post-commit` 与 `scripts/journal_append.sh` 自动追加 `docs/SSOT/JOURNAL.md`（append-only）。
 - JOURNAL 旧条目禁止手工修改；如需记录操作者身份，统一映射为 `Pork- Belly`（不得出现 `freeman`）。
+
+G) Evidence 落盘 + 双锚定（必须）
+- 每次 RRC Evidence Pack 必须落盘到 `docs/SSOT/EVIDENCE/`。
+- 文件命名规则：`<captured_at_utc>_<mode>_<main_sha>.md`（UTC + mode + 40位 main_sha）。
+- 双锚定要求：
+  - Reality anchor：本次 Evidence Pack 的 (1)(2) 输出，且两者必须一致。
+  - Standard anchor：所有 SSOT/标准文档引用必须使用 SHA-pinned raw：`/<main_sha>/...`；禁止使用 `/main/` 作为验收真值。
+- routine 判定边界：
+  - 缺 (3)-(7) 证据时，结论必须标记为 `UNKNOWN + Evidence Gaps`，可以继续但结论范围受限。
+  - 仅在 `(1)!=(2)`（Hard Truth 冲突）或标准文件在 `main_sha` 下缺失时判定 `BLOCKED`。
+- 新对话接手流程：
+  - 先读固定 16 份必读文档，再读取 `docs/SSOT/EVIDENCE/` 中最近一份（按 UTC/main_sha）Evidence 文件。
 
 三、明确不导入（禁止项）
 
