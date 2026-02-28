@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Default: append journal entry after every commit.
+# Humans do not edit JOURNAL entries manually.
+ONECLICK_EVENT="${ONECLICK_EVENT:-git-commit}"
+ONECLICK_MODE="${ONECLICK_MODE:-routine}"
+ONECLICK_ROLE="${ONECLICK_ROLE:-executor}"
+
+# Prevent recursive commits: if the last commit touched JOURNAL, do nothing
+if git show --name-only --pretty="" HEAD | grep -q "^docs/SSOT/JOURNAL.md$"; then
+  exit 0
+fi
+
+# Append entry
+scripts/journal_append.sh
+
+# Stage the updated journal so the next commit includes it automatically.
+git add docs/SSOT/JOURNAL.md || true
