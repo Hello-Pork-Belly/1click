@@ -2,17 +2,18 @@
 
 - mode: routine|milestone
 - captured_at_utc: YYYY-MM-DDTHH:MM:SSZ
-- main_sha: <40-hex>  # MUST equal (1) and (2); mismatch => BLOCKED
+- main_sha: <40-hex>  # MUST equal (1) and (2); mismatch => STOP/BLOCKED
 
 ## Anchoring Rules (MUST)
 
 - Hard Truth for main HEAD must come from this Evidence Pack only:
   (1) git ls-remote ... refs/heads/main
   (2) gh api .../commits/main --jq .sha
+- First gate: verify (1)==(2). If mismatch => STOP/BLOCKED and stop.
 - All SSOT/standard references MUST be SHA-pinned using main_sha:
   raw.githubusercontent.com/<owner>/<repo>/<main_sha>/...
   Do NOT use /main/ for truth citations.
-- routine: missing evidence => UNKNOWN + Evidence Gaps (not BLOCKED),
+- mode=routine: missing evidence => UNKNOWN + Evidence Gaps (do NOT STOP/BLOCKED),
   except (1)!=(2) (Hard Truth conflict) or standard missing at main_sha.
 
 # Evidence Pack (verbatim outputs)
