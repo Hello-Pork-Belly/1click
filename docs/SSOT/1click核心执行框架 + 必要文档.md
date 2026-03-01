@@ -86,7 +86,8 @@ G) RRC Evidence Persistence & Dual Anchoring (MUST)
 - SSOT 可发现：docs/SSOT/INDEX.md 能一键定位全部真值文件与入口。
 - Workflow Hygiene：Actions 无噪音红叉（含 No jobs were run）
 - PR/审计流程可跑通：required checks + 审计 PASS
-- Release Blockers 可触发且可验收：命中高风险变更时，必须按 docs/SSOT/一键安装流程机制.md 的加严门槛执行（双人审计/远端演练/证据加码/Commander 签字），且无绕过路径。
+- Release Blockers 可触发且可验收：命中高风险变更时，
+必须按 docs/SSOT/一键安装流程机制.md 的加严门槛执行（双人审计/远端演练/证据加码/Commander 签字），且无绕过路径。
 - 供应链门禁可跑通：下载校验/版本锁定/依赖升级审计在 required checks 中可复现且无绕过路径。
 - 哨兵能输出：Reality Snapshot + SSOT Snapshot + Drift Report + Fix Plan
 
