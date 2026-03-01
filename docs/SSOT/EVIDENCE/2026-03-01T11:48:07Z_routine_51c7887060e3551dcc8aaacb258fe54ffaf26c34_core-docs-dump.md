@@ -1,0 +1,804 @@
+# Evidence Pack (core docs dump)
+
+- mode: routine
+- captured_at_utc: 2026-03-01T11:48:07Z
+- main_sha: 51c7887060e3551dcc8aaacb258fe54ffaf26c34
+
+## (1) git ls-remote refs/heads/main
+```text
+51c7887060e3551dcc8aaacb258fe54ffaf26c34	refs/heads/main
+```
+
+## (2) gh api commits/main --jq .sha
+```text
+51c7887060e3551dcc8aaacb258fe54ffaf26c34
+```
+
+## 一键安装构思.md (SHA-pinned raw)
+```md
+
+【Repo/SSOT 运行规则（新增；仅补缺口）】
+- 本项目仓库：@GitHub /Hello-Pork-Belly/1click
+- 单一事实源（SSOT）：以仓库 `docs/SSOT/` 为准；任何结论必须引用 raw(main) 的对应文件。
+- 审计模式（SENTINEL v2）：默认 `mode: routine`（只采证据与记录，不追 A0）；只有 Commander 明确声明 `mode: milestone` 才做 P0 
+对齐审计（要求 A0 `post_merge_main_head/main_head` 与硬证据闭环一致，
+并补齐 merged facts）。
+- Evidence Pack：按仓库 `docs/SSOT/EVIDENCE-PACK.template.md` 的字段与顺序逐字粘贴命令输出；GitHub UI 仅作弱证据。
+
+1. 目的（为什么要做）
+- 我需要一套在 Ubuntu 上“一键安装/一键编排常用应用”的脚本体系。
+- 目标不是写一堆一次性的安装命令，而是形成可复用、可审计、可维护的脚本与流程。
+- 我不希望每次与模型对话都重新解释背景；本文件是唯一的“构思与约束汇总”。
+
+2. 现实环境与约束（必须考虑）
+- 机器来源：免费/低成本云 VPS（可在任意主机商/云上测试；但脚本/文档/日志/错误输出中禁止出现任何 VPS/基础设施云厂商名称）。
+- 典型规格两类：
+  - 低配：x86 2c1g（负责承载 Web/站点，多站点/slug 切分）。
+  - 高配：ARM 4c24g（负责承载重组件，例如 Redis/MariaDB）。
+- 目标系统：Ubuntu 22.04/24.04。
+- 基础前提：所有机器都已安装并长期启用 Tailscale（这是默认前置条件）。
+- 互联方式：跨机通信与远程管理默认走 Tailscale；跨机依赖（如宿主机→Hub 的 DB/Redis）必须走 Tailscale。
+- Tailscale 安全边界：Hub 机的 DB/Redis 端口仅允许来自宿主机节点的 Tailscale 流量访问（本阶段以网络隔离/allowlist 为主，不要求实现 Redis ACL）。
+- 防火墙要求：默认 UFW（底层可落到 iptables/nftables）；Hub 的 3306/6379 必须仅对 tailscale0 放行，且仅允许来自 inventory 的 
+allowlist（宿主机节点）访问；公网网卡不得暴露 DB/Redis。
+- 重要：低配机资源紧张，需要 swap、并发限制、内存/IO 优化等策略。
+- 默认资源桶策略（可被 inventory 覆盖；用于避免各模块各写一套 tuning）：
+  - 2c1g（低配 host 典型）：默认启用 swap（建议 2G）；限制并发（Web/PHP/备份/压缩等耗资源任务需限速/限并发）；优先降低 I/O 
+抖动（尽量避免高频小文件写入）。
+  - 4c24g（高配 hub 典型）：默认不强制 swap；允许更高并发，但备份/压缩仍需可控；DB/Redis 以稳定为先。
+  - 资源桶默认值只作为“未显式声明时”的 fallback；任何关键参数都应能通过 inventory（非敏感）覆盖。
+- 厂商中立（硬约束，范围限定）：脚本、配置、注释、README、日志/错误输出中不得出现任何 
+VPS/基础设施云厂商/平台名称（IaaS/主机商）；允许出现第三方 SaaS/应用/开源项目名称（如 DNS/CDN/对象存储/邮件服务、WordPress、Tailscale 等），
+但仍需避免把实现绑死在某一家 provider 上（用可替换的 provider 配置/映射表表达）。
+
+- 支持矩阵：Ubuntu 版本（22.04/24.04）、arch（x86_64/aarch64）、topology（lite|standard|hub）、web（OLS 优先，LNMP 何时进入 v1+）。
+- 默认工具链与来源：证书/续期工具链（默认选择与 non-interactive 方式）、Web/DB/Redis 安装来源（系统源/第三方源清单、签名/校验方式）。
+- 第三方二进制白名单：例如 rclone/cloudflared/其他必需组件（每项必须记录来源、版本策略、校验方式、缓存路径、更新频率）。
+- 备份口径：tar 压缩算法与 level（gzip/zstd）、可复现打包选项要求、manifest 字段最小集与 hash 算法（sha256）。
+- DB dump 口径：mysqldump 一致性选项（是否 `--single-transaction`、是否包含 routines/events/triggers 等）与跨版本恢复注意点。
+- Redis 隔离默认：namespace（key 前缀）为默认策略；DB index/ACL 是否/何时启用。
+- 防火墙与端口口径：默认 UFW；Hub 的 3306/6379 必须 tailscale0-only + allowlist（来源=inventory）；必须给出可复现验证命令与 FAIL 
+判定，并把输出纳入 Evidence Pack。
+- 日志与可观测：统一日志格式（时间戳/LEVEL/module/run_id）、日志目录/轮转策略（logrotate/journald）与上限。
+- 版本与发布：版本号策略（SemVer）、何时 bump、tag 规范、CHANGELOG 维护口径。
+- 危险操作确认：哪些动作必须 HZ_CONFIRM=YES/--force，以及默认保护策略。
+
+- CI/验收分层：哪些检查必须在 CI 中完成（静态/仓库级），哪些必须在真实目标拓扑完成（运行态/跨机/备份恢复演练）；
+以及最小验收拓扑定义（至少 1 host + 1 hub）。
+
+3. 核心交付物（最终要得到什么）
+- 一套脚本/模块，能在上述约束下可靠完成：部署、升级、备份、恢复、巡检、告警。
+- 结构化的“可复现输入 → 可验证输出”：每次运行要有清晰日志与验收清单。
+- 可扩展：后续加入更多常用应用，不要导致代码爆炸（避免继续堆 >5000 行手写脚本）。
+
+3.1 工程化硬约束（避免后期反复踩坑）
+- 机密/凭证管理：生成、存放（不入 git）、轮换、恢复；严禁出现在日志/输出。
+- Secrets（机密）注入与命名规范（必须统一）：
+  - 原则：任何 token/密码/私钥/邮件凭证/Cloudflare 凭证/rclone token 均不得写入 git、inventory、日志；仅允许通过 env/secret store 注入。
+  - 允许在文档中出现第三方 SaaS/应用/开源项目名称，但实现层必须保持 provider-agnostic；任何 provider 
+相关差异只能通过可替换的配置/映射表达，不得把逻辑写死到某一家。
+  - env 命名约定（示例）：
+    - 通用：`HZ_ENV`（prod|staging|dev）、`HZ_DRY_RUN`（0|1|2）、`HZ_LOG_DIR`（默认 logs/）。
+    - DB/Redis（站点级）：`HZ_SITE_<SITE_ID>_DB_PASS`、`HZ_SITE_<SITE_ID>_DB_ROOT_PASS`（仅 Hub 初始化用）；`HZ_SITE_<SITE_ID>_REDIS_PASS`（预留：
+仅在未来启用 Redis ACL 时使用，本阶段不要求）。
+    - Cloudflare：`HZ_CF_API_TOKEN`、`HZ_CF_ACCOUNT_ID`（如需）、`HZ_CF_ZONE_ID`（站点级可选）。
+    - 邮件：`HZ_SMTP_HOST`、`HZ_SMTP_PORT`、`HZ_SMTP_USER`、`HZ_SMTP_PASS`、`HZ_MAIL_FROM`、`HZ_MAIL_TO`。
+    - rclone：`HZ_RCLONE_CONFIG_B64`（推荐：base64 注入临时 config，运行后销毁）或 `HZ_RCLONE_REMOTE` + `HZ_RCLONE_TOKEN_*`（按 provider）。
+  - 注入优先级：CLI 参数（仅非敏感） < inventory（非敏感） < env/secret store（敏感）；敏感值不得通过 CLI 明文传入。
+  - 脱敏规则：所有 `diagnostics`/日志输出必须对匹配 `*_PASS`、`*_TOKEN*`、`*_KEY*`、`*_SECRET*` 的变量值进行掩码（例如保留前后 2-4 位，其余用 `***`）。
+- 统一配置入口（inventory）：固定使用 YAML；脚本/recipes 必须从 inventory 驱动（不允许每个模块自创参数名/来源）。
+- Inventory 目录与最小 schema（必须固定）：
+  - 路径：`inventory/hosts/*.yml`（宿主机/Hub 机）、`inventory/sites/*.yml`（站点）。
+  - hosts 字段（最小集）：`id`、`role`（host|hub）、`os`、`arch`（x86_64|aarch64）、`resources`（cpu/ram/disk 桶）、`tailscale`（node_name/ip）、`ssh`（user/port）。
+  - hosts 可选字段（用于网络/端口表达，不要求每次填写）：`allow_from`（允许访问本机服务的 host_ref 列表）、
+`services`（mariadb/redis/web 等服务声明：port、bind_interface=tailscale0 或 0.0.0.0）。
+  - sites 字段（最小集）：`site_id`、`domain`、`slug`、`stack`（lomp|lnmp）、`topology`（lite|standard）、`host_ref`、`hub_ref`（仅 lite）、
+`db`（name/user）、`redis`（namespace；
+ACL 暂不纳入本阶段）。
+  - 敏感字段规则：任何 token/密码/私钥不得进入 inventory；只能通过 env/secret store 注入（命名规范在 Secrets 小节定义）。
+- 宿主机侧隔离：每站点独立目录/配置/备份与日志隔离；推荐独立系统用户（至少保证 wp-config 等敏感文件不跨站可读）。
+- 版本与供应链：关键组件版本策略（pin/主版本策略）必须明确；下载来源可追溯；升级需有回滚点。
+- 默认实现选择（减少分歧；除非 inventory/recipe 明确覆盖，否则采用以下默认）：
+  - 证书与续期：默认使用标准 ACME 工具链（例如 certbot）；必须支持 non-interactive；续期必须可被 `check` 验证（证书存在、
+有效期、自动续期定时器/cron 存在）。
+  - Web/DB/Redis 安装来源：优先使用可追溯、可复现的官方/系统包源；若必须使用第三方源，必须在 docs/BASELINE.md 记录来源与版本策略。
+  - 服务管理：统一使用 systemd（或容器运行时的等效机制）并确保 `status`/`check` 可判定服务存活。
+  - 防火墙：默认使用 UFW（底层可落到 iptables/nftables），规则必须可重复执行且可审计；禁止把 DB/Redis 暴露到公网接口。
+- 故障域与应急：Hub 机故障时的降级/告警/恢复顺序必须定义；至少提供一键诊断/一键恢复路径。
+- 生命周期：install 之外，必须覆盖 update/upgrade、status/healthcheck、backup/restore、uninstall/cleanup。
+- 备份产物规范（必须统一，便于自动审计与跨应用复用）：
+  - 路径与命名（建议）：`backups/<scope>/<id>/<YYYYmmdd-HHMMSS>/`（scope=site|host|hub；id=site_id 或 host id）。
+  - 必须包含：
+    - `manifest.json`（或等效清单文件）：记录 installer 版本、module/recipe 名称、目标 OS/arch/资源桶、备份时间、
+包含的子项目（db/files/config）、以及校验信息（hash/size）。
+    - 备份数据文件：站点文件与数据库备份必须可区分（例如 `files.tar.gz`、`db.sql.gz`）。
+  - `restore` 的最小验证口径（用于 `check`）：至少验证“可解包 + 可导入到测试库或可恢复到新目录”；失败必须给出明确失败点与退出码。
+- Module / Recipe 接口契约（必须统一）：
+  - 统一子命令：`install`、`status`、`check`、`upgrade`、`backup`、`restore`、`uninstall`、`diagnostics`。
+  - DRY_RUN 语义统一：0=真实执行；1=只打印将执行的动作；2=只生成计划/工件（不改系统）。
+  - 返回码统一：0=成功；1=可预期失败（参数/前置不满足）；2=执行失败（中途出错）；3=部分成功（需人工跟进）；>3 保留。
+  - 幂等与所有权边界（减少“重复运行”与“覆盖用户改动”的争议）：
+    - install/upgrade 重跑必须幂等：允许重复执行且结果一致；必要时用“已管理标记”（managed marker）区分脚本管理区与用户自定义区。
+    - 默认原则：脚本只修改其“管理范围内”的配置文件/片段；对用户自定义配置必须保守（不直接覆盖，优先生成 `*.d/` 
+片段或带清晰 begin/end 标记的 managed block）。
+    - uninstall/cleanup 的默认原则：优先移除服务与脚本生成的配置；数据是否删除必须可配置（默认保留数据并给出提示与路径）。
+  - 日志与输出统一：默认英文；标准前缀（INFO/WARN/ERROR）；每次运行写入 `logs/<date>/<module_or_recipe>.log`（并受日志上限约束）。
+- `check` 子命令最小规范（必须可机读、可脚本化）：
+  - 目标：一键输出 PASS/FAIL 的“最小静态检查 + 最小运行态验收”，为自动化门禁与人工审阅提供统一证据。
+  - 最小静态检查（对仓库脚本/配置）：
+    - `bash -n`：所有 Bash 脚本语法检查。
+    - `shellcheck`：所有 Bash 脚本 lint（允许通过 `.shellcheckrc` 或注释做最小必要豁免）。
+    - `shfmt`：格式检查（允许仅在 CI/工厂阶段强制；本地可选自动修复）。
+    - inventory 校验：YAML 可解析 + 必填字段存在（host/site 引用能解析到）。
+    - CI 约定（最小）：仓库应提供 `hz recipe <name> check` 或等效入口，CI 只需跑 `check` 即可完成静态门禁。
+  - 最小运行态验收（对目标机器/拓扑，按所选 module/recipe 执行）：
+    - 前置探测：OS/arch/资源桶与 inventory 一致；必要依赖（curl、tar、systemctl 等）可用。
+    - Tailscale：节点在线、能访问 hub/host 的 tailscale IP；hub 端口仅在 tailscale0 可达。
+    - 服务存活：相关 systemd 服务或容器状态 OK（至少 `status` 可判定）。
+    - 关键端口：
+      - Hub 机：MariaDB `3306`、Redis `6379`（仅 tailscale0）；公网接口不可达。
+      - 宿主机：Web 端口按方案（80/443 或 OLS/Nginx 对应端口）。
+    - 备份/恢复（如该 module/recipe 声明支持）：至少完成一次“备份生成 + 校验（可解包/可导入到测试库或恢复到新目录）”。
+
+- CI/验收分层与最小可重复拓扑（必须定义；用于门禁与提速）:
+  - 目标：把验证拆成“仓库静态门禁”与“真实环境运行态验收”，避免所有验证都依赖人工登录 VPS。
+  - L0（仓库静态门禁，必须进 required checks）：bash -n / shellcheck / shfmt / inventory.validate / vendor-neutral gate（禁止云厂商名）/ 
+第三方下载校验规则扫描（如要求 sha256/签名）。
+  - L1（本地/CI 可模拟的集成门禁，可选但建议）：在容器或 VM 中跑最小 install/check（不依赖跨机），
+用于快速回归（例如仅验证脚本幂等与基本服务起停）。
+  - L2（真实目标拓扑运行态验收，命中高风险时必须）：至少 1 台 host + 1 台 hub，且必须覆盖：Tailscale 连通、hub 端口 
+tailscale0-only + allowlist、生存性检查、以及一次备份生成 + restore_verify。
+  - 约束：L2 的证据必须能被复现（命令 + 输出 + 退出码），并能进入 Evidence Pack/审计报告。
+
+- 日志上限覆盖范围：logrotate/journald 等需覆盖系统日志与各应用日志（OLS、PHP、WP、MariaDB、Redis、fail2ban、脚本日志等），避免遗漏。
+- 目录结构与命令空间（建议固定，避免扩展失控）：
+  - `modules/`：可复用能力模块（按分类拆分：`modules/web/*`、`modules/media/*`、`modules/ops/*`、`modules/net/*`、`modules/check/*`）。
+  - `recipes/`：组合方案（例如 `lomp-lite-host`、`lomp-lite-hub`、`lomp-standard`、`lnmp-lite-host` 等）。
+  - `bin/`：统一入口 CLI（例如 `hz`），对外暴露稳定命令：
+    - `hz module <name> <subcommand>`（调用单一模块）
+    - `hz recipe <name> <subcommand>`（执行组合方案）
+    - `hz menu`（交互菜单，仅 UI/Wizard 层）
+  - 命名规范（必须固定，避免后续出现多套叫法）：
+    - module 名称建议使用分层路径：例如 `web/ols`、`web/wp`、`ops/backup`、`net/tailscale`、`check/baseline`。
+    - recipe 名称使用“方案-形态-侧”的组合：例如 `lomp-lite-host`、`lomp-lite-hub`、`lomp-standard`、`lomp-hub`、`lnmp-lite-host`、`lnmp-lite-hub`、`lnmp-standard`。
+    - 对外展示（菜单/帮助/日志）必须使用同一套名称（与目录一致），避免出现别名/缩写造成审计困难。
+  - `docs/`：规范与说明（`docs/CHANGELOG.md`、`docs/BASELINE.md`、`docs/SSOT/一键安装构思.md` 等）。
+  - `logs/`：运行日志落盘目录（受日志上限约束；允许在 inventory 或 env 覆盖路径）。
+
+- 仓库元信息必须标准化：
+  - 版本（installer/project version）：需要一个明确的版本号（例如 SemVer），并能在菜单/CLI 显示与通过 `--version` 输出。
+  - 变更记录：遵循 docs/VERSIONING 的理念；如提供人类可读 changelog，应集中在 `docs/CHANGELOG.md`。
+  - 许可证（LICENSE）：仓库必须包含明确的 LICENSE 文件（选定一种开源许可证），并在 README 标注。
+  - 语言策略：默认英文（日志/错误/输出）；中文仅作为 UI 提示/帮助信息的补充，避免双语输出混杂导致排障困难。
+  - Installer 必须同时提供交互菜单与 non-interactive CLI：后者用于自动化/CI/远程运维；subcommand 命名与行为必须稳定。
+  - Inventory 必须选定单一格式 + 固定路径规范（例如 `inventory/hosts/*.yml`、`inventory/sites/*.yml`）；所有模块/recipes 统一从 inventory 读取配置。
+  - 版本与发布机制：明确何时 bump 版本、git tag 规范与 release 产物策略；至少提供 git tag + changelog（docs/CHANGELOG.md）。
+
+- Telemetry / Diagnostics Policy（可选，默认不上传）
+  - 默认行为：仅做本地探测（用于分支与提示），不上传任何信息。
+  - 默认支持生成本地诊断包（diagnostics bundle），由用户自行决定是否提交；诊断包必须脱敏（不含 token/密码/私钥/公网 IP 等）。
+  - 可选 opt-in：允许用户明确同意后上传“最小化匿名统计/兼容性指纹”（仅环境桶/目标 recipe/module/成功失败/阶段号/installer 
+版本），不上传原始日志。
+  - 若未来采用对象存储（例如 Cloudflare R2）：必须使用短期签名 URL（不在脚本内保存 R2 凭证）、对象随机 ID 命名、TTL 
+自动过期删除、并允许用户撤回。
+  - 隐私原则：宁可缺数据也不默认收集；任何上传都必须明确告知内容与用途，并默认关闭。
+  - 说明：本策略可能随项目阶段调整（当前仍在犹豫阶段）。
+
+3.2 可执行细则补充（落实到代码与验收；默认值可被 inventory 覆盖）
+
+3.2.1 Repo Baseline（Bash/CLI 基线）
+- Bash 规范：所有可执行脚本统一使用 `#!/usr/bin/env bash`；默认 `set -euo pipefail`；统一 `IFS=$'\n\t'`；禁止隐式 glob/word-splitting。
+- 兼容性：目标为 Ubuntu 22.04/24.04 自带 Bash；禁止依赖非系统默认 Bash 特性（除非在 BASELINE.md 明确列出）。
+- 通用库（必须集中，禁止各模块私造）：
+  - `lib/log.sh`：统一日志函数（INFO/WARN/ERROR）、时间戳（ISO-8601）、module 名、run_id。
+  - `lib/run.sh`：dry-run 执行器、retry、timeout、并发限制（jobs/semaphore）、lock（flock）。
+  - `lib/mask.sh`：对环境变量与诊断输出统一脱敏（匹配规则见 Secrets 小节）。
+  - `lib/inventory.sh`：读取 inventory（YAML→键值访问）；失败给出明确错误与退出码=1。
+- run_id：每次执行生成唯一 run_id（例如 `YYYYmmdd-HHMMSS-<shortid>`），贯穿日志、备份 manifest、diagnostics 包名。
+- 输出格式（日志默认英文）：
+  - 单行：`<ts> <LEVEL> <module> <run_id> <message>`
+  - 禁止输出敏感值；对可疑字段统一走 mask。
+
+3.2.2 Inventory Schema 语义与校验口径（补全）
+- 必填字段的“语义”必须固定（否则难以审计）：
+  - `hosts.resources.*_bucket`：仅用于映射到默认 tuning（swap/并发/压缩级别/IO 优先级）；真实参数由映射表决定。
+  - `hosts.allow_from`：仅表达“允许哪些 host 访问本机 services.* 端口”，不得表达公网网段；引用必须能解析到 `inventory/hosts/*.yml` 的 `id`。
+  - `hosts.services.<svc>.bind_interface`：允许 `tailscale0` 或 `0.0.0.0`（仅 web 类）；DB/Redis 必须为 `tailscale0`。
+  - `sites.topology`：决定跨机依赖是否启用（lite=远程 hub；standard=同机）。
+- `check` 的 inventory 校验最小口径（PASS 才允许继续）：
+  - YAML 可解析；必填字段齐全；枚举值合法；host/site 引用能解析；冲突检测（同一 site_id/domain 不重复；端口冲突提示）。
+
+- 建议提供本地 secrets 目录（不入 git）：`secrets/<HZ_ENV>/`，文件权限必须 0600，目录 0700。
+- 默认 loader：允许从 `secrets/<HZ_ENV>/*.env` 读取并 export（仅在本机），但日志/diagnostics 必须掩码。
+- systemd 注入：若以 systemd 运行，优先使用 drop-in `EnvironmentFile=` 指向本地 secrets 文件；不得把敏感值写入 unit 文件正文。
+- 轮换：提供 `hz ops/secrets rotate`（或等效能力）输出“需要更新哪些 env 变量/文件”的清单；实际值由用户或外部 secret store 提供。
+
+- 灾备/迁移（DR）最小口径：必须提供“换机/重装后可恢复”的步骤清单（不含敏感值本体），至少包含：哪些 secrets 
+文件需要备份、备份介质/权限要求、恢复后如何验证（用 check/diagnostics 验证读取成功但不泄露值）。
+- rotate 的 DoD（最小集合）：rotate 后必须能判定哪些服务需要 reload/restart；
+必须提供一条可机读验证（例如尝试连接/鉴权或读取配置生效标志）；失败必须给出回滚路径（恢复到上一版 secrets 文件或上一版本引用）。
+- 紧急撤销（可选但建议）：对外部凭证（如 API token）应支持“快速失效/替换”的操作指引，并确保 diagnostics/log 不会输出旧值。
+
+3.2.4 Hub 多租户默认实现口径（MariaDB/Redis）
+- MariaDB：默认 one site = one database + one user；用户权限最小化（仅该库的 DDL/DML 所需权限）；禁止复用 root；root 仅用于初始化与紧急维护。
+- MariaDB 默认字符集/排序规则：在 docs/BASELINE.md 固定（例如 utf8mb4 + 通用 collation）；避免站点间差异造成迁移风险。
+- 备份口径：默认 `mysqldump`（或等效工具）并写明一致性选项；未来如引入物理备份工具，必须在 BASELINE.md 记录来源与策略。
+- Redis：默认采用 key 前缀命名空间（`<namespace>:`）而不是 DB index；避免共享实例下 DB index 管理复杂。
+
+3.2.5 防火墙规则生成与验证口径（UFW 默认）
+- 规则生成必须幂等：重复运行不增加重复规则；规则需带可审计注释（包含 module/recipe 与受管对象）。
+- Hub 入站：仅 tailscale0 放行 `3306/6379`，且仅允许来自 allowlist（`hosts.allow_from` 解析到的 tailscale IP）。
+- 验证：`check` 必须同时验证：
+  - 从允许的宿主机通过 tailscale IP 访问端口成功（例如 tcp probe）。
+  - 从“公网接口”不可达（在本机通过非 tailscale 路径自测 + 若可用则从另一台非 allowlist 机器测试；至少给出可复现命令）。
+
+3.2.6 备份产物的严格格式（补全 manifest 规范）
+- `manifest.json` 最小字段（必须存在）：
+  -
+ `installer_version`、`run_id`、`recipe_or_module`、`subcommand`、`timestamp`、`target`（scope/id/os/arch/resources）、`includes`（db/files
+/config）、`artifacts`（name/path/sha256/size）。
+
+- hash：默认 sha256；tar 包默认 gzip（或在 BASELINE.md 指定 zstd）；db dump 默认 `db.sql.gz`；站点文件默认 `files.tar.gz`。
+- 打包与可复现性（默认口径；如需调整必须在 docs/BASELINE.md 写死）：
+  - tar 默认开启“可复现打包”选项（固定排序、固定 mtime、去除随机性），避免同一份内容重复备份 hash 不一致；如系统 tar 
+版本不支持，则至少保证 sha256 计算基于备份文件本身并在 manifest 记录 tar 版本。
+  - 压缩级别与算法默认值需固定（gzip 或 zstd 的 level），并写入 manifest（例如 compression: {algorithm: gzip, level: 6}）。
+- DB dump 一致性（mysqldump 默认口径必须固定）：
+  - 默认启用一致性选项（例如 InnoDB 的 --single-transaction），并明确是否包含 routines/events/triggers；任何偏离必须在 docs/BASELINE.md 记录。
+  - dump 文件必须在 manifest 标注 engine: mysqldump、mysql_version、mariadb_version（如可得），便于跨版本恢复排障。
+- 备份加密（默认策略必须明确）：
+  - 默认不对本地备份包做二次加密，但必须支持“可选加密”路径（例如 rclone crypt 或外部加密），其密钥/配置一律走 
+env/secret store；不得写入 inventory/日志。
+  - 若启用加密，manifest 必须记录 encryption: {enabled: true, method: <method_name>}（不记录密钥）。
+- restore 目标选择与防覆盖（最小口径）：
+  - restore 必须支持恢复到“新目录”（文件）与“测试库”（db）两种模式；默认使用测试库避免覆盖生产库。
+  - 测试库命名默认：<db_name>__restore_test（若冲突则递增后缀），并在输出中明确打印最终目标。
+  - restore 后最小验证必须包含：能连接测试库 + 表数量>0（或存在站点表前缀匹配的表；wp_ 仅作为 fallback）+ files 
+解包目录存在且非空；失败需指明步骤与退出码。
+- artifacts 结构补全（便于一包多对象）：
+  - 每个 artifact 除 name/path/sha256/size 外，建议增加 type（db|files|config|logs）与 scope_id（site_id/host_id），避免多站点/多主机备份混淆。
+- retention=14：默认按“时间倒序保留最新 14 份”，清理必须可 dry-run 预览。
+
+3.2.7 LOMP Lite（v1）最小 DoD / `check` 条目建议（可作为第一版硬门禁）
+- CHECK inventory.validate … PASS
+- CHECK baseline.tools (curl/tar/systemctl/ufw/ss) … PASS
+- CHECK tailscale.up … PASS
+- CHECK tailscale.connectivity (host→hub ping/port) … PASS
+- CHECK hub.ports.tailscale_only (3306/6379) … PASS
+- CHECK hub.allowlist.enforced … PASS
+- CHECK services.mariadb.active / services.redis.active … PASS
+- CHECK services.web.active (OLS 或 Nginx) … PASS
+- CHECK tls.cert.present_and_renewable … PASS
+- CHECK backup.generate … PASS
+- CHECK backup.restore_verify … PASS
+
+3.2.8 版本与供应链（落地口径）
+- 关键组件版本策略必须在 `docs/BASELINE.md` 固定：哪些 pin 主版本、哪些跟随系统源；任何第三方源必须记录来源与签名/校验方式。
+- upgrade 必须具备回滚点：升级前保存受管配置快照与关键版本信息；失败时能回退到“服务可启动”的状态并给出提示。
+
+4. LOMP 三种形态（产品边界）
+4.1 LOMP Lite（优先级最高：跨两台机器的拆分式 LOMP）
+- 低配宿主机（x86 2c1g）：OLS + WordPress（可多站点/slug）。
+- 高配 Hub 机（ARM 4c24g）：Redis + MariaDB。
+- 两机通过 Tailscale 互联；WP 远程连接 Redis/DB。
+- 目标：把“免费资源组合最大化”的模式做成稳定、一键、可维护。
+
+4.2 LOMP Standard（单机标准版）
+- 同一台机器完成：OLS + WordPress + Redis + MariaDB。
+- 目标：尽可能复用 Lite 的模块，只在“Redis/DB 本机化”做差异。
+
+
+4.3 LOMP Hub（集中式 Hub 版）
+- 定义：在高配 Hub 机上集中安装/管理 Redis + MariaDB（未来可扩展更多共享服务）。
+- 与 Lite/Standard 的关系：Hub 侧能力与安全/多租户/备份/告警规范应作为共享模块被复用；Lite/Standard 仅在 Web 栈与部署拓扑上做差异。
+
+4.4 LNMP（以 LOMP 为基础扩展的 Nginx 方案）
+- 定位：在 LOMP 的“共享能力/维护能力/Hub 能力”基础上，增加/并行一套 LNMP（Nginx + PHP-FPM + WordPress）实现。
+- 原则：
+  - Hub 侧（Redis + MariaDB、多租户、一站一库一户、上云备份/retention、仅 Tailscale 可达等）与 LOMP 完全共用。
+  - 维护能力（升级/回滚、备份/恢复演练、告警、日志上限、低配优化、Site Health 达标等）与 LOMP 共用。
+  - 主要差异只在“Web 栈”：把 OLS/LSWS 替换为 Nginx + PHP-FPM（其余尽量复用同一套模块与规范）。
+- 形态建议（与 LOMP 对齐）：
+  - LNMP Lite：宿主机跑 Nginx+WP，Hub 机跑 Redis+MariaDB（跨机拆分）。
+  - LNMP Standard：单机 Nginx+WP+Redis+MariaDB。
+  - LNMP Hub：与 LOMP Hub 共用（无需另建）。
+- 备注：仓库/菜单层面应能看到 LNMP 入口（至少在选择安装方案时可选 LOMP / LNMP）。
+
+4.5 常用应用扩展（LOMP/LNMP 之外）
+
+- Plex：通常部署在高配机器；需要通过 Tailscale 管理；日志上限；升级/回滚；必要的数据目录与备份策略。
+- [Media] Immich：自托管照片/视频管理；通常部署在高配机器（Docker）；需要通过 Tailscale 管理；
+数据目录与数据库的备份/恢复（上云同样用 rclone + retention=14）；日志上限；升级/回滚；资源占用（存储/转码）需有阈值与告警。
+- Transmission：通常部署在某一台高配机器；与 rclone 绑定云盘（mount 或同步策略由脚本统一管理）；权限隔离；带宽/连接数限制；日志上限；告警。
+- rclone 云盘：作为通用能力模块（不仅备份），需要统一配置入口与凭证管理；并明确“与备份同样遵守 
+retention=14（如适用）/清理策略/不可泄露 token”。
+
+- [Ops] Docker：作为通用运行时与编排基础（尤其用于运维/监控类应用）；要求安装/升级/回滚与日志上限；并纳入 inventory 驱动与 non-interactive CLI。
+- [Ops] Portainer：用于可视化管理 Docker；支持 Portainer Server 与 Portainer Agent（按需要在多机部署）；必须走 Tailscale 管理面访问；
+并遵守备份/恢复与日志上限。
+- [Check] Uptime Kuma：用于服务可用性与 HTTP/端口/自定义健康检查；告警对接邮件（最低要求）；并遵守日志上限与生命周期命令。
+- [Check/Ops] Grafana：用于可视化与告警面板；数据持久化与备份策略必须明确；并遵守日志上限与升级/回滚。
+- [Net] Cloudflare Tunnel（cloudflared）：用于将内部服务安全暴露到公网；必须与 Cloudflare Zero Trust 策略配套；凭证/密钥严格管理（不入 git、不入日志）。
+- [Net] Cloudflare Zero Trust：作为远程访问与应用暴露的统一安全边界；要求最小权限、分应用策略与可撤销；与 Tailscale 
+的边界关系需清晰（默认内部管理走 Tailscale，对外访问走 CF Tunnel/Zero Trust）。
+- 强制继承：上述应用同样必须遵守本简报的通用硬约束（机密不入日志、日志上限、监控告警、生命周期命令）。
+
+5. 一键部署之外必须覆盖的“一键维护”范围（非可选）
+5.1 OLS + WordPress（宿主机侧）
+- 性能与安全基线：权限、目录安全、证书/续期。
+- PHP 并发与资源限制：适配低配机器（并发、超时、内存）。
+- Swap：低配机稳定性策略（防 OOM）。
+- cron：证书续期、日志轮转、备份、健康检查、WP 维护任务。
+- WP-Cron 策略：默认禁用 WP 内置伪 cron，改用系统 cron/定时器触发 wp-cron.php，避免低配机在高并发下抖动。
+- WordPress 定期备份到云盘：使用 rclone 同步到 Google Drive / OneDrive / Dropbox 等；备份保留 14 个版本（retention=14），并定期清理旧备份。
+- 备份可恢复性：必须提供恢复脚本/流程，并定期做 restore 校验（至少验证可解包/可导入/可恢复到新目录或新实例）。
+- WordPress Site Health 在安装完成后要达到并保持“Good/Great job”状态，并说明需要通过脚本/配置来保证（例如 PHP/OPcache、
+REST/loopback、cron、权限、HTTPS、更新策略等，写成概括性要求，不展开实现细节）。
+- 验收（DoD）模板要求：每个新模块/方案必须给出“可机读/可脚本化”的验收命令与判定标准（PASS/FAIL），并能在 `check` 子命令中一键执行。
+
+5.2 Redis + MariaDB（Hub 机侧）
+- 安全基线：最小暴露面（仅 Tailscale 网段可达）、访问控制、凭证管理。
+- 端口与防火墙表达（不涉及 ACL）：
+  - Hub 机服务端口基线：MariaDB `3306`、Redis `6379`。
+  - 绑定与暴露：Hub 上述端口必须绑定到 `tailscale0`（或仅监听 tailscale IP）；公网接口不得监听/不得放行。
+  - UFW/iptables 规则原则：
+    - 入站：仅允许来自允许列表（inventory `hosts.allow_from` 指定的宿主机）的 tailscale IP 访问 `3306/6379`。
+    - 出站：按需放行（更新/备份上云等）。
+  - 验证要求：`check` 必须验证“tailscale0 可达 + 公网接口不可达”。
+- ACL 范围声明：本阶段以“网络隔离（仅 Tailscale 可达）+ 最小权限账号（MariaDB）+ Redis 命名空间隔离”为主，不对 Redis ACL 做强制实现要求。
+- 多租户需求：
+  1) Redis + MariaDB 作为共享 Hub 资源时，需要支持“一站一户”的隔离模型。
+  2) MariaDB：每个站点独立数据库（one site = one database），并为每个站点创建独立账号与最小权限（one site = one user, least 
+privilege），禁止复用 root/全局账号。
+  3) Redis：每个站点独立命名空间/逻辑隔离（例如独立 DB index 或 key 前缀）；ACL 层面本阶段不展开/不强制，后续如需要再启用。
+- 升级策略：Web/DB 组件升级与回滚、版本锁定与变更记录。
+- 备份策略：数据库备份、跨机备份、恢复演练。
+- 备份可恢复性：必须有可演练的恢复流程（导入到新库/测试库），并定期验证备份有效。
+- 数据库备份也要支持上云：使用 rclone 同步到同一类云盘目标；备份保留 14 个版本（retention=14），
+并定期清理旧备份（与站点备份同一套机制/目标存储）。
+
+5.3 主机级安全与告警
+- fail2ban：SSH/服务防爆破。
+- rkhunter（或同类）：rootkit 扫描与告警。
+- 邮件通知：关键事件（备份失败、磁盘/内存告警、证书异常、升级完成）。
+- 日志必须有“局限性/上限”：对各类应用与脚本的日志进行轮转与大小/天数限制（logrotate 或等效机制），
+避免日志长期增长撑爆 VPS（后续新增应用同样必须遵守）。
+- 资源监控与阈值告警（最低要求）：CPU/RAM/磁盘/服务存活的基础监控，并能触发邮件通知（适配低配机）。
+
+- oneclick（手写仓库）只完成了“一键安装”的基础部分，但脚本规模已很重（>5000 行），继续手写会浪费大量时间。
+- horizon-lab 的目标：用“流程 + 规矩 + 审计回路”让 AI 帮我扩展脚本能力。
+- 约定：仓库/菜单层面应能看到并调用 Tailscale 相关能力（至少能检查安装状态、连通性、节点信息，并作为其它模块的前置校验）。
+- 约定：一键安装入口应有统一的“菜单/CLI 体验”，并与仓库目录结构一致：
+  - 第一层：语言选择（English 为默认；Chinese 为辅助），输出/日志以英文为主。
+  - 第二层：功能分类（以当前仓库菜单为参考：Web / Media / Ops / Net / Check）。
+  - 第三层：具体应用/模块（例如 LOMP/LNMP、Plex、Transmission、rclone、Tailscale、Docker/Portainer、Uptime Kuma、Grafana、Cloudflare Tunnel/Zero 
+Trust、备份、邮件、加固、安全检查等）。
+  - 分类映射建议：
+    - Web：LOMP/LNMP、OLS/Nginx、WordPress、站点维护。
+    - Media：Plex 等媒体应用。
+    - Ops（可视为 cloud/ops）：备份上云（rclone）、系统加固、邮件、升级/回滚、logrotate 等运维能力。
+    - Net（可视为 remote/net）：Tailscale、远程联通性、端口/防火墙规则。
+    - Check：诊断/自检（健康检查、快速排障）。
+- 交互体验（Wizard/UI 层）改进建议：
+  - 菜单选择支持方向键（↑↓←→）+ Enter 选择；Esc/← 返回；同时保留数字输入作为 fallback。
+  - 选中项高亮：优先使用“反白 + 颜色（例如绿色）”双保险；若终端不支持颜色则仅反白。
+  - 兼容性与降级：检测非 TTY/CI/不支持终端控制时，自动降级为数字菜单或提示使用 non-interactive CLI。
+  - 可选快捷键：支持 `j/k` 或 `w/s` 上下移动，适配不同终端/移动端。
+- 流水线分工（概念上类似 agent skills ）：
+  - Planner：把需求收敛为可执行规格（步骤、文件、接口、验收）。
+  - Executor：按规格生成/修改 Bash 脚本与配置。
+  - Refiner：幂等、安全、日志、可维护性收敛。
+  - Auditor：结构化输出 PASS/FAIL 与修改建议；失败则回炉。
+  - Repo Sentinel：独立对账（远端现实 vs SSOT），严格按 SENTINEL v2（mode gate + Evidence Pack）输出 Drift/Fix/Stop-Go。
+- 输出门禁（用于“尽量全自动”但可控）：
+  - 任何自动化生成/修改必须先通过 `check`（静态检查 + 最小验收）与审计门禁（PASS 才允许进入 PR 步骤）。
+  - PR 合并允许使用 auto-merge（squash/rebase 由仓库策略决定），以减少人工介入；但合并必须满足 required checks 全通过 + 
+审计门禁 PASS（高风险变更建议双审计 PASS）。
+  - 若 required checks 或审计未通过，则必须回炉（修复后重新跑 check/审计），不得以“手动合并”绕过门禁。
+  - main 分支允许开启 auto-merge 的准入条件（必须写死并持续满足；任一条件不满足则应暂停 auto-merge）：
+    - `check` 已覆盖并作为 required checks：bash 语法检查、shellcheck、shfmt、inventory 校验、vendor-neutral gate。
+    - 至少一个核心方案（优先 LOMP Lite）具备可自动化的最小运行态验收：Tailscale 连通、Hub 端口仅 tailscale0 可达、服务存活、
+以及一次备份/恢复验证（可解包/可导入/可恢复到新目录）。
+    - 关键变更具备回滚点（版本锁定/配置备份/可逆操作说明），并在 docs/CHANGELOG.md 记录。
+- Git 工作流约定（用于并行方案与安全试验，可选但建议）：
+  - 允许维护多个“实验仓库/分支”（例如 Horizon-Google / Horizon-OpenAI 或同一仓库不同分支）。
+  - 任何自动化改动只允许提交到 feature 分支并以 PR 方式合并；禁止直接 push 到 main。
+  - 如本地需要并行工作，可使用 `git worktree` 为不同分支建立独立工作目录，避免反复切换与互相污染。
+
+- `AGENTS.md`（可选，建议在多代理/工厂化方案启用）：
+  - 目的：把各代理（Gemini/Gem、ChatGPT、Codex、Antigravity、n8n roles）的职责边界、输入输出、触发条件、验收门禁写成仓库内的“运行手册”。
+  - 最小结构：角色列表（Commander/Planner/Executor/Auditor/Sentinel：Role→Scope→Inputs→Outputs→DoD）、门禁规则（routine vs milestone 
+的判定）、Evidence Pack 规范、凭证与日志禁区（不入 git、不入日志）。
+
+7. 与模型协作的“操作方式”（请模型按此执行）
+7.1 我提供给模型的输入（至少包含）
+- 目标形态：Lite / Standard / Hub（以及具体是宿主机还是 Hub 机）。
+- 机器信息：Ubuntu 版本、架构（x86/arm）、资源（CPU/RAM）、主机名。
+- 网络信息：Tailscale 节点名/IP、允许访问的网段/端口。
+- 站点信息：域名、站点数量/slug 规划、证书策略。
+- 期望的验收：部署完成后我如何一键验证（命令、URL、服务状态、健康检查）。
+
+7.2 我希望模型输出的东西（按顺序）
+1) 方案与步骤：清晰的阶段划分（先 Hub 后宿主机 / 先网络后服务等），以及为什么。
+2) 可执行规格（SPEC）：
+   - 需要新增/修改哪些脚本文件（路径 + 作用）。
+   - 输入参数/环境变量（命名、默认值、敏感信息处理）。
+   - 幂等策略与失败回滚点。
+   - 验收清单（每一步如何验证）。
+3) 代码产物：符合仓库 baseline 的 Bash 脚本（不要用内联 Python/Node/Perl）。
+4) 审计结果：PASS/FAIL + 必要的修复建议；不通过必须明确下一轮需要补什么证据/修改。
+
+7.3 关键约束（必须遵守）
+- 脚本默认非交互（如需要交互，应明确区分为“UI/Wizard 层”与“Engine 层”，并说明放在哪个层）。
+- 幂等：重复运行不应破坏系统；必要时提供 DRY_RUN。
+- 安全：最小暴露面（尤其 DB/Redis 只允许 Tailscale 访问），敏感信息不可写入日志。
+- 可观测：英文结构化日志、明确的成功/失败退出码。
+- 厂商中立：任何输出/帮助信息/错误信息不得包含云厂商名；不得引入厂商专用逻辑（例如云厂商元数据接口/专用工具）。
+如需环境检测，只允许输出通用特征（os/arch/resources）。
+
+7.4 推荐的多模型分工（可选，但建议）
+- Gemini/Gem：用于“仓库导航 + 背景对齐 + 目录/模块定位 + 生成上下文包”。
+- ChatGPT（GPT-5.2）：用于“深度代码分析 + 方案设计 + 风险评估 + SPEC 产出”。
+- Codex / n8n Factory：用于“按 SPEC 生成/修改代码 + 多轮审计回炉 + 输出最终脚本”。
+
+8. 当前优先级（路线图的起点）
+- 优先：把 LOMP Lite 做稳（跨两台机器，Tailscale，OLS+WP 与 Redis+MariaDB 分离），并把维护能力（升级/备份/告警/低配优化）纳入最小可用闭环。
+- 在 LOMP Lite 稳定后：基于已抽象的共享模块扩展 LNMP（优先 LNMP Lite），保持“仅 Web 栈差异、其余共享”。
+- 之后：在 Lite 的模块基础上派生 LOMP Hub 与 LOMP Standard（复用/共享代码）。
+
+（说明：本文件是给模型看的“项目简报”。后续任何新增想法，都应继续补充到这里，作为单一事实源。）
+
+9. Appendix：inventory 示例（YAML，非敏感；敏感值用 env 注入）
+9.1 inventory/hosts/host-x86-01.yml（宿主机示例）
+```yml
+id: host-x86-01
+role: host
+os: ubuntu-24.04
+arch: x86_64
+resources:
+  cpu_bucket: 2c
+  ram_bucket: 1g
+  disk_bucket: small
+tailscale:
+  node_name: host-x86-01
+  ip: 100.64.0.10
+ssh:
+  user: ubuntu
+  port: 22
+allow_from: []
+services:
+  web:
+    port: 443
+    bind_interface: 0.0.0.0
+```
+
+9.2 inventory/hosts/hub-arm-01.yml（Hub 示例）
+```yml
+id: hub-arm-01
+role: hub
+os: ubuntu-24.04
+arch: aarch64
+resources:
+  cpu_bucket: 4c
+  ram_bucket: 24g
+  disk_bucket: medium
+tailscale:
+  node_name: hub-arm-01
+  ip: 100.64.0.20
+ssh:
+  user: ubuntu
+  port: 22
+allow_from:
+  - host-x86-01
+services:
+  mariadb:
+    port: 3306
+    bind_interface: tailscale0
+  redis:
+    port: 6379
+    bind_interface: tailscale0
+```
+
+9.3 inventory/sites/site-001.yml（LOMP Lite 站点示例：host + hub）
+```yml
+site_id: site-001
+domain: example.com
+slug: site001
+stack: lomp
+topology: lite
+host_ref: host-x86-01
+hub_ref: hub-arm-01
+db:
+  name: wp_site001
+  user: wp_site001
+redis:
+  namespace: site001
+```
+
+9.4 inventory/sites/site-002.yml（LOMP Standard 站点示例：单机）
+```yml
+site_id: site-002
+domain: example2.com
+slug: site002
+stack: lomp
+topology: standard
+host_ref: host-x86-01
+hub_ref: null
+# standard 模式下 db/redis 仍可声明，用于模块复用；实际绑定由 recipe 决定
+# db/redis 的密码一律通过 env/secret store 注入
+
+db:
+  name: wp_site002
+  user: wp_site002
+redis:
+  namespace: site002
+```
+
+说明：
+- inventory 只存“非敏感结构信息”。所有密码/token/私钥一律通过 env/secret store 注入并在日志/diagnostics 脱敏。
+- `allow_from` 用于表达 Hub 允许哪些宿主机访问其服务端口（网络隔离/allowlist），本阶段不要求 Redis ACL。```
+
+## 一键安装流程机制.md (SHA-pinned raw)
+```md
+# 一键安装流程机制（可复用模板）
+
+目的：把“中型项目的一键安装/一键编排系统”开发与迭代过程，固化为可审计、可回滚、可门禁、可复用的流程机制；适用于本仓库及未来新项目。
+
+适用范围：
+- 需要多步骤交付、长期迭代、且要求自动化/低人手介入的 GitHub 项目。
+- 以 SSOT（Single Source of Truth）驱动；优先用 Rulesets/Required checks/Auto-merge 实现门禁；若仓库现实为“no workflows / no required checks”，
+则以 DECISIONS.md 的 D-011 Evidence Gate 作为临时等价门禁。
+
+核心原则（红线）
+1. SSOT 优先：仓库内 SSOT 文件为唯一事实源；任何冲突以 SSOT 为准，并通过 PR 修正。
+2. 禁止直接 push main：所有变更必须 feature 分支 + PR。
+3. 门禁不可绕过：若仓库配置了 required checks，则必须全绿 + 审计 PASS 才允许合并；若仓库现实为“no required checks”，
+则必须满足 D-011 Evidence Gate（Evidence Pack + 本地验证命令输出）+ 审计 PASS；禁止手动绕过。
+4. PASS ≠ DONE：审计 PASS 只是门禁之一；是否 DONE 必须满足 DoD + Done Gate。
+5. Workflow Hygiene 硬门槛：不得产生持续红色失败/邮件噪音（例如在已配置 workflows 的前提下出现 “No jobs were run” 
+这类红噪音）。若仓库现实为“no workflows / no runs”，
+必须明确标注为 misconfig/未配置，且不得推断“无失败=健康”；必要时通过 follow-up 闭环治理。
+6. 厂商中立（范围限定）：禁止 VPS/IaaS/主机商名称；允许第三方 SaaS/应用/开源名，但实现必须 provider-agnostic。
+7. 一 PR 一主题：允许“单次任务很重”，但必须同主题、同 Files 白名单、同回滚策略。
+8. 责任链条明确：Commander 拥有最终 Stop/Go（可在 checks 全绿时仍判 BLOCKED）；Auditor 只对“单 PR 审计 PASS/FAIL”负责；
+哨兵只做仲裁/RCA 与漂移报告，不替代审计结论。
+9. 高风险变更加严：涉及鉴权/Secrets/远程执行/防火墙/备份恢复/供应链下载校验/工作流门禁的改动，必须触发 Release Blockers 加严验收（见下文）。
+
+- Commander（Gemini Gem）：总控/统筹；按 SSOT 拆任务、派发、闭环；负责 Done 判定与 STATE/DECISIONS 更新。
+- Planner（GPT）：产出可执行 SPEC；必须给 Best Default（禁止模棱两可）；多方案必须排序并给切换条件。
+- Executor（Codex）：按 SPEC 的 Files 白名单实施；本地 Mac 高质量模型；提交分支/PR；产出完成报告（Evidence Pack）。
+- Auditor（antigravity）：结构化 PASS/FAIL 审计；必须远端核验（PR/commit/checks/actions）；含 Workflow Hygiene；必要时进入“仲裁模式”。
+- 哨兵（Repo Sentinel / 我的GPT）：远端现实核对与漂移报警；输出 Reality/SSOT/Drift/Fix Plan；不改代码、不下结论代替审计。
+
+仓库治理（GitHub 侧）
+- 启用并维护：Rulesets + Required checks + Auto-merge。
+- 所有合并必须满足门禁；Auto-merge 只能在门禁满足时触发，不得弱化门禁。
+
+Required checks 约定（必须稳定）
+- required checks 的“名称集合”必须写入 docs/SSOT/DECISIONS.md（或 RULES.yml）并长期稳定；不得随意改名，否则视为门禁漂移。
+- 允许新增 checks；删除/改名 checks 视为高风险变更，必须走 Release Blockers。
+
+SSOT 文件体系（必须持续维护）
+- 总纲：docs/SSOT/一键安装构思.md
+- SSOT 入口索引：docs/SSOT/START-HERE.md（列出全部 SSOT 真值文件、用途、以及“唯一真值指向”）
+- 进度账本：docs/SSOT/STATE.md（Done/Doing/Next；A0 为 milestone-gated）
+- 决策记录：docs/SSOT/DECISIONS.md（行为/契约/安全/流程；含 D-011 Evidence Gate 与 D-014/SENTINEL v2）
+- 规格模板：docs/SSOT/SPEC-TEMPLATE.md
+- 角色合同：docs/SSOT/ROLES/{COMMANDER,PLANNER,EXECUTOR,AUDITOR,SENTINEL}.md
+- Evidence Pack 模板：docs/SSOT/EVIDENCE-PACK.template.md
+- Phase 真值：docs/PHASES.yml（updated_at 规则在文件内说明；不在 docs/SSOT/ 下）
+- RULES 真值：docs/RULES.yml（如存在/被引用）
+- 审计清单：docs/AUDIT-CHECKLIST.md（如存在/被引用）
+
+关键机制 1：Repo Reality Check（RRC，现实对齐门禁）
+目的：防止“对话/本地完成感”与 GitHub 实况脱节。
+- 任何 Task 开始前、以及准备关闭前，必须产出 Reality Snapshot；缺失则 BLOCKED。
+- Repo Sentinel v2 采用 mode gate：默认 mode=routine；只有 Commander 明确声明 mode=milestone 才触发 P0 对齐审计。
+  - routine：只做证据采集与记录；不得因 main 前进要求刷新 A0；若 main_head != post_merge_main_head 只能记 P2/INFO，并输出固定句：
+defer A0 refresh until next milestone。
+  - milestone：必须闭环 A0（post_merge_main_head/main_head 对齐硬证据）并补齐 merged facts。
+- Reality Snapshot（字段示例）：
+  - repo
+  - task_id
+  - main_head（SHA/链接）
+  - related_pr（链接）
+  - pr_state（open/merged/closed）
+  - required_checks（名称+结果）
+  - actions_failures（链接；无则 none）
+  - noise_classification（none/no-jobs-run/misconfig/real-failure）
+  - decision（PROCEED/BLOCKED）
+
+关键机制 2：Task 状态机（闭环）
+- 任务必须可关闭：每个 Task 都要有 SPEC、DoD、Rollback、Exit codes。
+- 高风险任务（命中 Release Blockers）必须在 SPEC 中显式标注，并附加“加严项”对应 DoD。
+- 审计 FAIL：保持 Doing → 回到 Executor 修复（禁止合并）。
+- 审计 PASS：仍需检查 DoD + Done Gate；不满足则创建 follow-up（如 T-XXXb）进入 Next。
+- 禁止“做了一部分就当完成”或“最后一步无限重复”。
+
+Done Gate（任务关闭硬条件）
+必须同时满足：
+1) 若存在 required checks：required checks 全绿；若现实为“no required checks”：D-011 Evidence Gate 通过（Evidence Pack + 本地验证命令输出）
+2) 审计 PASS
+3) DoD 全部满足（可机读命令 + PASS/FAIL）
+4) 合并到 main 后无红色噪音（在已配置 workflows/runs 的前提下；若现实为“no workflows / no runs”，必须标注为 misconfig/未配置，并给出后续治理计划）
+
+Release Blockers（发布阻断条件，加严门槛）
+当变更触及以下任一类，除 Done Gate 外必须额外满足加严项；否则一律 BLOCKED：
+- 权限/鉴权/RBAC、GitHub App/OIDC 回调与校验、Secrets 读取/注入/脱敏策略
+- 远程执行（SSH/Runner/Agent）、防火墙与端口暴露策略、网络隔离（如 tailscale0-only）
+- 备份/恢复/迁移/轮换（rotate）流程与实现、数据目录与权限策略
+- 供应链：第三方二进制下载、校验（sha256/签名）、版本锁定、Actions/依赖升级
+加严项（最小集合）：
+1) 双人审计：至少 2 名审计角色分别输出 PASS/FAIL（可为 Auditor + 哨兵；或 Auditor + Commander）。
+2) 远端演练：必须在真实目标环境完成端到端验证（含失败路径与回滚一次）。
+3) 证据加码：Evidence Pack 必须包含“风险点清单 + 对应验证命令/输出 + 回滚演练证据”。
+4) Commander 签字：Commander 明确记录 Stop/Go 理由并写入 DECISIONS（含阻断条目是否解除）。
+
+不满足任一条：不得标 Done，必须回炉或 follow-up。
+
+关键机制 3：可控加重（Epic Task Policy，提速）
+目标：在不破坏审计/回滚的前提下提升速度。
+- 允许一个 Task 包含多个子交付点，但必须：
+  - 同一主题域
+  - 同一 Files 白名单
+  - 同一回滚策略
+- SPEC 的 DoD 必须子项化逐条验收；Auditor 子项逐条 PASS/FAIL；任一子项 FAIL => 总 FAIL。
+
+关键机制 4：Executor Evidence Pack（Codex 完成报告标准）
+目标：让审计天然“绑定远端 ref”，避免只审本地路径。
+完成报告必须包含（缺一即 FAIL/回炉）：
+- task_id + spec_ref（路径）
+- branch_name（远端分支名）
+- PR URL（优先）+ pr_head_sha
+- base_branch=main + main_head_sha
+- required_checks_rollup + actions_run_url
+- files_changed（与 Files 白名单对照）
+- 本地验证命令与退出码（DoD）
+- rollback_plan（revert/恢复方式）
+- risk_flags（如涉及 Release Blockers：列出命中条目；否则 none）
+- e2e_evidence（如涉及 Release Blockers：远端演练证据链接/输出；否则 optional）
+
+关键机制 5：审计与漂移治理（Auditor + 哨兵）
+```
+- Auditor（antigravity）：只负责“常规审计”，针对单 PR 输出 PASS/FAIL + 修复清单 + 证据引用；必须远端核验（PR/commit/checks/actions）并执行 Workflow Hygiene 硬门槛。
+- 哨兵（Repo Sentinel）：承担“独立漂移审计/仲裁/RCA”。触发条件：
+  - 任意角色对“阶段/完成/发布/合并”等结论存在分歧
+  - SSOT（STATE/PHASES/DECISIONS/RULES）与远端现实（main/tag/PR/checks/actions）不一致
+  - Actions 出现红叉噪音、邮件噪音、或疑似规则漂移
+  哨兵输出必须结构化：Reality Snapshot + SSOT Snapshot + Drift Report + Fix Plan + Stop/Go。
+- 原则：
+  - “仲裁/RCA”由哨兵完成，避免 Auditor 同时做裁判产生自我复核冲突。
+  - Auditor 的 PASS ≠ DONE；DONE 仍由 Commander 按 Done Gate 判定。
+```
+
+本地执行环境（建议：主仓库 + worktree）
+目标：Codex 与 antigravity 共用同一对象库，但隔离工作区，保证同步与干净审计。
+- 基座仓库：~/Documents/horizon-openai（只 fetch/pull，不直接改动）
+- Codex worktree：~/Documents/hzn-Txxx（每个任务一个目录）
+- Audit worktree：~/Documents/hzn-audit（审计专用目录）
+- 标准同步：
+  - 基座：git fetch --all --prune && git pull --ff-only
+  - 各 worktree：git pull --ff-only
+- 审计目录必须保持干净（无未跟踪垃圾文件）；必要时用 git clean 清理未跟踪文件。
+
+标准任务流程（Commander 必须按序执行）
+Step 0：Reality Sync（生成 Reality Snapshot；无则 BLOCKED）
+Step A：读取 SSOT（STATE/DECISIONS/总纲/PHASES），从 Next 选 Task（编号）
+Step B：生成 SPEC（按模板，含 Files 白名单/DoD/Rollback/Exit codes）并落库
+Step C：派发 Planner 完善 SPEC（必须 Best Default）
+Step D：派发 Executor 实现（严格 Files 白名单；产出 Evidence Pack；提 PR）
+Step E：派发 Auditor 审计（远端核验；Workflow Hygiene 硬门槛）
+Step F：满足 Done Gate 才合并；合并后更新 STATE/DECISIONS/PHASES，并做 post-merge 复核
+
+- “No jobs were run” 红叉：视为 Workflow Hygiene FAIL；修触发条件/if/noop 策略；必要时 follow-up。
+- “宣称完成但仓库不支持”：启用仲裁模式；用 VERSION/PHASES/STATE/tag/release 的远端断言裁决；补齐闭环后再宣称。
+- “本地与远端脱节”：检查 Evidence Pack 是否缺 PR/sha/checks/actions；补齐后重审。
+- “口径分歧/谁对谁错争论”：直接触发哨兵仲裁（RCA），以远端证据裁决并给最小修复清单；禁止继续口头争论。
+
+- 可把本机制抽成 starter/template：SSOT 结构 + ROLES 合同 + PR 模板 + workflow 门禁。
+- 建议把“哨兵 GPT”也作为模板一部分：默认绑定仓库并定期输出 Drift Report（阶段/版本/门禁/工作流噪音）。
+- 新项目优先复用合同与模板；业务代码另起模块。
+
+（EOF）```
+
+## 1click核心执行框架%20%2B%20必要文档.md (SHA-pinned raw)
+```md
+# 1click：导入范围（核心执行框架 + 必要文档）
+
+目标：在新仓库“1click”从零重建时，仅导入“能跑起来的核心执行框架”和“必须的流程/SSOT文档”。
+原则：不导入 archive/、upstream-* 快照、历史备份、临时产物；一切可追溯通过 Git 历史/Tag/PR 证据实现。
+
+一、核心执行框架（必须导入）
+
+1) 入口与命令层（CLI/入口脚本）
+- hz（主入口/命令分发器）
+- bin/（子命令与可执行脚本）
+
+2) 核心库（运行时与基础能力）
+- lib/（通用库：日志、错误处理、退出码、解析、模板、网络/ssh封装等）
+
+3) 业务模块/功能单元
+- modules/（可复用功能模块：安装、巡检、编排等）
+- recipes/（配方/编排定义：组合执行、并行/滚动/分组策略）
+
+4) 目标清单与环境描述
+- inventory/（目标主机清单/分组/变量；必须 provider-agnostic）
+
+5) 工具与辅助（仅与执行相关的必要部分）
+- tools/（执行所需工具脚本；不含一次性迁移脚本/临时修复脚本）
+
+6) 文档（与使用/运维直接相关的最小集合）
+- docs/（用户文档、操作说明、约定；注意去除与旧仓库臃肿相关的历史内容）
+
+二、必要文档（必须导入，作为新仓库的“事实源与门禁合同”）
+
+- docs/SSOT/一键安装构思.md（总纲；canonical）
+- docs/SSOT/START-HERE.md（SSOT 入口索引：列出真值文件、用途、以及“唯一真值指向”）
+- docs/SSOT/EVIDENCE-PACK.template.md（Evidence Pack 模板：verbatim 证据块结构）
+- docs/SSOT/一键安装流程机制.md（流程机制模板；含哨兵/门禁/证据包/回滚；canonical）
+- docs/SSOT/STATE.md（Done/Doing/Next；唯一进度账本）
+- docs/SSOT/DECISIONS.md（关键决策与契约记录）
+- docs/SSOT/SPEC-TEMPLATE.md（任务规格模板：Inputs/Files/DoD/Rollback/Exit codes）
+- docs/SSOT/JOURNAL.md（auto, append-only；新对话接手必读，配合 STATE/DECISIONS 做漂移归因）
+- docs/BASELINE.md（硬要求清单：支持矩阵/第三方白名单/备份口径/日志口径/危险操作确认；作为门禁依据）
+- docs/SSOT/EVIDENCE/（RRC 证据产物落盘目录；用于保存每次 Evidence Pack 文件，不计入固定必读集合）
+
+B) ROLES 合同（四角色 + 哨兵）
+- docs/SSOT/ROLES/COMMANDER.md
+- docs/SSOT/ROLES/PLANNER.md
+- docs/SSOT/ROLES/EXECUTOR.md（必须包含 Evidence Pack 必填字段：PR URL/head SHA/checks/actions/tag 证据）
+- docs/SSOT/ROLES/AUDITOR.md（常规审计；必须远端核验 + Workflow Hygiene）
+
+C) Phase 真值（必须唯一化）
+- docs/PHASES.yml（唯一 phase truth）
+- 说明：若保留 docs/SSOT/PHASES.md，则必须标注为镜像/Deprecated 并指向 docs/PHASES.yml；不得形成双真值。
+
+D) PR 证据模板
+- .github/pull_request_template.md（强制 Evidence + Linked SPEC + Reality Snapshot）
+
+E) 仓库规则（与门禁一致）
+- docs/RULES.yml（路径白名单/禁改区/auto-merge 策略等；必须与现实 workflows 策略一致）
+- required checks 名称集合必须固定在 docs/SSOT/DECISIONS.md（或 RULES.yml）并长期稳定；
+允许新增，但删除/改名视为高风险变更。
+- 供应链门禁必须可自动验证：第三方二进制下载必须带 sha256/签名校验与版本锁定；
+Actions/依赖升级必须记录并接受审计。
+
+F) JOURNAL 自动机制（必须启用）
+- hooks + 脚本：`.githooks/post-commit` 与 `scripts/journal_append.sh` 自动追加 `docs/SSOT/JOURNAL.md`（append-only）。
+- JOURNAL 旧条目禁止手工修改；如需记录操作者身份，统一映射为 `Pork- Belly`（不得出现 `freeman`）。
+
+G) RRC Evidence Persistence & Dual Anchoring (MUST)
+- 每次 RRC Evidence Pack 必须落盘到 `docs/SSOT/EVIDENCE/`。
+- 文件命名规则：`<captured_at_utc>_<mode>_<main_sha>.md`（UTC + mode + 40位 main_sha）。
+- 双锚定要求：
+  - Reality anchor：本次 Evidence Pack 的 (1)(2) 输出，且两者必须一致。
+  - Standard anchor：所有 SSOT/标准文档引用必须使用 SHA-pinned raw：`/<main_sha>/...`；
+    禁止使用 `/main/` 作为验收真值。
+- routine 判定边界：
+  - 缺 (3)-(7) 证据时，结论必须标记为 `UNKNOWN + Evidence Gaps`；Stop/Go=**GO**（范围受限）。
+  - 仅在 `(1)!=(2)`（Hard Truth 冲突）或标准文件在 `main_sha` 下缺失时判定 `BLOCKED`。
+- 新对话接手流程：
+  - 先读固定 16 份必读文档，再读取 `docs/SSOT/EVIDENCE/` 中最近一份（按 UTC/main_sha）Evidence 文件。
+
+三、明确不导入（禁止项）
+
+- archive/（历史归档目录，统一留在旧仓库；新仓库只保留最小可运行资产）
+- upstream-* / vendor 快照（上游导入快照、对比快照）
+- oneclick/（若为旧版或重复实现，默认不导入；需要时以“模块化迁移任务”单独评估）
+- skills/、.codex/skills/、训练材料/过程产物/临时脚本
+- 大体积二进制、截图、导出包（如需保留，放 Release assets 或单独 docs-site，而不是主树）
+
+四、导入后必须满足的“初始化门禁”（提醒：不是本步做，但这是验收标准）
+
+- SSOT 真值唯一（PHASES/STATE/DECISIONS 不冲突）
+- SSOT 可发现：docs/SSOT/INDEX.md 能一键定位全部真值文件与入口。
+- Workflow Hygiene：Actions 无噪音红叉（含 No jobs were run）
+- PR/审计流程可跑通：required checks + 审计 PASS
+- Release Blockers 可触发且可验收：命中高风险变更时，
+必须按 docs/SSOT/一键安装流程机制.md 的加严门槛执行（双人审计/远端演练/证据加码/Commander 签字），且无绕过路径。
+- 供应链门禁可跑通：下载校验/版本锁定/依赖升级审计在 required checks 中可复现且无绕过路径。
+- 哨兵能输出：Reality Snapshot + SSOT Snapshot + Drift Report + Fix Plan
+
+（EOF）
+```
+
