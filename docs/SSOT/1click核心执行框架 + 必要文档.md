@@ -53,8 +53,10 @@ D) PR 证据模板
 
 E) 仓库规则（与门禁一致）
 - docs/RULES.yml（路径白名单/禁改区/auto-merge 策略等；必须与现实 workflows 策略一致）
-- required checks 名称集合必须固定在 docs/SSOT/DECISIONS.md（或 RULES.yml）并长期稳定；允许新增，但删除/改名视为高风险变更。
-- 供应链门禁必须可自动验证：第三方二进制下载必须带 sha256/签名校验与版本锁定；Actions/依赖升级必须记录并接受审计。
+- required checks 名称集合必须固定在 docs/SSOT/DECISIONS.md（或 RULES.yml）并长期稳定；
+允许新增，但删除/改名视为高风险变更。
+- 供应链门禁必须可自动验证：第三方二进制下载必须带 sha256/签名校验与版本锁定；
+Actions/依赖升级必须记录并接受审计。
 
 F) JOURNAL 自动机制（必须启用）
 - hooks + 脚本：`.githooks/post-commit` 与 `scripts/journal_append.sh` 自动追加 `docs/SSOT/JOURNAL.md`（append-only）。
@@ -65,7 +67,8 @@ G) RRC Evidence Persistence & Dual Anchoring (MUST)
 - 文件命名规则：`<captured_at_utc>_<mode>_<main_sha>.md`（UTC + mode + 40位 main_sha）。
 - 双锚定要求：
   - Reality anchor：本次 Evidence Pack 的 (1)(2) 输出，且两者必须一致。
-  - Standard anchor：所有 SSOT/标准文档引用必须使用 SHA-pinned raw：`/<main_sha>/...`；禁止使用 `/main/` 作为验收真值。
+  - Standard anchor：所有 SSOT/标准文档引用必须使用 SHA-pinned raw：`/<main_sha>/...`；
+    禁止使用 `/main/` 作为验收真值。
 - routine 判定边界：
   - 缺 (3)-(7) 证据时，结论必须标记为 `UNKNOWN + Evidence Gaps`；Stop/Go=**GO**（范围受限）。
   - 仅在 `(1)!=(2)`（Hard Truth 冲突）或标准文件在 `main_sha` 下缺失时判定 `BLOCKED`。

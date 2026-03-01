@@ -25,7 +25,8 @@ jobs:
             maxlen="$(awk '{ if (length($0)>m) m=length($0) } END{ print m+0 }' "$f")"
             echo "max_line_length=$maxlen"
             if [ "$maxlen" -gt 2000 ]; then
-              echo "FAIL: $f has a line longer than 2000 chars (max=$maxlen)"
+              echo "FAIL: $f has a line longer than 2000 chars " \
+                   "(max=$maxlen)"
               exit 1
             fi
             # 2) suspiciously low line count vs file size (hard)
@@ -33,7 +34,8 @@ jobs:
             bytes="$(wc -c < "$f" | tr -d ' ')"
             echo "lines=$lines bytes=$bytes"
             if [ "$bytes" -gt 3000 ] && [ "$lines" -lt 20 ]; then
-              echo "FAIL: $f is large but has too few lines (bytes=$bytes lines=$lines)"
+              echo "FAIL: $f is large but has too few lines " \
+                   "(bytes=$bytes lines=$lines)"
               exit 1
             fi
           done
