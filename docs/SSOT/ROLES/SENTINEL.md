@@ -113,6 +113,20 @@ raw(main) may be stale/cached; only raw/<MAIN_SHA> is admissible for content/for
 Example:
 - `https://raw.githubusercontent.com/Hello-Pork-Belly/1click/<MAIN_SHA>/docs/SSOT/STATE.md`
 
+### Evidence-by-file (Hard Truth shortcut)
+
+If an Evidence Pack file under `docs/SSOT/EVIDENCE/` has been merged into `main`, that file becomes an acceptable Hard Truth source for Sentinel routine RRC.
+
+Sentinel MAY consume the Evidence Pack by reading the SHA-pinned raw content of the merged evidence file:
+- `https://raw.githubusercontent.com/<owner>/<repo>/<MAIN_SHA>/docs/SSOT/EVIDENCE/<...>.md`
+
+In this mode:
+- The evidence file content is treated as the verbatim command output for the items it contains.
+- The evidence file must include `mode`, `captured_at_utc`, and `main_sha` in its header.
+- Sentinel MUST still apply the (1)==(2) gate using the values recorded inside the evidence file (not the UI).
+- Sentinel MUST NOT require the user to paste terminal output again if the evidence file is present and SHA-pinned.
+- Missing items not present in the evidence file remain UNKNOWN and must be listed under Evidence Gaps.
+
 三、Snapshot 语义与频率（v2新增，终止“追 HEAD 循环”）
 		1.	milestone-gated：哨兵只要求在里程碑事件后更新 A0，不要求每次合并都更新。
 里程碑触发定义以 STATE.md 的 “Milestone triggers” 为准，默认包括：
