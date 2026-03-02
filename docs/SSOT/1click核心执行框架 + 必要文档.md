@@ -29,6 +29,7 @@
 
 - docs/SSOT/一键安装构思.md（总纲；canonical）
 - docs/SSOT/START-HERE.md（SSOT 入口索引：列出真值文件、用途、以及“唯一真值指向”）
+- 单一入口声明：以 START-HERE 为准；若存在 docs/SSOT/INDEX.md，则仅作为 redirect/deprecated 使用（不作为并行真值入口）。
 - docs/SSOT/EVIDENCE-PACK.template.md（Evidence Pack 模板：verbatim 证据块结构）
 - docs/SSOT/一键安装流程机制.md（流程机制模板；含哨兵/门禁/证据包/回滚；canonical）
 - docs/SSOT/STATE.md（Done/Doing/Next；唯一进度账本）
@@ -51,29 +52,19 @@ C) Phase 真值（必须唯一化）
 D) PR 证据模板
 - .github/pull_request_template.md（强制 Evidence + Linked SPEC + Reality Snapshot）
 
-E) 仓库规则（与门禁一致）
-- docs/RULES.yml（路径白名单/禁改区/auto-merge 策略等；必须与现实 workflows 策略一致）
-- required checks 名称集合必须固定在 docs/SSOT/DECISIONS.md（或 RULES.yml）并长期稳定；
-允许新增，但删除/改名视为高风险变更。
-- 供应链门禁必须可自动验证：第三方二进制下载必须带 sha256/签名校验与版本锁定；
-Actions/依赖升级必须记录并接受审计。
+E) 门禁细则引用（避免与 Playbook 重复）
+- 本文件不重复定义阶段门禁、Stop/Go、DoD、Release Blockers 细则。
+- 上述执行细则统一以《docs/SSOT/一键安装流程机制.md》为准，本文件仅保留入口与落地路径。
+- docs/RULES.yml、required checks、审计口径如需调整，也由 Playbook + DECISIONS 统一收敛后回引。
 
 F) JOURNAL 自动机制（必须启用）
 - hooks + 脚本：`.githooks/post-commit` 与 `scripts/journal_append.sh` 自动追加 `docs/SSOT/JOURNAL.md`（append-only）。
 - JOURNAL 旧条目禁止手工修改；如需记录操作者身份，统一映射为 `Pork- Belly`（不得出现 `freeman`）。
 
-G) RRC Evidence Persistence & Dual Anchoring (MUST)
-- 每次 RRC Evidence Pack 必须落盘到 `docs/SSOT/EVIDENCE/`。
-- 文件命名规则：`<captured_at_utc>_<mode>_<main_sha>.md`（UTC + mode + 40位 main_sha）。
-- 双锚定要求：
-  - Reality anchor：本次 Evidence Pack 的 (1)(2) 输出，且两者必须一致。
-  - Standard anchor：所有 SSOT/标准文档引用必须使用 SHA-pinned raw：`/<main_sha>/...`；
-    禁止使用 `/main/` 作为验收真值。
-- routine 判定边界：
-  - 缺 (3)-(7) 证据时，结论必须标记为 `UNKNOWN + Evidence Gaps`；Stop/Go=**GO**（范围受限）。
-  - 仅在 `(1)!=(2)`（Hard Truth 冲突）或标准文件在 `main_sha` 下缺失时判定 `BLOCKED`。
-- 新对话接手流程：
-  - 先读固定 16 份必读文档，再读取 `docs/SSOT/EVIDENCE/` 中最近一份（按 UTC/main_sha）Evidence 文件。
+G) RRC 证据落地（执行口径）
+- 每次 RRC 证据文件落盘路径：`docs/SSOT/EVIDENCE/`。
+- 文件命名与双锚定判定规则遵循 Playbook 与 EVIDENCE-PACK.template，不在本文件重复展开。
+- 新对话接手时：先读 START-HERE 指向的必读集合，再读取最新一份 evidence 文件。
 
 三、明确不导入（禁止项）
 
@@ -83,15 +74,8 @@ G) RRC Evidence Persistence & Dual Anchoring (MUST)
 - skills/、.codex/skills/、训练材料/过程产物/临时脚本
 - 大体积二进制、截图、导出包（如需保留，放 Release assets 或单独 docs-site，而不是主树）
 
-四、导入后必须满足的“初始化门禁”（提醒：不是本步做，但这是验收标准）
-
-- SSOT 真值唯一（PHASES/STATE/DECISIONS 不冲突）
-- SSOT 可发现：docs/SSOT/INDEX.md 能一键定位全部真值文件与入口。
-- Workflow Hygiene：Actions 无噪音红叉（含 No jobs were run）
-- PR/审计流程可跑通：required checks + 审计 PASS
-- Release Blockers 可触发且可验收：命中高风险变更时，
-必须按 docs/SSOT/一键安装流程机制.md 的加严门槛执行（双人审计/远端演练/证据加码/Commander 签字），且无绕过路径。
-- 供应链门禁可跑通：下载校验/版本锁定/依赖升级审计在 required checks 中可复现且无绕过路径。
-- 哨兵能输出：Reality Snapshot + SSOT Snapshot + Drift Report + Fix Plan
+四、导入后验收（引用 Playbook）
+- 初始化验收是否通过，统一按《docs/SSOT/一键安装流程机制.md》的 Phase 门禁与 DoD 判定。
+- 本文件只负责“导入什么、放在哪、从哪里开始接手”，不承担门禁细则定义。
 
 （EOF）
