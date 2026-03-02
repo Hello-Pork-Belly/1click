@@ -27,16 +27,13 @@
 
 二、必要文档（必须导入，作为新仓库的“事实源与门禁合同”）
 
-- docs/SSOT/一键安装构思.md（总纲；canonical）
-- docs/SSOT/START-HERE.md（SSOT 入口索引：列出真值文件、用途、以及“唯一真值指向”）
-- 单一入口声明：以 START-HERE 为准；若存在 docs/SSOT/INDEX.md，则仅作为 redirect/deprecated 使用（不作为并行真值入口）。
+- Fixed Read Set (19) — see docs/SSOT/START-HERE.md
+- Core naming:
+  - Blueprint = docs/SSOT/一键安装构思.md
+  - Playbook = docs/SSOT/一键安装流程机制.md
+  - Framework = docs/SSOT/1click核心执行框架 + 必要文档.md
+- 唯一入口为 docs/SSOT/START-HERE.md；若存在 docs/SSOT/INDEX.md，则仅为 legacy redirect/deprecated，不作为真值入口。
 - docs/SSOT/EVIDENCE-PACK.template.md（Evidence Pack 模板：verbatim 证据块结构）
-- docs/SSOT/一键安装流程机制.md（流程机制模板；含哨兵/门禁/证据包/回滚；canonical）
-- docs/SSOT/STATE.md（Done/Doing/Next；唯一进度账本）
-- docs/SSOT/DECISIONS.md（关键决策与契约记录）
-- docs/SSOT/SPEC-TEMPLATE.md（任务规格模板：Inputs/Files/DoD/Rollback/Exit codes）
-- docs/SSOT/JOURNAL.md（auto, append-only；新对话接手必读，配合 STATE/DECISIONS 做漂移归因）
-- docs/BASELINE.md（硬要求清单：支持矩阵/第三方白名单/备份口径/日志口径/危险操作确认；作为门禁依据）
 - docs/SSOT/EVIDENCE/（RRC 证据产物落盘目录；用于保存每次 Evidence Pack 文件，不计入固定必读集合）
 
 B) ROLES 合同（四角色 + 哨兵）
