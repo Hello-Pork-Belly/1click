@@ -48,6 +48,7 @@ C) Phase 真值（必须唯一化）
 
 D) PR 证据模板
 - .github/pull_request_template.md（强制 Evidence + Linked SPEC + Reality Snapshot）
+- 如发现 JOURNAL 出现在 git status，MUST 按下文两种路径处理；不得混入无关 PR。
 
 E) 门禁细则引用（避免与 Playbook 重复）
 - 本文件不重复定义阶段门禁、Stop/Go、DoD、Release Blockers 细则。
@@ -57,6 +58,26 @@ E) 门禁细则引用（避免与 Playbook 重复）
 F) JOURNAL 自动机制（必须启用）
 - hooks + 脚本：`.githooks/post-commit` 与 `scripts/journal_append.sh` 自动追加 `docs/SSOT/JOURNAL.md`（append-only）。
 - JOURNAL 旧条目禁止手工修改；如需记录操作者身份，统一映射为 `Pork- Belly`（不得出现 `freeman`）。
+
+## JOURNAL auto-stage: how to avoid PR contamination
+
+现状说明（MUST 知悉）：
+- `.githooks/post-commit` 会自动追加并 `git add docs/SSOT/JOURNAL.md`（append-only）。
+- 因此 `docs/SSOT/JOURNAL.md` 可能进入 staged，从而污染 docs-only / 单主题 PR。
+
+路径 1：本 PR 不包含 JOURNAL（最常见，MUST 执行）
+- 命令（逐字执行）：
+  - `git restore --staged docs/SSOT/JOURNAL.md || true`
+  - `git restore docs/SSOT/JOURNAL.md`
+  - `git status --porcelain`
+- 门禁（MUST）：
+  - `git status --porcelain` 必须为空才允许继续 commit/PR。
+
+路径 2：本 PR 专门提交 JOURNAL（仅当明确需要落盘连续性日志）
+- MUST 使用单独分支 / 单独 PR / 单主题。
+- PR MUST 仅包含 `docs/SSOT/JOURNAL.md`。
+- commit message MUST 包含 `captured_at_utc` 与 `role`。
+- actor 映射 `Pork- Belly` 的规则 SHALL 保持不变（仅陈述，不改机制）。
 
 G) RRC 证据落地（执行口径）
 - 每次 RRC 证据文件落盘路径：`docs/SSOT/EVIDENCE/`。
