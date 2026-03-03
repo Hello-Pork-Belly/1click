@@ -186,7 +186,9 @@ git revert <merge_commit_sha>
 
 NOTE:
 - This PR is intentionally docs-only and is NOT auto-merged." \
-  --json url --jq .url)"
+  --base main \
+  --head "$BR" \
+  2>/dev/null | tail -n 1 || true)"
 
 # Only after PR is created successfully, record last_sha (prevents duplicates)
 echo "$MAIN_SHA" > "$STATE_FILE"
