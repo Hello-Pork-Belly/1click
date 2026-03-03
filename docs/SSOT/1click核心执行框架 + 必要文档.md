@@ -84,6 +84,19 @@ G) RRC 证据落地（执行口径）
 - 文件命名与双锚定判定规则遵循 Playbook 与 EVIDENCE-PACK.template，不在本文件重复展开。
 - 新对话接手时：先读 START-HERE 指向的必读集合，再读取最新一份 evidence 文件。
 
+## Auto-Handoff v1 (local, hourly)
+
+- 目的：在 mode=routine 下做定时对账，只有 main_sha 变化时才生成 handoff evidence 并发起 docs-only PR。
+- 执行方式：`tools/local/launchd/com.1click.handoff.plist` 每小时触发（`StartInterval=3600`），调用 `scripts/handoff_capture.sh --auto-pr`。
+- MAIN_SHA 真值来源 MUST 为 `gh api repos/<repo>/commits/main --jq .sha`，并与 `git ls-remote ... refs/heads/main` 一致；不一致则 MUST STOP/BLOCKED。
+- 降噪要求：last_sha 状态文件 MUST 存储在 git 外部（`~/.cache/1click/handoff_last_sha`），用于“仅在 MAIN_SHA 变化时”触发。
+- 新对话接手顺序 MUST 为：
+  1) `docs/SSOT/START-HERE.md`
+  2) Fixed Read Set (19)
+  3) `docs/SSOT/EVIDENCE/*_handoff.md` 中最新文件（按文件名 UTC + main_sha）
+- 读取规则 MUST 使用 SHA-pinned raw（`raw/<MAIN_SHA>/...`）；`/main/` 仅可导航，不得作为验收真值。
+- 锁定示例：现有 Read Set 锚点示例 `MAIN_SHA=42b69e8341162d23191946d5cdd72307cbd67ccf`，消费时 SHALL 以该 SHA 的 raw 路径读取。
+
 三、明确不导入（禁止项）
 
 - archive/（历史归档目录，统一留在旧仓库；新仓库只保留最小可运行资产）
