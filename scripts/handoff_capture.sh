@@ -160,15 +160,10 @@ fi
 BR="codex/docs/handoff-${SAFE_TS}-${MAIN_SHA:0:7}"
 git checkout -B "$BR" >/dev/null 2>&1
 
-git add "$OUT"
+# Clear index to prevent any staged carry-over (e.g., previously staged evidence/JOURNAL)
+git reset
 
-# Ensure single-file commit
-CHANGED="$(git diff --cached --name-only | wc -l | tr -d ' ')"
-if [[ "$CHANGED" -ne 1 ]]; then
-  echo "ERROR: staged file count != 1 (expected only the evidence file)" >&2
-  git diff --cached --name-only >&2
-  exit 3
-fi
+git add "$OUT"
 
 git commit -m "docs(evidence): add handoff evidence pack (${MAIN_SHA:0:7})" >/dev/null
 git push -u origin "$BR" >/dev/null
