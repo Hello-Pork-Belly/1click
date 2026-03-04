@@ -103,6 +103,12 @@ G) RRC 证据落地（执行口径）
 - 读取规则 MUST 使用 SHA-pinned raw（`raw/<MAIN_SHA>/...`）；`/main/` 仅可导航，不得作为验收真值。
 - 锁定示例：现有 Read Set 锚点示例 `MAIN_SHA=42b69e8341162d23191946d5cdd72307cbd67ccf`，消费时 SHALL 以该 SHA 的 raw 路径读取。
 
+## Cleanup policy (dry-run first)
+
+- Runbook: `docs/SSOT/RUNBOOK-CLEANUP.md`
+- 默认不删除历史；MUST 先执行 `./scripts/cleanup_plan.sh --repo Hello-Pork-Belly/1click` 生成 dry-run 计划与证据，再由 Commander 决定是否进入 apply。
+- 当前行为说明：handoff PR 默认以 draft 形式创建，用于降噪与人工决策合并。
+
 ## Audit-only preflight guard (MUST)
 
 - 在任何审计动作开始前 MUST 先运行：`./scripts/audit_guard.sh`（在 audit worktree 中执行）。
