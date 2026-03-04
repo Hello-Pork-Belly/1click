@@ -97,6 +97,19 @@ G) RRC 证据落地（执行口径）
 - 读取规则 MUST 使用 SHA-pinned raw（`raw/<MAIN_SHA>/...`）；`/main/` 仅可导航，不得作为验收真值。
 - 锁定示例：现有 Read Set 锚点示例 `MAIN_SHA=42b69e8341162d23191946d5cdd72307cbd67ccf`，消费时 SHALL 以该 SHA 的 raw 路径读取。
 
+## Audit-only preflight guard (MUST)
+
+- 在任何审计动作开始前 MUST 先运行：`./scripts/audit_guard.sh`（在 audit worktree 中执行）。
+- 若 guard 输出 FAIL，SHALL 立即停止审计并先修复，再重新运行直到 PASS。
+- 最短修复命令（按失败项执行）：
+  - `git config core.hooksPath /dev/null`
+  - `git restore --staged docs/SSOT/JOURNAL.md || true`
+  - `git restore docs/SSOT/JOURNAL.md`
+  - `git restore --staged . && git restore .`
+  - `git fetch --all --prune`
+  - `git reset --hard origin/main`
+  - `git checkout wt/audit`
+
 三、明确不导入（禁止项）
 
 - archive/（历史归档目录，统一留在旧仓库；新仓库只保留最小可运行资产）
