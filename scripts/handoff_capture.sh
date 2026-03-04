@@ -183,7 +183,9 @@ Rollback (after merge):
 git revert <merge_commit_sha>
 
 NOTE:
-- This PR is intentionally docs-only and is NOT auto-merged." \
+- This PR is intentionally docs-only and is NOT auto-merged.
+- NOTE: This PR is created as DRAFT to avoid auto-merge noise; Commander decides when/if to merge." \
+  --draft \
   --base main \
   --head "$BR" \
   2>/dev/null | tail -n 1 || true)"
