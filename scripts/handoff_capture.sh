@@ -107,6 +107,9 @@ AUDIT_WT="${ONECLICK_AUDIT_WT:-}"
   echo "- mode: ${MODE}"
   echo "- captured_at_utc: ${CAPTURED_AT_UTC}"
   echo "- main_sha: ${MAIN_SHA}"
+  echo "- phase: TBD"
+  echo "- next_task: TBD"
+  echo "- dod: TBD"
   echo
   echo "## (1) git ls-remote refs/heads/main"
   echo '```text'
