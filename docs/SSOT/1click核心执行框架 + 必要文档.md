@@ -88,6 +88,8 @@ G) RRC 证据落地（执行口径）
 
 - 目的：在 mode=routine 下做定时对账，只有 main_sha 变化时才生成 handoff evidence 并发起 docs-only PR。
 - 执行方式：`tools/local/launchd/com.1click.handoff.plist` 每小时触发（`StartInterval=3600`），调用 `scripts/handoff_capture.sh --auto-pr`。
+- Runbook: `docs/SSOT/RUNBOOK-AUTO-HANDOFF-LAUNCHD.md`
+- 在重启或权限变更后，MUST 先执行 Runbook 的 Verify 命令，再继续项目执行。
 - MAIN_SHA 真值来源 MUST 为 `gh api repos/<repo>/commits/main --jq .sha`，并与 `git ls-remote ... refs/heads/main` 一致；不一致则 MUST STOP/BLOCKED。
 - 降噪要求：last_sha 状态文件 MUST 存储在 git 外部（`~/.cache/1click/handoff_last_sha`），用于“仅在 MAIN_SHA 变化时”触发。
 - 新对话接手顺序 MUST 为：
