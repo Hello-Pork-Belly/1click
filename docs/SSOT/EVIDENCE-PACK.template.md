@@ -16,6 +16,24 @@
 - mode=routine: missing evidence => UNKNOWN + Evidence Gaps (do NOT STOP/BLOCKED),
   except (1)!=(2) (Hard Truth conflict) or standard missing at main_sha.
 
+## Capture policy (anti-noise)
+
+Evidence Pack outputs SHOULD be captured via `scripts/ev_capture.sh` (or equivalent),
+not copied from UI/terminal selections. Copy/paste can introduce noise markers like
+`<user__selection>` which makes evidence non-verbatim and non-auditable.
+
+### Example: capture (1)(2) main HEAD anchors
+```bash
+./scripts/ev_capture.sh /tmp/ev_ls_remote.txt -- git ls-remote https://github.com/Hello-Pork-Belly/1click.git refs/heads/main
+./scripts/ev_capture.sh /tmp/ev_commits_main.txt -- gh api repos/Hello-Pork-Belly/1click/commits/main --jq .sha
+```
+
+### Example: capture PR facts
+
+```bash
+./scripts/ev_capture.sh /tmp/ev_pr_view_80.json -- gh pr view 80 -R Hello-Pork-Belly/1click --json number,state,mergedAt,mergeCommit,url,files
+```
+
 # Evidence Pack (verbatim outputs)
 > Paste command + output blocks verbatim. Missing output => UNKNOWN (do not substitute with GitHub UI).
 

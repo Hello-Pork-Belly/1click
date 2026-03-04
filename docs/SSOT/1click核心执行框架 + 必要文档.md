@@ -83,6 +83,10 @@ G) RRC 证据落地（执行口径）
 - 每次 RRC 证据文件落盘路径：`docs/SSOT/EVIDENCE/`。
 - 文件命名与双锚定判定规则遵循 Playbook 与 EVIDENCE-PACK.template，不在本文件重复展开。
 - 新对话接手时：先读 START-HERE 指向的必读集合，再读取最新一份 evidence 文件。
+- Evidence MUST be captured via `scripts/ev_capture.sh` (or equivalent) to avoid UI noise; do not paste terminal selections that may include `<user__selection>`.
+- 示例：
+  - `./scripts/ev_capture.sh /tmp/ev_main_ls.txt -- git ls-remote https://github.com/Hello-Pork-Belly/1click.git refs/heads/main`
+  - `./scripts/ev_capture.sh /tmp/ev_pr.json -- gh pr view <N> -R Hello-Pork-Belly/1click --json number,state,mergedAt,mergeCommit,url`
 
 ## Auto-Handoff v1 (local, hourly)
 
