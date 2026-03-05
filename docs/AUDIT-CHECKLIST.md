@@ -4,6 +4,10 @@ Use this checklist for auditable PR review in `Hello-Pork-Belly/1click`.
 
 ## 1) Remote Reality Check (required)
 
+- Evidence-by-file is allowed: if an evidence file has been merged into `main`, auditors MAY treat the SHA-pinned raw content of that evidence file as Hard Truth input.
+- If any required item is missing from the evidence inputs, it MUST be marked as `UNKNOWN + Evidence Gaps` (do not fabricate).
+- GitHub UI MUST NOT replace Hard Truth; UI links are weak/supporting evidence only.
+
 Collect and paste URLs/output for:
 
 ```bash
