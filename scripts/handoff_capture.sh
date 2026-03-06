@@ -25,6 +25,22 @@ done
 REPO="${REPO:-Hello-Pork-Belly/1click}"
 MODE="${MODE:-routine}"
 
+# --- observability helpers (best-effort; UNKNOWN if unavailable) ---
+now_ms() {
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - <<'PY'
+import time
+print(int(time.time() * 1000))
+PY
+    return
+  fi
+  # fallback seconds * 1000
+  echo "$(( $(date -u +%s) * 1000 ))"
+}
+
+t0_ms="$(now_ms || true)"
+t0_ms="${t0_ms:-}"
+
 # Resolve gh path (launchd may have limited PATH)
 GH_BIN="${GH_BIN:-}"
 if [[ -z "$GH_BIN" ]]; then
@@ -101,12 +117,61 @@ WT_ROOT="$(dirname "$TOPLEVEL")"
 EXEC_WT="$TOPLEVEL"
 AUDIT_WT="${ONECLICK_AUDIT_WT:-}"
 
+t1_ms="$(now_ms || true)"
+t1_ms="${t1_ms:-}"
+run_elapsed_ms="UNKNOWN"
+if [[ "$t0_ms" =~ ^[0-9]+$ && "$t1_ms" =~ ^[0-9]+$ ]]; then
+  run_elapsed_ms="$(( t1_ms - t0_ms ))"
+fi
+
+model_family="${MODEL_FAMILY:-}"
+model_version="${MODEL_VERSION:-}"
+
+# best-effort fallbacks for version if not explicitly set
+if [[ -z "$model_version" ]]; then
+  model_version="${OPENAI_MODEL:-${CODEX_MODEL:-${MODEL:-}}}"
+fi
+
+# family best-effort from env if not explicitly set (do NOT guess)
+if [[ -z "$model_family" ]]; then
+  # if user provided a model version via OPENAI_MODEL/CODEX_MODEL/MODEL, family
+  # still UNKNOWN unless MODEL_FAMILY is set.
+  model_family="UNKNOWN"
+fi
+
+# channel best-effort (do NOT guess)
+channel="UNKNOWN"
+if [[ -n "${TERM_PROGRAM:-}" ]]; then
+  # Apple_Terminal / iTerm are treated as CLI
+  channel="CLI"
+fi
+
+# result/retries/notes
+result="${RESULT:-UNKNOWN}"
+retries="${RETRIES:-0}"
+notes="${NOTES:-EMPTY}"
+
+# normalize empties to UNKNOWN/EMPTY rules
+model_family="${model_family:-UNKNOWN}"
+model_version="${model_version:-UNKNOWN}"
+channel="${channel:-UNKNOWN}"
+retries="${retries:-0}"
+result="${result:-UNKNOWN}"
+notes="${notes:-EMPTY}"
+
 {
   echo "# Evidence Pack (handoff)"
   echo
   echo "- mode: ${MODE}"
   echo "- captured_at_utc: ${CAPTURED_AT_UTC}"
   echo "- main_sha: ${MAIN_SHA}"
+  echo "- model_family: ${model_family}"
+  echo "- model_version: ${model_version}"
+  echo "- channel: ${channel}"
+  echo "- run_elapsed_ms: ${run_elapsed_ms}"
+  echo "- result: ${result}"
+  echo "- retries: ${retries}"
+  echo "- notes: ${notes}"
   echo "- phase: TBD"
   echo "- next_task: TBD"
   echo "- dod: TBD"
