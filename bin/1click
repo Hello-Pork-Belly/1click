@@ -1,0 +1,31 @@
+#!/bin/sh
+set -eu
+
+ONECLICK_BIN_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+ONECLICK_REPO_ROOT=$(CDPATH='' cd -- "${ONECLICK_BIN_DIR}/.." && pwd)
+export ONECLICK_REPO_ROOT
+
+# shellcheck source=../lib/log.sh
+. "${ONECLICK_REPO_ROOT}/lib/log.sh"
+# shellcheck source=../lib/cli.sh
+. "${ONECLICK_REPO_ROOT}/lib/cli.sh"
+# shellcheck source=../lib/env.sh
+. "${ONECLICK_REPO_ROOT}/lib/env.sh"
+
+cli_parse "$@" || exit "$?"
+
+case "${ONECLICK_COMMAND}" in
+  help)
+    print_help
+    ;;
+  version)
+    print_version
+    ;;
+  check-env)
+    check_env
+    ;;
+  *)
+    log_error "internal error: unknown command dispatch: ${ONECLICK_COMMAND}"
+    exit 5
+    ;;
+esac

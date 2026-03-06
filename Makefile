@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 HZ := ./bin/hz
 
-.PHONY: ci check lint hz-version recipes-dry-run
+.PHONY: ci check lint hz-version recipes-dry-run phase1-cli-check
 
 ci: check
 
@@ -46,3 +46,13 @@ recipes-dry-run:
 	if [[ "$$found" -eq 0 ]]; then \
 	  echo "[WARN] no recipes found (recipes/*/contract.yml)"; \
 	fi
+
+phase1-cli-check:
+	@set -euo pipefail; \
+	sh -n bin/1click lib/cli.sh lib/env.sh lib/log.sh; \
+	./bin/1click --help; \
+	./bin/1click --version; \
+	tmp_os_release="$$(mktemp /tmp/oneclick-os-release.XXXXXX)"; \
+	trap 'rm -f "$$tmp_os_release"' EXIT; \
+	printf '%s\n' 'ID=ubuntu' 'ID_LIKE=debian' 'NAME="Ubuntu"' 'VERSION_ID="24.04"' > "$$tmp_os_release"; \
+	ONECLICK_OS_RELEASE_FILE="$$tmp_os_release" ./bin/1click check-env
