@@ -49,7 +49,9 @@ recipes-dry-run:
 
 phase1-cli-check:
 	@set -euo pipefail; \
-	sh -n bin/1click lib/cli.sh lib/env.sh lib/log.sh; \
+	for f in bin/1click lib/cli.sh lib/env.sh lib/log.sh; do \
+	  sh -n "$$f"; \
+	done; \
 	./bin/1click --help; \
 	./bin/1click --version; \
 	tmp_os_release="$$(mktemp /tmp/oneclick-os-release.XXXXXX)"; \
