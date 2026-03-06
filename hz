@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# shellcheck source=lib/common.sh
+. "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)/lib/common.sh"
+
+# shellcheck source=lib/log.sh
+. "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)/lib/log.sh"
+
+print_and_exit_usage() {
+  hz_usage
+  exit "$1"
+}
+
+if [ $# -eq 0 ]; then
+  print_and_exit_usage 1
+fi
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --help)
+      print_and_exit_usage 0
+      ;;
+    --version)
+      printf '%s\n' "$HZ_VERSION"
+      exit 0
+      ;;
+    --dry-run)
+      export HZ_DRY_RUN=1
+      shift
+      ;;
+    check-env)
+      shift
+      exec "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)/bin/check-env" "$@"
+      ;;
+    --*)
+      log_error "invalid argument: $1"
+      print_and_exit_usage "$HZ_EXIT_EXPECTED_FAIL"
+      ;;
+    *)
+      log_error "unknown command: $1"
+      print_and_exit_usage "$HZ_EXIT_EXPECTED_FAIL"
+      ;;
+  esac
+done
+
+print_and_exit_usage "$HZ_EXIT_EXPECTED_FAIL"
