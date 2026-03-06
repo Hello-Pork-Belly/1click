@@ -136,6 +136,19 @@ In this mode:
 - Footer must be copy-paste ready.  
   / Footer 必须可直接 copy/paste。
 
+## Sentinel GO continuation prompt / Sentinel GO 延续提示
+
+- Every Sentinel GO output SHOULD append a Gemini continuation prompt.  
+  / 每个 Sentinel GO 输出都 SHOULD 追加一个 Gemini continuation prompt。
+- Default GO still routes to 尚书房.  
+  / 默认 GO 仍然流转到 尚书房。
+- The continuation prompt is an operator convenience block, not a replacement for the footer.  
+  / continuation prompt 是 operator convenience block，不替代 footer。
+- The continuation prompt SHOULD include `MAIN_SHA=` and `LATEST_HANDOFF_EVIDENCE=` with the latest values.  
+  / continuation prompt SHOULD 使用最新值写出 `MAIN_SHA=` 与 `LATEST_HANDOFF_EVIDENCE=`。
+- 尚书房 may override the default next step at any time.  
+  / 尚书房可以在任意时刻 override 默认下一步。
+
 三、Snapshot 语义与频率（v2新增，终止“追 HEAD 循环”）
 		1.	milestone-gated：哨兵只要求在里程碑事件后更新 A0，不要求每次合并都更新。
 里程碑触发定义以 STATE.md 的 “Milestone triggers” 为准，默认包括：

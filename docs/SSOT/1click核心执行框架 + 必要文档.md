@@ -147,6 +147,44 @@ HANDOFF: 交给 Codex / Hand off to Codex
 这是默认流转，不是唯一可能流转。特殊情况可由 Commander / 尚书房覆盖。  
 / This is the default handoff chain; exceptional routing may be overridden by Commander / 尚书房.
 
+### F. Sentinel GO Continuation Prompt / Sentinel GO 延续提示
+
+- 在 Sentinel GO 结果之后，输出 SHOULD 追加一个给 Gemini / Commander 的 copy-paste-ready Gemini continuation prompt。  
+  / After a Sentinel GO result, the output SHOULD append a copy-paste-ready Gemini continuation prompt for Gemini / Commander.
+- 该 continuation prompt MUST 使用最新 MAIN_SHA 与最新 handoff evidence 路径。  
+  / The continuation prompt MUST use the latest MAIN_SHA and the latest handoff evidence path.
+- 该 continuation prompt 用于降低操作者 copy/paste 风险，并平滑启动下一轮。  
+  / The continuation prompt is meant to reduce operator copy/paste risk and smoothly start the next round.
+- Sentinel GO 的默认流转仍然是尚书房；continuation prompt 只是 operator convenience block，不替代 footer。  
+  / Default Sentinel GO routing still goes to 尚书房; the continuation prompt is only an operator convenience block and does not replace the footer.
+
+示例 / Example:
+
+```text
+MAIN_SHA=<latest MAIN_SHA>
+LATEST_HANDOFF_EVIDENCE=docs/SSOT/EVIDENCE/<latest_handoff_evidence>.md
+ROLE: COMMANDER
+NEXT_TASK: Ask Planner to define the next task from the latest main and latest handoff evidence.
+下一步任务：请 Planner 基于最新 main 与最新 handoff evidence 定义下一轮任务。
+STATUS: PASS
+NEXT_ROLE: Planner
+NEXT_INPUT: Read MAIN_SHA and LATEST_HANDOFF_EVIDENCE above, then define the next task with strict allowlist, verification, and rollback.
+HANDOFF: 交给 Planner / Hand off to Planner
+```
+
+### G. Commander Final Authority / 尚书房最高裁决权
+
+- 尚书房是该流程的 final authority。  
+  / 尚书房 is the final authority in this workflow.
+- 尚书房 MAY 在任意步骤 intervene。  
+  / 尚书房 MAY intervene at any step.
+- 尚书房 MAY override 默认流转链。  
+  / 尚书房 MAY override the default routing chain when necessary.
+- 除非尚书房明确 override，否则默认流转继续生效。  
+  / Default routing still applies unless overridden by 尚书房.
+- 正常执行中尚书房不必介入，但其 authority 必须保持显式。  
+  / 尚书房 does not need to intervene in normal execution, but its authority must remain explicit.
+
 C) Phase 真值（必须唯一化）
 - docs/PHASES.yml（唯一 phase truth）
 - 说明：若保留 docs/SSOT/PHASES.md，则必须标注为镜像/Deprecated 并指向 docs/PHASES.yml；不得形成双真值。
