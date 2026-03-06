@@ -42,6 +42,49 @@ B) ROLES 合同（四角色 + 哨兵）
 - docs/SSOT/ROLES/EXECUTOR.md（必须包含 Evidence Pack 必填字段：PR URL/head SHA/checks/actions/tag 证据）
 - docs/SSOT/ROLES/AUDITOR.md（常规审计；必须远端核验 + Workflow Hygiene）
 
+## Unified Handoff Footer / 统一交接结尾格式
+
+### A. Fixed Template / 固定模板
+
+```text
+STATUS: <PASS|STOP|FAIL|BLOCKED>
+NEXT_ROLE: <role name>
+NEXT_INPUT: <one-sentence instruction for the next role>
+HANDOFF: 交给 <role name> / Hand off to <role name>
+```
+
+### B. Field Definitions / 字段说明
+
+- STATUS：本轮状态，只允许 PASS / STOP / FAIL / BLOCKED  
+  / Current execution state; only PASS / STOP / FAIL / BLOCKED are allowed.
+- NEXT_ROLE：下一个接手角色  
+  / The next role that should take over.
+- NEXT_INPUT：给下一个角色的一句话输入，必须可直接复制  
+  / One-sentence input for the next role; must be copy-paste ready.
+- HANDOFF：显式交接提示，降低人工 copy/paste 出错风险  
+  / Explicit handoff line to reduce copy/paste mistakes.
+
+### C. Default Role Routing / 默认角色流转表
+
+- Gemini → Planner
+- Planner → Codex
+- Codex → antigravity
+- antigravity → 哨兵
+- 哨兵 → 尚书房（GO） / Codex（FAIL or Fix Plan）
+- 尚书房 → Gemini / Planner / Freeman（按决策）
+
+这是默认流转，特殊情况可由 Commander/尚书房覆盖。  
+/ This is the default handoff chain; exceptional routing may be overridden by Commander/尚书房.
+
+### D. Usage Rules / 使用规则
+
+- 每个角色回复的最后必须追加该 footer  
+  / Every role response must end with this footer.
+- 若需要人工处理，NEXT_ROLE 必须写 Freeman 或 尚书房  
+  / If manual handling is required, NEXT_ROLE must be Freeman or 尚书房.
+- 若审计失败，必须显式写回 Codex  
+  / If audit fails, handoff must explicitly route back to Codex.
+
 C) Phase 真值（必须唯一化）
 - docs/PHASES.yml（唯一 phase truth）
 - 说明：若保留 docs/SSOT/PHASES.md，则必须标注为镜像/Deprecated 并指向 docs/PHASES.yml；不得形成双真值。
