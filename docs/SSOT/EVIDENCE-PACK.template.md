@@ -3,6 +3,13 @@
 - mode: routine|milestone
 - captured_at_utc: YYYY-MM-DDTHH:MM:SSZ
 - main_sha: <40-hex>  # MUST equal (1) and (2); mismatch => STOP/BLOCKED
+- model_family: Codex|GPT|Gemini|Auditor|UNKNOWN
+- model_version: <string|UNKNOWN>
+- channel: CLI|DesktopApp|Web|API|UNKNOWN
+- run_elapsed_ms: <int|UNKNOWN>
+- result: PASS|FAIL|STOP|UNKNOWN
+- retries: <int|UNKNOWN>
+- notes: <free text|EMPTY|UNKNOWN>
 
 ## Anchoring Rules (MUST)
 
