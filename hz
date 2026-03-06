@@ -1,10 +1,10 @@
 #!/bin/sh
 
 # shellcheck source=lib/common.sh
-. "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/lib/common.sh"
+. "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)/lib/common.sh"
 
 # shellcheck source=lib/log.sh
-. "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/lib/log.sh"
+. "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)/lib/log.sh"
 
 print_and_exit_usage() {
   hz_usage
@@ -30,7 +30,7 @@ while [ $# -gt 0 ]; do
       ;;
     check-env)
       shift
-      exec "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/bin/check-env" "$@"
+      exec "$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)/bin/check-env" "$@"
       ;;
     --*)
       log_error "invalid argument: $1"

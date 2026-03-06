@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # shellcheck source=lib/log.sh
-. "$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)/lib/log.sh"
+. "$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)/lib/log.sh"
 
 detect_os() {
   if [ -n "${HZ_OS_OVERRIDE:-}" ]; then
