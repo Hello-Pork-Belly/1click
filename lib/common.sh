@@ -1,9 +1,14 @@
 #!/bin/sh
 
+# shellcheck disable=SC2034
 STATE_SCHEMA_VERSION=1
+# shellcheck disable=SC2034
 HZ_EXIT_OK=0
+# shellcheck disable=SC2034
 HZ_EXIT_EXPECTED_FAIL=1
+# shellcheck disable=SC2034
 HZ_EXIT_EXEC_FAIL=2
+# shellcheck disable=SC2034
 HZ_EXIT_PARTIAL=3
 HZ_VERSION_DEFAULT=0.1.0-dev
 
