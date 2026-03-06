@@ -48,3 +48,12 @@ Repository truth target: `Hello-Pork-Belly/1click`
   - Rollback
 - Planner MUST include an overall Epic DoD and a risk declaration (P0/P1/P2) before execution begins.
 - Any path outside the declared allowlist is FAIL.
+
+## Default footer rule / 默认 footer 规则
+
+- Every Planner output must end with the unified footer.  
+  / 每个 Planner 输出都必须以统一 footer 结尾。
+- Default success routing: PASS -> Codex.  
+  / 默认成功流转：PASS -> Codex。
+- `NEXT_INPUT` must be a single copy-paste-ready execution instruction for Codex.  
+  / `NEXT_INPUT` 必须是一句可直接复制给 Codex 的执行指令。

@@ -127,6 +127,15 @@ In this mode:
 - Sentinel MUST NOT require the user to paste terminal output again if the evidence file is present and SHA-pinned.
 - Missing items not present in the evidence file remain UNKNOWN and must be listed under Evidence Gaps.
 
+## Default footer rule / 默认 footer 规则
+
+- Every Sentinel output must end with the unified footer.  
+  / 每个 Sentinel 输出都必须以统一 footer 结尾。
+- Default routing: GO -> 尚书房; FAIL / STOP -> Codex.  
+  / 默认流转：GO -> 尚书房；FAIL / STOP -> Codex。
+- Footer must be copy-paste ready.  
+  / Footer 必须可直接 copy/paste。
+
 三、Snapshot 语义与频率（v2新增，终止“追 HEAD 循环”）
 		1.	milestone-gated：哨兵只要求在里程碑事件后更新 A0，不要求每次合并都更新。
 里程碑触发定义以 STATE.md 的 “Milestone triggers” 为准，默认包括：
