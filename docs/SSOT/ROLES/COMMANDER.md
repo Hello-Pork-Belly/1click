@@ -94,6 +94,16 @@ decision: PROCEED|BLOCKED
 - If core feature is delivered but noise/correctness defects remain, close via explicit follow-up chain (`T-XXX` + `T-XXXb`).
 - Verbal notes are not closure. Every remaining issue must exist as a tracked Next task in STATE.
 
+## Final authority / 最高裁决权
+- Commander / 尚书房 is the final authority in this workflow.  
+  / Commander / 尚书房 是该流程中的最高裁决权。
+- Commander / 尚书房 MAY intervene at any step.  
+  / Commander / 尚书房 可以在任意步骤介入。
+- Commander / 尚书房 MAY override the default routing chain when necessary.  
+  / Commander / 尚书房 可以在必要时 override 默认流转链。
+- Default routing still applies unless overridden by Commander / 尚书房.  
+  / 除非 Commander / 尚书房明确 override，否则默认流转继续生效。
+
 ## Outputs (every run)
 - Current Task ID
 - Reality Snapshot (Step 0)
