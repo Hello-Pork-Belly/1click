@@ -83,3 +83,12 @@ decision: PROCEED|BLOCKED
   - PASS/FAIL verdict
   - Fix list when FAIL
 - Commander Done is valid only when all subtasks PASS and `Closure / Done ledger` is written in STATE.
+
+## Default footer rule / 默认 footer 规则
+
+- Every Auditor output must end with the unified footer.  
+  / 每个 Auditor 输出都必须以统一 footer 结尾。
+- Default routing: PASS -> 哨兵; FAIL -> Codex.  
+  / 默认流转：PASS -> 哨兵；FAIL -> Codex。
+- On FAIL, `NEXT_INPUT` must explicitly require the minimal repair and return for re-audit.  
+  / 在 FAIL 时，`NEXT_INPUT` 必须明确写出 minimal repair + return for re-audit。

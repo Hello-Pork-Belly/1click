@@ -85,6 +85,68 @@ HANDOFF: 交给 <role name> / Hand off to <role name>
 - 若审计失败，必须显式写回 Codex  
   / If audit fails, handoff must explicitly route back to Codex.
 
+### E. Role-specific Default Routing / 角色默认执行路由
+
+- 该 footer 不只是 generic format，还定义 Planner / antigravity / Sentinel 的默认执行路由。  
+  / This footer is not only a generic format; it also defines the default execution routing for Planner / antigravity / Sentinel.
+- Planner / antigravity / Sentinel 的输出结尾都 MUST 附上该 footer。  
+  / Planner / antigravity / Sentinel outputs MUST end with this footer.
+- footer 内容必须 copy/paste ready。  
+  / The footer content must be copy-paste ready.
+
+- Planner 默认成功流转如下：  
+  / Planner default success routing is:
+
+```text
+STATUS: PASS
+NEXT_ROLE: Codex
+NEXT_INPUT: Execute exactly per SPEC with strict allowlist, Evidence Pack, and rollback.
+HANDOFF: 交给 Codex / Hand off to Codex
+```
+
+- antigravity / Auditor 默认 PASS 流转如下：  
+  / antigravity / Auditor default PASS routing is:
+
+```text
+STATUS: PASS
+NEXT_ROLE: 哨兵
+NEXT_INPUT: Perform routine RRC based on evidence and verbatim outputs.
+HANDOFF: 交给 哨兵 / Hand off to Sentinel
+```
+
+- antigravity / Auditor 默认 FAIL 流转如下：  
+  / antigravity / Auditor default FAIL routing is:
+
+```text
+STATUS: FAIL
+NEXT_ROLE: Codex
+NEXT_INPUT: Perform the minimal repair, then return for re-audit.
+HANDOFF: 交给 Codex / Hand off to Codex
+```
+
+- Sentinel 默认 GO 流转如下：  
+  / Sentinel default GO routing is:
+
+```text
+STATUS: PASS
+NEXT_ROLE: 尚书房
+NEXT_INPUT: Decide closeout, next step, or next phase.
+HANDOFF: 交给 尚书房 / Hand off to 尚书房
+```
+
+- Sentinel 默认 FAIL / STOP 流转如下：  
+  / Sentinel default FAIL / STOP routing is:
+
+```text
+STATUS: FAIL
+NEXT_ROLE: Codex
+NEXT_INPUT: Fix according to the Fix Plan and resubmit.
+HANDOFF: 交给 Codex / Hand off to Codex
+```
+
+这是默认流转，不是唯一可能流转。特殊情况可由 Commander / 尚书房覆盖。  
+/ This is the default handoff chain; exceptional routing may be overridden by Commander / 尚书房.
+
 C) Phase 真值（必须唯一化）
 - docs/PHASES.yml（唯一 phase truth）
 - 说明：若保留 docs/SSOT/PHASES.md，则必须标注为镜像/Deprecated 并指向 docs/PHASES.yml；不得形成双真值。
