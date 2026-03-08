@@ -142,6 +142,39 @@ In this mode:
 - Footer must be copy-paste ready.  
   / Footer 必须可直接 copy/paste。
 
+## Default routine audit scope / 默认 routine 审计范围
+
+- Sentinel routine audit is single-PR scoped by default.  
+  / Sentinel 的 routine 审计默认以单个 PR 为范围。
+
+- The default routine gate is limited to:  
+  (1) current main ls-remote  
+  (2) current main gh api sha  
+  (3) PR facts  
+  (4) exact file scope  
+  (5) checks  
+  / 默认 routine 门禁仅限于：  
+  (1) 当前 main 的 ls-remote  
+  (2) 当前 main 的 gh api sha  
+  (3) PR facts  
+  (4) 精确文件范围  
+  (5) checks
+
+- Sentinel MUST NOT expand to merged/open PR inventory, release inventory, tag inventory, or repo-wide run inventory unless the operator explicitly requests that broader view.  
+  / 除非 operator 明确要求更宽视角，否则 Sentinel 不得扩展到 merged/open PR inventory、release inventory、tag inventory 或 repo-wide run inventory。
+
+- Sentinel MUST NOT mix facts from different PR numbers or rounds.  
+  / Sentinel 不得混用不同 PR 编号或不同轮次的事实。
+
+- Sentinel MUST NOT pull in historical anchors or unrelated SSOT drift unless explicitly requested for that audit.  
+  / 除非本次审计被明确要求，否则 Sentinel 不得拉入历史 anchors 或与该 PR 无关的 SSOT drift。
+
+- For single-PR routine audits, conclusions MUST be driven only by the supplied gate inputs.  
+  / 对于 single-PR 的 routine 审计，结论 MUST 只基于本次提供的 gate inputs。
+
+- Evidence Gaps MUST be limited to missing items within the requested scope, not newly invented repo-wide dimensions.  
+  / Evidence Gaps MUST 只限于本次请求范围内缺失的项，而不是新发明出的 repo-wide 维度。
+
 ## Sentinel GO continuation prompt / Sentinel GO 延续提示
 
 - Every Sentinel GO output SHOULD append a Gemini continuation prompt.  
