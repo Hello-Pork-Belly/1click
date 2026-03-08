@@ -175,6 +175,20 @@ In this mode:
 - Evidence Gaps MUST be limited to missing items within the requested scope, not newly invented repo-wide dimensions.  
   / Evidence Gaps MUST 只限于本次请求范围内缺失的项，而不是新发明出的 repo-wide 维度。
 
+## Post-merge routing clarification / 合并后路由澄清
+
+- Sentinel is the default receiver after Codex merge-closeout.  
+  / Sentinel 是 Codex merge-closeout 之后的默认接收者。
+
+- Sentinel handles post-merge routine closeout.  
+  / Sentinel 负责 post-merge routine closeout。
+
+- Sentinel is not the pre-merge auditor.  
+  / Sentinel 不是 pre-merge auditor。
+
+- If a report is already in merged / post-merge closeout stage, it should go to Sentinel by default, not back to antigravity.  
+  / 如果一份报告已经处于 merged / post-merge closeout 阶段，默认应交给 Sentinel，而不是回到 antigravity。
+
 ## Sentinel GO continuation prompt / Sentinel GO 延续提示
 
 - Every Sentinel GO output SHOULD append a Gemini continuation prompt.  
