@@ -3,9 +3,10 @@
 - mode: routine|milestone
 - captured_at_utc: YYYY-MM-DDTHH:MM:SSZ
 - main_sha: <40-hex>  # MUST equal (1) and (2); mismatch => STOP/BLOCKED
-- model_family: Codex|GPT|Gemini|Auditor|UNKNOWN
-- model_version: <string|UNKNOWN>
-- channel: CLI|DesktopApp|Web|API|UNKNOWN
+- role: commander|planner|executor|auditor|sentinel|unknown
+- model_family: GPT|Gemini|Claude|UNKNOWN  # model family only; do not put role or app names here
+- model_version: <provider model id/version|UNKNOWN>  # model identifier/version only
+- channel: CLI|DesktopApp|Web|API|UNKNOWN  # app surface only; do not put role or model names here
 - run_elapsed_ms: <int|UNKNOWN>
 - result: PASS|FAIL|STOP|UNKNOWN
 - retries: <int|UNKNOWN>
@@ -20,6 +21,7 @@
 - All SSOT/standard references MUST be SHA-pinned using main_sha:
   raw.githubusercontent.com/<owner>/<repo>/<main_sha>/...
   Do NOT use /main/ for truth citations.
+- raw(main) may remain for navigation/discovery only; it is not truth validation.
 - mode=routine: missing evidence => UNKNOWN + Evidence Gaps (do NOT STOP/BLOCKED),
   except (1)!=(2) (Hard Truth conflict) or standard missing at main_sha.
 

@@ -86,7 +86,7 @@ P2 / INFO（记录即可）：
 
 Canonical docs 验收口径（script-verifiable，no `##` requirement）：
 		1.	ONLY use script-verifiable checks for canonical docs acceptance; NEVER require `##` headings as a hard gate.
-		2.	MUST require raw(main) file is readable and non-empty (`lines > 0`).
+		2.	MUST require SHA-pinned raw file is readable and non-empty (`lines > 0`).
 		3.	MUST require at least one H1 (`^# ` count >= 1).
 		4.	MUST require list items exist (`^[ -\\*]+` count > 0).
 		5.	MUST require zero legacy `.txt` references (pattern `\\.txt\\b|docs/SSOT/.*\\.txt` has 0 hits).
@@ -109,6 +109,7 @@ Acceptance evidence URLs are ONLY admissible in SHA-pinned form:
 - `https://raw.githubusercontent.com/Hello-Pork-Belly/1click/<MAIN_SHA>/<path>`
 
 raw(main) may be stale/cached; only raw/<MAIN_SHA> is admissible for content/format acceptance.
+- raw(main) MAY be used for navigation/discovery only before `MAIN_SHA` is established; it is not admissible for truth validation.
 
 Example:
 - `https://raw.githubusercontent.com/Hello-Pork-Belly/1click/<MAIN_SHA>/docs/SSOT/STATE.md`
@@ -200,21 +201,47 @@ In this mode:
 - Sentinel should not treat dual-PR as a new workflow; it is an internal Codex merge-closeout variant.  
   / Sentinel 不应把 dual-PR 视为新 workflow；它只是 Codex merge-closeout 的内部变体。
 
-- Gemini continuation prompt may be appended only after full closure.  
-  / 只有在 full closure 之后，才可以追加 Gemini continuation prompt。
+- A fixed Commander handoff block may be appended only after full closure.  
+  / 只有在 full closure 之后，才可以追加固定的 Commander handoff block。
+
+## Flow boundary clarification / 流程边界澄清
+
+- docs-only governance repair flow is limited to SSOT / governance wording, template, or truth-entry repairs.  
+  / docs-only governance repair flow 只限于 SSOT / governance 文案、模板或 truth-entry 修补。
+
+- project execution flow covers implementation, verification, merge-closeout, and project task closure.  
+  / project execution flow 才覆盖 implementation、verification、merge-closeout 与项目任务关闭。
+
+- Sentinel should not widen a docs-only governance repair round into unrelated project execution drift unless the operator explicitly asks for that broader review.  
+  / 除非 operator 明确要求更宽审计，否则 Sentinel 不应把 docs-only governance repair 轮次扩张成与本次无关的 project execution drift。
 
 ## Sentinel GO continuation prompt / Sentinel GO 延续提示
 
-- Every Sentinel GO output SHOULD append a Gemini continuation prompt.  
-  / 每个 Sentinel GO 输出都 SHOULD 追加一个 Gemini continuation prompt。
+- Every Sentinel GO output SHOULD append a fixed Commander handoff block.  
+  / 每个 Sentinel GO 输出都 SHOULD 追加一个固定的 Commander handoff block。
 - Default GO still routes to 尚书房.  
   / 默认 GO 仍然流转到 尚书房。
-- The continuation prompt is an operator convenience block, not a replacement for the footer.  
-  / continuation prompt 是 operator convenience block，不替代 footer。
-- The continuation prompt SHOULD include `MAIN_SHA=` and `LATEST_HANDOFF_EVIDENCE=` with the latest values.  
-  / continuation prompt SHOULD 使用最新值写出 `MAIN_SHA=` 与 `LATEST_HANDOFF_EVIDENCE=`。
+- The Commander handoff block is an operator convenience block, not a replacement for the footer.  
+  / Commander handoff block 是 operator convenience block，不替代 footer。
+- The Commander handoff block SHOULD include `MAIN_SHA=` and `LATEST_HANDOFF_EVIDENCE=` with the latest values.  
+  / Commander handoff block SHOULD 使用最新值写出 `MAIN_SHA=` 与 `LATEST_HANDOFF_EVIDENCE=`。
+- The Commander handoff block MUST NOT be loose free-text.  
+  / Commander handoff block 不得写成松散 free-text。
 - 尚书房 may override the default next step at any time.  
   / 尚书房可以在任意时刻 override 默认下一步。
+
+Example / 示例:
+
+```text
+MAIN_SHA=<latest MAIN_SHA>
+LATEST_HANDOFF_EVIDENCE=docs/SSOT/EVIDENCE/<latest_handoff_evidence>.md
+ROLE: COMMANDER
+TASK: Define the next task for Planner from the current main SHA and latest handoff evidence.
+STATUS: PASS
+NEXT_ROLE: Planner
+NEXT_INPUT: Read MAIN_SHA and LATEST_HANDOFF_EVIDENCE above, then define the next task with strict allowlist, verification, and rollback.
+HANDOFF: 交给 Planner / Hand off to Planner
+```
 
 三、Snapshot 语义与频率（v2新增，终止“追 HEAD 循环”）
 		1.	milestone-gated：哨兵只要求在里程碑事件后更新 A0，不要求每次合并都更新。
@@ -260,12 +287,12 @@ Purpose: recover from drift. This is a deterministic reset that forces the run t
 Trigger phrase (copy-paste): `RRC-RESET`
 
 When `RRC-RESET` is invoked, the responder MUST:
-1) Stop all ongoing reasoning/assumptions and re-anchor to raw(main) SSOT.
+1) Stop all ongoing reasoning/assumptions and re-anchor to SHA-pinned raw SSOT after establishing `MAIN_SHA` from this-run Evidence Pack.
 2) Read in this order:
-   - docs/SSOT/START-HERE.md (raw main)
-   - docs/SSOT/ROLES/SENTINEL.md (raw main)
-   - docs/SSOT/DECISIONS.md (raw main)
-   - docs/SSOT/STATE.md (raw main)
+   - docs/SSOT/START-HERE.md (raw/<MAIN_SHA>)
+   - docs/SSOT/ROLES/SENTINEL.md (raw/<MAIN_SHA>)
+   - docs/SSOT/DECISIONS.md (raw/<MAIN_SHA>)
+   - docs/SSOT/STATE.md (raw/<MAIN_SHA>)
 3) Treat EVERYTHING outside this-run Evidence Pack as UNKNOWN (especially main HEAD / PR states / tags / releases / actions).
 4) Require this-run Evidence Pack (verbatim) at minimum:
    (1) git ls-remote ... refs/heads/main

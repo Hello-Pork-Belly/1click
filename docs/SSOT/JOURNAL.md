@@ -5,21 +5,22 @@ Purpose:
 - Primary use: explain “why two observers saw different repo reality” by recording time + hard anchors.
 
 Rules:
-- This file is appended automatically by repo hooks and/or CI. Humans do not manually edit entries.
-- If an entry needs to reference the operator, use: Pork- Belly. Do not use other personal identifiers.
-- Entries must include at least: ts_utc, mode, event, actor, main_head, and (when applicable) PR/mergeCommit.
+- This file is appended automatically by repo hooks and/or CI. Humans do not manually edit existing entries.
+- If an entry needs to reference the operator, use the stable identifier: Pork-Belly. Do not use other personal identifiers or app/model labels.
+- Historical `Pork- Belly` should be interpreted as the same operator, but it must not be used for new entries.
+- Entries must include at least: ts_utc, mode, event, actor, main_head, and, when applicable, pr and merge_commit.
 
 Format (append-only):
 - ts_utc: 0000-00-00T00:00:00Z
   mode: routine|milestone
-  actor: Pork- Belly|<other>
+  actor: Pork-Belly|<other-stable-id>
   role: sentinel|commander|planner|executor|auditor|unknown
-  event: <short verb phrase>
+  event: <short verb phrase or task-closeout label>
   main_head: <40-hex>
-  pr: <#n or empty>
-  merge_commit: <40-hex or empty>
-  evidence: <path or url or empty>
-  note: <one-line>
+  pr: <#n|EMPTY>
+  merge_commit: <40-hex|EMPTY>
+  evidence: <repo-path|url|EMPTY>
+  note: <one-line|EMPTY>
 
 --- 
 ## Entries
