@@ -160,6 +160,17 @@ HANDOFF: 交给 Codex / Hand off to Codex
 - Codex 完成 merge-closeout 后，默认交由 Sentinel 执行 post-merge routine RRC 与 formal closeout。  
   / After Codex completes merge-closeout, Sentinel is the default role for post-merge routine RRC and formal closeout.
 
+### Sentinel routine scope clarification / Sentinel routine 范围澄清
+
+- The default Sentinel routine mode is a narrow single-PR gate review.  
+  / 默认的 Sentinel routine 模式是窄范围的单 PR gate review。
+
+- Broader remote-reality inventory is optional, not default.  
+  / 更宽的 remote-reality inventory 是可选项，不是默认项。
+
+- The operator may explicitly request broader inventory when needed.  
+  / 如有需要，operator 可以显式要求更宽的 inventory。
+
 ### H. Minimal failure record / 最小失败记录约定
 
 ```text
