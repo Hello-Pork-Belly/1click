@@ -27,7 +27,7 @@
 
 二、必要文档（必须导入，作为新仓库的“事实源与门禁合同”）
 
-- Fixed Read Set (19) — see docs/SSOT/START-HERE.md
+- Fixed Read Set (18) — see docs/SSOT/START-HERE.md
 - Core naming:
   - Blueprint = docs/SSOT/一键安装构思.md
   - Playbook = docs/SSOT/一键安装流程机制.md
@@ -35,6 +35,8 @@
 - 唯一入口为 docs/SSOT/START-HERE.md；若存在 docs/SSOT/INDEX.md，则仅为 legacy redirect/deprecated，不作为真值入口。
 - docs/SSOT/EVIDENCE-PACK.template.md（Evidence Pack 模板：verbatim 证据块结构）
 - docs/SSOT/EVIDENCE/（RRC 证据产物落盘目录；用于保存每次 Evidence Pack 文件，不计入固定必读集合）
+- 真值引用形式统一为 SHA-pinned raw（`raw/<MAIN_SHA>/...`）；`raw(main)` 仅可用于导航/发现，不得作为 truth validation。
+- 历史 readset / handoff snapshot 只代表当时的 `MAIN_SHA`，不得被当作 evergreen truth 直接沿用到新一轮。
 
 B) ROLES 合同（四角色 + 哨兵）
 - docs/SSOT/ROLES/COMMANDER.md
@@ -206,11 +208,22 @@ HANDOFF: 交给 Codex / Hand off to Codex
 - Regardless of single-PR or dual-PR mode, final closeout goes to Sentinel.  
   / 无论是 single-PR 还是 dual-PR 模式，最终的 routine closeout 都交给 Sentinel。
 
-- Sentinel may append a Gemini continuation prompt only after the full task is fully closed.  
-  / Sentinel 只有在整个任务 fully closed 之后，才可以追加 Gemini continuation prompt。
+- Sentinel may append a fixed Commander handoff block only after the full task is fully closed.  
+  / Sentinel 只有在整个任务 fully closed 之后，才可以追加固定的 Commander handoff block。
 
 - In dual-PR mode, this means the implementation PR and the docs-only closeout PR (if used) are both merged and aligned.  
   / 在 dual-PR 模式下，这意味着 implementation PR 与 docs-only closeout PR（如果使用）都已经合并并完成对齐。
+
+### Flow boundary clarification / 流程边界澄清
+
+- docs-only governance repair flow 只用于修补 SSOT / governance 文案、truth-entry、模板或流程说明。  
+  / docs-only governance repair flow is only for SSOT / governance wording, truth-entry, template, or workflow clarification repairs.
+
+- project execution flow 才用于 implementation / verification / merge-closeout / task closure。  
+  / project execution flow is the one used for implementation / verification / merge-closeout / task closure.
+
+- docs-only governance repair 合并后，默认回到 Commander / START-HERE 重新进入 project execution flow。  
+  / After a docs-only governance repair is merged, the default return target is Commander / START-HERE before re-entering project execution flow.
 
 ### Sentinel routine scope clarification / Sentinel routine 范围澄清
 
@@ -246,14 +259,16 @@ FAILURE_RECORD:
 
 ### I. Sentinel GO Continuation Prompt / Sentinel GO 延续提示
 
-- 在 Sentinel GO 结果之后，输出 SHOULD 追加一个给 Gemini / Commander 的 copy-paste-ready Gemini continuation prompt。  
-  / After a Sentinel GO result, the output SHOULD append a copy-paste-ready Gemini continuation prompt for Gemini / Commander.
-- 该 continuation prompt MUST 使用最新 MAIN_SHA 与最新 handoff evidence 路径。  
-  / The continuation prompt MUST use the latest MAIN_SHA and the latest handoff evidence path.
-- 该 continuation prompt 用于降低操作者 copy/paste 风险，并平滑启动下一轮。  
-  / The continuation prompt is meant to reduce operator copy/paste risk and smoothly start the next round.
+- 在 Sentinel GO 结果之后，输出 SHOULD 追加一个固定的 Commander handoff block，而不是 generic free-text continuation。  
+  / After a Sentinel GO result, the output SHOULD append a fixed Commander handoff block, not a generic free-text continuation.
+- 该 Commander handoff block MUST 使用最新 MAIN_SHA 与最新 handoff evidence 路径。  
+  / The Commander handoff block MUST use the latest MAIN_SHA and the latest handoff evidence path.
+- 该 Commander handoff block 用于降低操作者 copy/paste 风险，并平滑启动下一轮。  
+  / The Commander handoff block is meant to reduce operator copy/paste risk and smoothly start the next round.
 - Sentinel GO 的默认流转仍然是尚书房；continuation prompt 只是 operator convenience block，不替代 footer。  
   / Default Sentinel GO routing still goes to 尚书房; the continuation prompt is only an operator convenience block and does not replace the footer.
+- 只有在任务 fully closed 后，才可以追加该 Commander handoff block。  
+  / This Commander handoff block may be appended only after the task is fully closed.
 
 示例 / Example:
 
@@ -261,8 +276,7 @@ FAILURE_RECORD:
 MAIN_SHA=<latest MAIN_SHA>
 LATEST_HANDOFF_EVIDENCE=docs/SSOT/EVIDENCE/<latest_handoff_evidence>.md
 ROLE: COMMANDER
-NEXT_TASK: Ask Planner to define the next task from the latest main and latest handoff evidence.
-下一步任务：请 Planner 基于最新 main 与最新 handoff evidence 定义下一轮任务。
+TASK: Define the next task for Planner from the current main SHA and latest handoff evidence.
 STATUS: PASS
 NEXT_ROLE: Planner
 NEXT_INPUT: Read MAIN_SHA and LATEST_HANDOFF_EVIDENCE above, then define the next task with strict allowlist, verification, and rollback.
@@ -297,7 +311,7 @@ E) 门禁细则引用（避免与 Playbook 重复）
 
 F) JOURNAL 自动机制（必须启用）
 - hooks + 脚本：`.githooks/post-commit` 与 `scripts/journal_append.sh` 自动追加 `docs/SSOT/JOURNAL.md`（append-only）。
-- JOURNAL 旧条目禁止手工修改；如需记录操作者身份，统一映射为 `Pork- Belly`（不得出现 `freeman`）。
+- JOURNAL 旧条目禁止手工修改；如需记录操作者身份，统一映射为 `Pork-Belly`（不得出现 `freeman`；历史 `Pork- Belly` 仅视为 legacy alias）。
 
 ## JOURNAL auto-stage: how to avoid PR contamination
 
@@ -317,7 +331,7 @@ F) JOURNAL 自动机制（必须启用）
 - MUST 使用单独分支 / 单独 PR / 单主题。
 - PR MUST 仅包含 `docs/SSOT/JOURNAL.md`。
 - commit message MUST 包含 `captured_at_utc` 与 `role`。
-- actor 映射 `Pork- Belly` 的规则 SHALL 保持不变（仅陈述，不改机制）。
+- actor 映射 `Pork-Belly` 的规则 SHALL 保持不变（历史 `Pork- Belly` 仅作 legacy alias；仅陈述，不改机制）。
 
 G) RRC 证据落地（执行口径）
 - 每次 RRC 证据文件落盘路径：`docs/SSOT/EVIDENCE/`。
@@ -338,10 +352,10 @@ G) RRC 证据落地（执行口径）
 - 降噪要求：last_sha 状态文件 MUST 存储在 git 外部（`~/.cache/1click/handoff_last_sha`），用于“仅在 MAIN_SHA 变化时”触发。
 - 新对话接手顺序 MUST 为：
   1) `docs/SSOT/START-HERE.md`
-  2) Fixed Read Set (19)
+  2) Fixed Read Set (18)
   3) `docs/SSOT/EVIDENCE/*_handoff.md` 中最新文件（按文件名 UTC + main_sha）
 - 读取规则 MUST 使用 SHA-pinned raw（`raw/<MAIN_SHA>/...`）；`/main/` 仅可导航，不得作为验收真值。
-- 锁定示例：现有 Read Set 锚点示例 `MAIN_SHA=42b69e8341162d23191946d5cdd72307cbd67ccf`，消费时 SHALL 以该 SHA 的 raw 路径读取。
+- 历史锚点示例（例如 `MAIN_SHA=42b69e8341162d23191946d5cdd72307cbd67ccf`）仅用于说明格式；每次消费时 MUST 先用本轮 `(1)(2)` 重新确定 then-current `MAIN_SHA`，不得把旧 snapshot 当作当前真值。
 
 ## Cleanup policy (dry-run first)
 

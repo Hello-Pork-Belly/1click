@@ -31,7 +31,8 @@
 
 ## 3) EVIDENCE directory retention strategy
 - `*_handoff.md`:
-  - Suggested retention window: keep most recent **N=30** or last **14 days** (choose one when applying).
+  - Default retention window: keep most recent **N=30**.
+  - Switch to a **last 14 days** window only when Commander explicitly selects time-based retention for a cleanup run.
   - Rationale: handoff files are high-frequency and can bloat history.
 - `*_repo-settings.md`:
   - Keep periodic snapshots; suggested cadence weekly/monthly or after governance changes.
