@@ -88,11 +88,15 @@ decision: PROCEED|BLOCKED
 
 - Every Auditor output must end with the unified footer.  
   / 每个 Auditor 输出都必须以统一 footer 结尾。
-- Default PASS routing is Codex (for merge-closeout).  
-  / 默认 PASS 流转为 Codex（用于 merge-closeout）。
+- PASS -> Codex  
+  / PASS -> Codex
+- 这里的 PASS handoff 用于 merge-closeout。  
+  / This PASS handoff is for merge-closeout.
 - Default FAIL routing remains Codex (for minimal repair).  
   / 默认 FAIL 流转仍然是 Codex（用于 minimal repair）。
 - Auditor audits; Auditor does not own merge execution.  
   / Auditor 负责审计；Auditor 不负责 merge execution。
+- 对于已经 merged / 已进入 closeout-stage 的报告，Auditor 不应继续作为默认下一角色。  
+  / Auditor should not remain the default next role for a report that is already in merged / closeout-stage.
 - On FAIL, `NEXT_INPUT` must explicitly require the minimal repair and return for re-audit.  
   / 在 FAIL 时，`NEXT_INPUT` 必须明确写出 minimal repair + return for re-audit。
