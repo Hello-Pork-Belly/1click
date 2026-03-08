@@ -69,7 +69,8 @@ HANDOFF: 交给 <role name> / Hand off to <role name>
 - Gemini → Planner
 - Planner → Codex
 - Codex → antigravity
-- antigravity → 哨兵
+- antigravity（PASS）→ Codex
+- Codex（merge-closeout）→ 哨兵
 - 哨兵 → 尚书房（GO） / Codex（FAIL or Fix Plan）
 - 尚书房 → Gemini / Planner / Freeman（按决策）
 
@@ -109,9 +110,9 @@ HANDOFF: 交给 Codex / Hand off to Codex
 
 ```text
 STATUS: PASS
-NEXT_ROLE: 哨兵
-NEXT_INPUT: Perform routine RRC based on evidence and verbatim outputs.
-HANDOFF: 交给 哨兵 / Hand off to Sentinel
+NEXT_ROLE: Codex
+NEXT_INPUT: Perform merge-closeout with mergeability check, blocker evidence if blocked, post-merge hard truth, rollback, and handoff to Sentinel.
+HANDOFF: 交给 Codex / Hand off to Codex
 ```
 
 - antigravity / Auditor 默认 FAIL 流转如下：  
@@ -147,7 +148,40 @@ HANDOFF: 交给 Codex / Hand off to Codex
 这是默认流转，不是唯一可能流转。特殊情况可由 Commander / 尚书房覆盖。  
 / This is the default handoff chain; exceptional routing may be overridden by Commander / 尚书房.
 
-### F. Sentinel GO Continuation Prompt / Sentinel GO 延续提示
+### F. Merge-closeout ownership / 合并收口归属
+
+- antigravity 审计 PASS 后，默认由 Codex 执行 merge-closeout。  
+  / After antigravity returns PASS, Codex owns merge-closeout by default.
+- merge-closeout 至少包括：mergeability check、normal merge / auto-merge preferred、blocker evidence if blocked、admin bypass only when necessary and explicitly recorded、post-merge hard truth、merge facts、rollback、以及交接给 Sentinel。  
+  / Merge-closeout must include at minimum: mergeability check, normal merge / auto-merge preferred, blocker evidence if blocked, admin bypass only when necessary and explicitly recorded, post-merge hard truth, merge facts, rollback, and handoff to Sentinel.
+
+### G. Post-merge routine closeout / 合并后例行收口
+
+- Codex 完成 merge-closeout 后，默认交由 Sentinel 执行 post-merge routine RRC 与 formal closeout。  
+  / After Codex completes merge-closeout, Sentinel is the default role for post-merge routine RRC and formal closeout.
+
+### H. Minimal failure record / 最小失败记录约定
+
+```text
+FAILURE_RECORD:
+- context: <task / PR / phase / role>
+- step: <which step failed>
+- symptom: <what failed>
+- cause_status: <confirmed / suspected / unknown>
+- cause: <brief cause>
+- disposition: <fixed / deferred / wontfix / noise>
+- repro: <yes / no>              # optional
+- followup: <issue / PR / none>  # optional
+```
+
+- 不是每个 failure 都要单独开 issue。  
+  / Not every failure needs a separate issue.
+- 轻量执行失败可留在 Evidence Pack / audit note / closeout note。  
+  / Lightweight execution failures may stay in the Evidence Pack / audit note / closeout note.
+- 治理 / 政策 / 安全 / 重复性结构失败应升级为 follow-up。  
+  / Governance / policy / security / repeated structural failures should be escalated as follow-up work.
+
+### I. Sentinel GO Continuation Prompt / Sentinel GO 延续提示
 
 - 在 Sentinel GO 结果之后，输出 SHOULD 追加一个给 Gemini / Commander 的 copy-paste-ready Gemini continuation prompt。  
   / After a Sentinel GO result, the output SHOULD append a copy-paste-ready Gemini continuation prompt for Gemini / Commander.
@@ -172,7 +206,7 @@ NEXT_INPUT: Read MAIN_SHA and LATEST_HANDOFF_EVIDENCE above, then define the nex
 HANDOFF: 交给 Planner / Hand off to Planner
 ```
 
-### G. Commander Final Authority / 尚书房最高裁决权
+### J. Commander Final Authority / 尚书房最高裁决权
 
 - 尚书房是该流程的 final authority。  
   / 尚书房 is the final authority in this workflow.

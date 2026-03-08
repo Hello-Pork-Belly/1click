@@ -133,6 +133,12 @@ In this mode:
   / 每个 Sentinel 输出都必须以统一 footer 结尾。
 - Default routing: GO -> 尚书房; FAIL / STOP -> Codex.  
   / 默认流转：GO -> 尚书房；FAIL / STOP -> Codex。
+- Sentinel is the default post-merge routine closeout role after Codex merge-closeout.  
+  / Sentinel 是 Codex merge-closeout 之后的默认 post-merge routine closeout 角色。
+- Sentinel should consume merge-closeout evidence and produce a formal GO / STOP closeout.  
+  / Sentinel 应消费 merge-closeout evidence，并输出 formal GO / STOP closeout。
+- Sentinel may reference minimal failure records when present.  
+  / 如果存在 minimal failure records，Sentinel 可以引用它们。
 - Footer must be copy-paste ready.  
   / Footer 必须可直接 copy/paste。
 
