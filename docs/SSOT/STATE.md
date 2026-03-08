@@ -248,9 +248,9 @@ efa1666c9fb605419b5fe46d062b021f0f8a9efd
 
 - `task_id`: `T-1.2`
   - `closed_at`: `2026-03-08T08:47:07Z`
-  - `closure_pr`: `TBD before merge of the docs-only closeout PR`
+  - `closure_pr`: `https://github.com/Hello-Pork-Belly/1click/pull/112`
   - `closure_merge_commit`: `ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f (https://github.com/Hello-Pork-Belly/1click/commit/ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f)`
-  - `commander_done_declaration`: `Task ID: T-1.2 | DoD satisfied: implementation merged and post-merge verification passed; docs-only closeout PR pending merge | Related PR(s): https://github.com/Hello-Pork-Belly/1click/pull/109 | Merge commit SHA: ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f | Rollback: git revert ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f | Done declared_at: 2026-03-08T08:47:07Z`
+  - `commander_done_declaration`: `Task ID: T-1.2 | DoD satisfied: implementation merged and post-merge verification passed; docs-only closeout PR opened | Related PR(s): https://github.com/Hello-Pork-Belly/1click/pull/109, https://github.com/Hello-Pork-Belly/1click/pull/112 | Merge commit SHA: ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f | Rollback: git revert ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f | Done declared_at: 2026-03-08T08:47:07Z`
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-25T11:45:15Z)
 mode: routine
