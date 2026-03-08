@@ -2,7 +2,7 @@
 
 This file is the single source of truth for project progress in 1click.
 
-Last updated: 2026-02-27
+Last updated: 2026-03-08
 Owner: Pork-Belly
 
 ## Reality Snapshot A0 (remote)
@@ -162,6 +162,13 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
   - Merge commit: https://github.com/Hello-Pork-Belly/1click/commit/aac4c6c11f406bce69f6db05f1ce421c64ec1f36
   - DoD verification at merge time: `make check` exit `0`
 
+- T-1.2 State Management and Centralized Logging Framework
+  - Status: Done (implementation merged; docs-only closeout in progress)
+  - Implementation PR: https://github.com/Hello-Pork-Belly/1click/pull/109
+  - Implementation merge commit: https://github.com/Hello-Pork-Belly/1click/commit/ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f
+  - Governance reference: https://github.com/Hello-Pork-Belly/1click/pull/110
+  - Closeout evidence: `docs/SSOT/EVIDENCE/T-1.2-closeout-PR109.md`
+
 - A0 snapshot now records merged facts and remote reality including PR #5 anchor and PR #8 governance incident.
 
 - Legacy imported Done/PR history moved out of truth surface:
@@ -238,6 +245,12 @@ efa1666c9fb605419b5fe46d062b021f0f8a9efd
   - `closure_pr`: `https://github.com/Hello-Pork-Belly/1click/pull/<N>`
   - `closure_merge_commit`: `<sha> (https://github.com/Hello-Pork-Belly/1click/commit/<sha>)`
   - `commander_done_declaration`: `Task ID: T-XYZ | DoD satisfied: yes | Related PR(s): <PR URL> | Merge commit SHA: <sha> | Rollback: git revert <sha> | Done declared_at: YYYY-MM-DDTHH:MM:SSZ`
+
+- `task_id`: `T-1.2`
+  - `closed_at`: `2026-03-08T08:47:07Z`
+  - `closure_pr`: `TBD before merge of the docs-only closeout PR`
+  - `closure_merge_commit`: `ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f (https://github.com/Hello-Pork-Belly/1click/commit/ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f)`
+  - `commander_done_declaration`: `Task ID: T-1.2 | DoD satisfied: implementation merged and post-merge verification passed; docs-only closeout PR pending merge | Related PR(s): https://github.com/Hello-Pork-Belly/1click/pull/109 | Merge commit SHA: ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f | Rollback: git revert ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f | Done declared_at: 2026-03-08T08:47:07Z`
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-25T11:45:15Z)
 mode: routine
