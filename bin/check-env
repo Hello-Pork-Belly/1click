@@ -1,0 +1,50 @@
+#!/bin/sh
+set -eu
+
+HZ_REPO_ROOT=${HZ_REPO_ROOT:-$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)}
+export HZ_REPO_ROOT
+
+# shellcheck source=../lib/common.sh
+. "${HZ_REPO_ROOT}/lib/common.sh"
+# shellcheck source=../lib/log.sh
+. "${HZ_REPO_ROOT}/lib/log.sh"
+# shellcheck source=../lib/check_env.sh
+. "${HZ_REPO_ROOT}/lib/check_env.sh"
+# shellcheck source=../lib/state.sh
+. "${HZ_REPO_ROOT}/lib/state.sh"
+# shellcheck source=../lib/trap.sh
+. "${HZ_REPO_ROOT}/lib/trap.sh"
+
+runtime_prepare
+trap_install
+
+if [ "$#" -ne 0 ]; then
+  log_error "check-env does not accept additional arguments"
+  exit "${HZ_EXIT_EXPECTED_FAIL}"
+fi
+
+state_mark_running "preflight" "check-env:start"
+log_kv INFO "check_env_started"
+
+case "${HZ_SIMULATE_FAIL:-}" in
+  after_state_write)
+    die_expected "simulated failure after_state_write"
+    ;;
+esac
+
+if ! check_env; then
+  if [ -z "${HZ_LAST_ERROR:-}" ]; then
+    HZ_LAST_ERROR="check-env failed"
+    export HZ_LAST_ERROR
+  fi
+  die_expected "${HZ_LAST_ERROR}"
+fi
+
+case "${HZ_SIMULATE_FAIL:-}" in
+  after_env_pass)
+    die_expected "simulated failure after_env_pass"
+    ;;
+esac
+
+state_mark_success "preflight" "check-env:done"
+log_kv INFO "check_env_completed"

@@ -1,0 +1,82 @@
+#!/bin/sh
+set -eu
+
+HZ_REPO_ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+export HZ_REPO_ROOT
+
+# shellcheck source=lib/common.sh
+. "${HZ_REPO_ROOT}/lib/common.sh"
+# shellcheck source=lib/log.sh
+. "${HZ_REPO_ROOT}/lib/log.sh"
+# shellcheck source=lib/check_env.sh
+. "${HZ_REPO_ROOT}/lib/check_env.sh"
+# shellcheck source=lib/state.sh
+. "${HZ_REPO_ROOT}/lib/state.sh"
+# shellcheck source=lib/trap.sh
+. "${HZ_REPO_ROOT}/lib/trap.sh"
+
+usage_error() {
+  log_error "$1"
+  hz_usage
+  exit "${HZ_EXIT_EXPECTED_FAIL}"
+}
+
+dispatch_command() {
+  case "${HZ_COMMAND}" in
+    help)
+      hz_usage
+      ;;
+    version)
+      hz_print_version
+      ;;
+    check-env)
+      runtime_prepare
+      trap_install
+      export HZ_RUNTIME_BOOTSTRAPPED=1
+      exec "${HZ_REPO_ROOT}/bin/check-env"
+      ;;
+    *)
+      usage_error "unsupported command: ${HZ_COMMAND}"
+      ;;
+  esac
+}
+
+HZ_COMMAND="help"
+HZ_DRY_RUN="${HZ_DRY_RUN:-0}"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --help)
+      if [ "$#" -ne 1 ]; then
+        usage_error "--help does not accept additional arguments"
+      fi
+      HZ_COMMAND="help"
+      break
+      ;;
+    --version)
+      if [ "$#" -ne 1 ]; then
+        usage_error "--version does not accept additional arguments"
+      fi
+      HZ_COMMAND="version"
+      break
+      ;;
+    --dry-run)
+      HZ_DRY_RUN=1
+      export HZ_DRY_RUN
+      shift
+      ;;
+    check-env)
+      shift
+      if [ "$#" -ne 0 ]; then
+        usage_error "check-env does not accept additional arguments"
+      fi
+      HZ_COMMAND="check-env"
+      break
+      ;;
+    *)
+      usage_error "unsupported argument: $1"
+      ;;
+  esac
+done
+
+dispatch_command
