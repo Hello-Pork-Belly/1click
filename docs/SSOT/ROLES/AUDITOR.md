@@ -100,3 +100,14 @@ decision: PROCEED|BLOCKED
   / Auditor should not remain the default next role for a report that is already in merged / closeout-stage.
 - On FAIL, `NEXT_INPUT` must explicitly require the minimal repair and return for re-audit.  
   / 在 FAIL 时，`NEXT_INPUT` 必须明确写出 minimal repair + return for re-audit。
+
+## dual-PR clarification / dual-PR 说明
+
+- dual-PR does not change the Auditor role.  
+  / dual-PR 不改变 Auditor 的职责。
+
+- Auditor still audits the implementation PR pre-merge.  
+  / Auditor 仍然只负责 implementation PR 的 pre-merge 审计。
+
+- A docs-only closeout PR, if needed, belongs to Codex merge-closeout and does not reopen the audit chain by default.  
+  / 如确有需要，docs-only closeout PR 仍属于 Codex merge-closeout，默认不会重新开启审计链。

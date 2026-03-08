@@ -189,6 +189,20 @@ In this mode:
 - If a report is already in merged / post-merge closeout stage, it should go to Sentinel by default, not back to antigravity.  
   / 如果一份报告已经处于 merged / post-merge closeout 阶段，默认应交给 Sentinel，而不是回到 antigravity。
 
+## dual-PR clarification / dual-PR 说明
+
+- Sentinel is the final closeout role for both single-PR and dual-PR modes.  
+  / Sentinel 是 single-PR 与 dual-PR 两种模式下的最终 closeout 角色。
+
+- In dual-PR mode, Sentinel closes out only after the docs-only closeout PR is merged.  
+  / 在 dual-PR 模式下，只有 docs-only closeout PR 也合并后，Sentinel 才执行 closeout。
+
+- Sentinel should not treat dual-PR as a new workflow; it is an internal Codex merge-closeout variant.  
+  / Sentinel 不应把 dual-PR 视为新 workflow；它只是 Codex merge-closeout 的内部变体。
+
+- Gemini continuation prompt may be appended only after full closure.  
+  / 只有在 full closure 之后，才可以追加 Gemini continuation prompt。
+
 ## Sentinel GO continuation prompt / Sentinel GO 延续提示
 
 - Every Sentinel GO output SHOULD append a Gemini continuation prompt.  

@@ -180,6 +180,38 @@ HANDOFF: 交给 Codex / Hand off to Codex
 - Sentinel 是默认的 post-merge routine closeout 角色。  
   / Sentinel is the default post-merge routine closeout role.
 
+### single-PR / dual-PR closeout mode / 单 PR 与双 PR 收口模式
+
+- single-PR is the default execution and closeout mode.  
+  / single-PR 是默认的执行与收口模式。
+
+- dual-PR is allowed only when a separate docs-only closeout PR is genuinely needed.  
+  / 只有在确实需要单独的 docs-only closeout PR 时，才允许 dual-PR。
+
+- Example: the implementation PR is merged first, but STATE / JOURNAL / EVIDENCE closeout must be recorded in a separate docs-only closeout PR.  
+  / 例如：implementation PR 先合并，而 STATE / JOURNAL / EVIDENCE 的收口需要在单独的 docs-only closeout PR 中记录。
+
+- Even in dual-PR mode, both steps remain inside Codex merge-closeout.  
+  / 即使在 dual-PR 模式下，这两个步骤仍然都属于 Codex merge-closeout。
+
+- dual-PR does NOT create a new role or a new default routing chain.  
+  / dual-PR 不会创建新的角色，也不会创建新的默认流转链。
+
+- antigravity still audits the implementation PR before merge.  
+  / antigravity 仍然只在 implementation PR 合并前执行审计。
+
+- Codex then handles: implementation PR merge-closeout; docs-only closeout PR if needed; post-merge hard truth / evidence / rollback; final closeout goes to Sentinel.  
+  / 然后由 Codex 负责：implementation PR 的 merge-closeout；如有需要，再处理 docs-only closeout PR；post-merge hard truth / evidence / rollback；最终交给 Sentinel 做 final closeout。
+
+- Regardless of single-PR or dual-PR mode, final closeout goes to Sentinel.  
+  / 无论是 single-PR 还是 dual-PR 模式，最终的 routine closeout 都交给 Sentinel。
+
+- Sentinel may append a Gemini continuation prompt only after the full task is fully closed.  
+  / Sentinel 只有在整个任务 fully closed 之后，才可以追加 Gemini continuation prompt。
+
+- In dual-PR mode, this means the implementation PR and the docs-only closeout PR (if used) are both merged and aligned.  
+  / 在 dual-PR 模式下，这意味着 implementation PR 与 docs-only closeout PR（如果使用）都已经合并并完成对齐。
+
 ### Sentinel routine scope clarification / Sentinel routine 范围澄清
 
 - The default Sentinel routine mode is a narrow single-PR gate review.  
