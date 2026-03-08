@@ -34,3 +34,14 @@ Format (append-only):
   merge_commit: 
   evidence: 
   note: 
+
+- ts_utc: 2026-03-08T08:50:11Z
+  mode: routine
+  actor: Pork- Belly
+  role: executor
+  event: t1-2-closeout
+  main_head: 87691ecae9761e5f88ff966ba65a6fa5c75506d9
+  pr: #112
+  merge_commit: ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f
+  evidence: docs/SSOT/EVIDENCE/T-1.2-closeout-PR109.md
+  note: T-1.2 implementation merged in PR #109; docs-only closeout PR #112 opened after main verification.
