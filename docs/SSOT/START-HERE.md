@@ -13,7 +13,7 @@ Truth validation 只认 **SHA-pinned raw**（`raw/<MAIN_SHA>/...`）。
 - Playbook = docs/SSOT/一键安装流程机制.md
 - Framework = docs/SSOT/1click核心执行框架 + 必要文档.md
 
-## Fixed Read Set (18)
+## Fixed Read Set (19)
 1. docs/SSOT/一键安装构思.md  (Blueprint)
 2. docs/SSOT/一键安装流程机制.md  (Playbook)
 3. docs/SSOT/1click核心执行框架 + 必要文档.md  (Framework)
@@ -29,12 +29,13 @@ Truth validation 只认 **SHA-pinned raw**（`raw/<MAIN_SHA>/...`）。
 13. docs/SSOT/ROLES/EXECUTOR.md
 14. docs/SSOT/ROLES/AUDITOR.md
 15. docs/SSOT/ROLES/SENTINEL.md
-16. docs/RULES.yml
-17. docs/AUDIT-CHECKLIST.md
-18. docs/SSOT/EVIDENCE/  (directory; read latest evidence file)
+16. docs/SSOT/ROLES/INSPECTOR.md
+17. docs/RULES.yml
+18. docs/AUDIT-CHECKLIST.md
+19. docs/SSOT/EVIDENCE/  (directory; read latest evidence file)
 
 ## New conversation handoff
-- 先读 Fixed Read Set 1–18（按序）
+- 先读 Fixed Read Set 1–19（按序）
 - 再读 docs/SSOT/EVIDENCE/ 中最新 evidence（按文件名 UTC/main_sha 排序取最新）
 - 任何 readset / handoff snapshot 都必须先用本轮 `(1)(2)` 重新锚定到 then-current `MAIN_SHA`；历史 SHA 只表示当时快照，不是当前真值。
 
@@ -45,12 +46,15 @@ Truth validation 只认 **SHA-pinned raw**（`raw/<MAIN_SHA>/...`）。
   / project execution flow applies only when the task is about implementation, verification, merge-closeout, or task closure for project execution.
 - docs-only governance repair 合并后，默认返回 Commander / START-HERE 重新判定下一轮项目入口。  
   / After a docs-only governance repair is merged, the default return target is Commander / START-HERE for the next project entry decision.
+- 当明确调用御史时，读 `docs/SSOT/ROLES/INSPECTOR.md`，并保持该角色只读、只向尚书房汇报。  
+  / When Inspector is explicitly invoked, read `docs/SSOT/ROLES/INSPECTOR.md` and keep the role read-only and reporting only to 尚书房.
 
 ## Entry Points
 - STATE: [docs/SSOT/STATE.md](./STATE.md)
 - DECISIONS: [docs/SSOT/DECISIONS.md](./DECISIONS.md)
 - SENTINEL: [docs/SSOT/ROLES/SENTINEL.md](./ROLES/SENTINEL.md)
 - COMMANDER: [docs/SSOT/ROLES/COMMANDER.md](./ROLES/COMMANDER.md)
+- INSPECTOR: [docs/SSOT/ROLES/INSPECTOR.md](./ROLES/INSPECTOR.md)
 
 ## How to use
 - 复制模板并填写 Evidence Pack：见 [docs/SSOT/EVIDENCE-PACK.template.md](./EVIDENCE-PACK.template.md)
