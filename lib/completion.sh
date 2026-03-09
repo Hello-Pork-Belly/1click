@@ -1,68 +1,14 @@
-#!/bin/bash
-set -euo pipefail
-
-# lib/completion.sh
-# Shell completion generator for hz.
+#!/bin/sh
 
 hz_completion_print() {
-  local shell="${1:-}"
+  shell_name=${1:-bash}
 
-  if [[ -z "${shell}" ]]; then
-    if [[ -n "${ZSH_VERSION:-}" ]]; then
-      shell="zsh"
-    else
-      shell="bash"
-    fi
-  fi
-
-  case "${shell}" in
+  case "${shell_name}" in
     bash)
       cat <<'BASH_EOF'
 # Bash completion for hz
 # Usage:
 #   source <(hz completion bash)
-
-_hz_repo_root() {
-  local hp d link
-  hp="$(command -v hz 2>/dev/null || true)"
-  [[ -n "${hp}" ]] || return 1
-
-  d="$(cd "$(dirname "${hp}")" && pwd)"
-  hp="${d}/$(basename "${hp}")"
-
-  while [[ -L "${hp}" ]]; do
-    link="$(readlink "${hp}" || true)"
-    [[ -n "${link}" ]] || break
-    if [[ "${link}" = /* ]]; then
-      hp="${link}"
-    else
-      hp="$(cd "$(dirname "${hp}")" && cd "$(dirname "${link}")" 2>/dev/null && pwd)/$(basename "${link}")"
-    fi
-  done
-
-  echo "$(cd "$(dirname "${hp}")/.." && pwd)"
-}
-
-_hz_list_recipes() {
-  local root
-  root="$(_hz_repo_root 2>/dev/null)" || return 0
-  [[ -d "${root}/recipes" ]] || return 0
-  (cd "${root}/recipes" && ls -1d */ 2>/dev/null | sed 's:/$::' | sort) || true
-}
-
-_hz_list_hosts() {
-  local root
-  root="$(_hz_repo_root 2>/dev/null)" || return 0
-  [[ -d "${root}/inventory/hosts" ]] || return 0
-  (cd "${root}/inventory/hosts" && ls -1 *.yml 2>/dev/null | sed 's:\.yml$::' | sort) || true
-}
-
-_hz_list_groups() {
-  local root
-  root="$(_hz_repo_root 2>/dev/null)" || return 0
-  [[ -d "${root}/inventory/groups" ]] || return 0
-  (cd "${root}/inventory/groups" && ls -1 *.yml 2>/dev/null | sed 's:\.yml$::' | sed 's:^:@:' | sort) || true
-}
 
 _hz_complete() {
   local cur prev cmd sub
@@ -71,35 +17,21 @@ _hz_complete() {
   cmd="${COMP_WORDS[1]:-}"
   sub="${COMP_WORDS[2]:-}"
 
-  local commands="check install ping diagnose doctor inventory recipe module notify cron watch report secret completion version help"
-  if [[ "${COMP_CWORD}" -eq 1 ]]; then
-    COMPREPLY=( $(compgen -W "${commands}" -- "${cur}") )
-    return 0
-  fi
+  local top_level="check-env report secret completion install ping diagnose doctor inventory recipe module notify cron watch help version"
 
-  if [[ "${prev}" == "--target" ]]; then
-    local tg
-    tg="$(_hz_list_hosts) $(_hz_list_groups)"
-    COMPREPLY=( $(compgen -W "${tg}" -- "${cur}") )
+  if [[ "${COMP_CWORD}" -eq 1 ]]; then
+    COMPREPLY=( $(compgen -W "${top_level}" -- "${cur}") )
     return 0
   fi
 
   case "${cmd}" in
-    install)
-      if [[ "${COMP_CWORD}" -eq 2 ]]; then
-        COMPREPLY=( $(compgen -W "$(_hz_list_recipes)" -- "${cur}") )
-        return 0
-      fi
-      COMPREPLY=( $(compgen -W "--dry-run --target --target= --host --host= --rolling --rolling= --pause --pause= --timeout --timeout= --local-mode --headless" -- "${cur}") )
-      return 0
-      ;;
     report)
       if [[ "${COMP_CWORD}" -eq 2 ]]; then
         COMPREPLY=( $(compgen -W "html" -- "${cur}") )
         return 0
       fi
       if [[ "${sub}" == "html" ]]; then
-        COMPREPLY=( $(compgen -W "--latest --out --out=" -- "${cur}") )
+        COMPREPLY=( $(compgen -W "--input --output --latest --out" -- "${cur}") )
         return 0
       fi
       ;;
@@ -109,37 +41,15 @@ _hz_complete() {
         return 0
       fi
       ;;
-    cron)
-      if [[ "${COMP_CWORD}" -eq 2 ]]; then
-        COMPREPLY=( $(compgen -W "list add remove" -- "${cur}") )
-        return 0
-      fi
-      ;;
-    watch)
-      if [[ "${COMP_CWORD}" -eq 2 ]]; then
-        COMPREPLY=( $(compgen -W "run once install" -- "${cur}") )
-        return 0
-      fi
-      COMPREPLY=( $(compgen -W "--heal --schedule --schedule= --user --user= --name --name=" -- "${cur}") )
-      return 0
-      ;;
-    inventory)
-      if [[ "${COMP_CWORD}" -eq 2 ]]; then
-        COMPREPLY=( $(compgen -W "resolve" -- "${cur}") )
-        return 0
-      fi
-      if [[ "${COMP_CWORD}" -eq 3 && "${sub}" == "resolve" ]]; then
-        COMPREPLY=( $(compgen -W "$(_hz_list_hosts) $(_hz_list_groups)" -- "${cur}") )
-        return 0
-      fi
-      ;;
     completion)
-      COMPREPLY=( $(compgen -W "bash zsh" -- "${cur}") )
-      return 0
+      if [[ "${COMP_CWORD}" -eq 2 ]]; then
+        COMPREPLY=( $(compgen -W "bash zsh" -- "${cur}") )
+        return 0
+      fi
       ;;
   esac
 
-  COMPREPLY=()
+  COMPREPLY=( $(compgen -W "${top_level}" -- "${cur}") )
   return 0
 }
 
@@ -148,16 +58,45 @@ BASH_EOF
       ;;
     zsh)
       cat <<'ZSH_EOF'
-# Zsh completion for hz (via bashcompinit)
+#compdef hz
+# Zsh completion for hz
 # Usage:
 #   source <(hz completion zsh)
 
-autoload -U +X bashcompinit && bashcompinit
-source <(hz completion bash)
+_hz() {
+  local -a top_level
+  top_level=(check-env report secret completion install ping diagnose doctor inventory recipe module notify cron watch help version)
+
+  if (( CURRENT == 2 )); then
+    compadd -- "${top_level[@]}"
+    return 0
+  fi
+
+  case "${words[2]:-}" in
+    report)
+      if (( CURRENT == 3 )); then
+        compadd -- html
+      else
+        compadd -- --input --output --latest --out
+      fi
+      ;;
+    secret)
+      compadd -- gen-key encrypt decrypt
+      ;;
+    completion)
+      compadd -- bash zsh
+      ;;
+    *)
+      compadd -- "${top_level[@]}"
+      ;;
+  esac
+}
+
+compdef _hz hz
 ZSH_EOF
       ;;
     *)
-      echo "Unknown shell: ${shell}. Expected: bash|zsh" >&2
+      printf 'ERROR: completion: unknown shell: %s\n' "${shell_name}" >&2
       return 1
       ;;
   esac
