@@ -1,7 +1,74 @@
+#!/bin/sh
+set -eu
+
+case "$0" in
+  */*) HZ_BIN_DIR=${0%/*} ;;
+  *) HZ_BIN_DIR=. ;;
+esac
+REPO_ROOT=$(CDPATH='' cd -- "${HZ_BIN_DIR}/.." && pwd)
+export REPO_ROOT
+export HZ_REPO_ROOT=${REPO_ROOT}
+
+# shellcheck source=../lib/crypto.sh
+. "${REPO_ROOT}/lib/crypto.sh"
+# shellcheck source=../lib/html_renderer.sh
+. "${REPO_ROOT}/lib/html_renderer.sh"
+
+hz_print_version() {
+  if [ -r "${REPO_ROOT}/VERSION" ]; then
+    tr -d '\n' < "${REPO_ROOT}/VERSION"
+    printf '\n'
+  else
+    printf '0.0.0\n'
+  fi
+}
+
+hz_usage() {
+  cat <<'USAGE'
+Usage:
+  ./bin/hz --help
+  ./bin/hz --version
+  ./bin/hz check-env
+  ./bin/hz report html --input <path/to/log.jsonl> --output <path/to/report.html>
+  ./bin/hz secret encrypt
+  ./bin/hz secret decrypt
+
+Notes:
+  - report html also accepts legacy forms: --latest, positional input, and --out.
+  - secret encrypt/decrypt read from stdin by default.
+  - other existing hz commands continue through the legacy dispatcher.
+USAGE
+}
+
+hz_report_html_usage() {
+  cat <<'USAGE'
+Usage:
+  ./bin/hz report html --input <path/to/log.jsonl> --output <path/to/report.html>
+  ./bin/hz report html --latest [--output <path/to/report.html>]
+  ./bin/hz report html <path/to/log.jsonl> [--out <path/to/report.html>]
+USAGE
+}
+
+hz_secret_usage() {
+  cat <<'USAGE'
+Usage:
+  ./bin/hz secret gen-key
+  ./bin/hz secret encrypt
+  ./bin/hz secret decrypt
+
+Environment:
+  HZ_SECRET_PASSPHRASE=<passphrase>
+USAGE
+}
+
+hz_legacy_run() {
+  legacy_tmp=$(mktemp "${TMPDIR:-/tmp}/bin-hz-legacy.XXXXXX")
+  trap 'rm -f "${legacy_tmp}"' EXIT HUP INT TERM
+  cat >"${legacy_tmp}" <<'__HZ_LEGACY_BASH__'
 #!/bin/bash
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_ROOT="${HZ_LEGACY_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 
 # shellcheck source=lib/logging.sh
 . "${REPO_ROOT}/lib/logging.sh"
@@ -881,6 +948,149 @@ main() {
       log_error "invalid subcommand: ${cmd}"
       hz_usage
       return 1
+      ;;
+  esac
+}
+
+main "$@"
+__HZ_LEGACY_BASH__
+  chmod +x "${legacy_tmp}"
+  HZ_LEGACY_REPO_ROOT="${REPO_ROOT}" /bin/bash "${legacy_tmp}" "$@"
+  legacy_rc=$?
+  rm -f "${legacy_tmp}"
+  trap - EXIT HUP INT TERM
+  exit "${legacy_rc}"
+}
+
+hz_cmd_report_html() {
+  report_input=''
+  report_output=''
+  report_latest=0
+
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --input)
+        shift
+        report_input=${1:-}
+        ;;
+      --input=*)
+        report_input=${1#--input=}
+        ;;
+      --output)
+        shift
+        report_output=${1:-}
+        ;;
+      --output=*|--out=*)
+        report_output=${1#*=}
+        ;;
+      --out)
+        shift
+        report_output=${1:-}
+        ;;
+      --latest)
+        report_latest=1
+        ;;
+      -h|--help|help)
+        hz_report_html_usage
+        return 0
+        ;;
+      *)
+        if [ -z "${report_input}" ]; then
+          report_input=$1
+        else
+          hz_legacy_run report html "$@"
+        fi
+        ;;
+    esac
+    shift || true
+  done
+
+  if [ "${report_latest}" -eq 1 ]; then
+    report_input=$(html_find_latest_jsonl) || {
+      printf 'ERROR: report html: no *.jsonl found under records/\n' >&2
+      return 1
+    }
+  fi
+
+  [ -n "${report_input}" ] || {
+    printf 'ERROR: report html: missing --input\n' >&2
+    hz_report_html_usage >&2
+    return 1
+  }
+
+  if [ -z "${report_output}" ]; then
+    report_output=${report_input%.jsonl}.html
+    [ "${report_output}" = "${report_input}" ] && report_output="${report_input}.html"
+  fi
+
+  render_jsonl_to_html "${report_input}" "${report_output}"
+}
+
+hz_cmd_secret() {
+  secret_action=${1:-}
+  shift || true
+
+  case "${secret_action}" in
+    gen-key)
+      crypto_gen_key
+      ;;
+    encrypt)
+      if [ "$#" -gt 0 ]; then
+        printf '%s' "$*" | crypto_encrypt_stdin
+      else
+        crypto_encrypt_stdin
+      fi
+      ;;
+    decrypt)
+      if [ "$#" -gt 0 ]; then
+        printf '%s' "$*" | crypto_decrypt_stdin
+      else
+        crypto_decrypt_stdin
+      fi
+      ;;
+    ''|-h|--help|help)
+      hz_secret_usage
+      ;;
+    *)
+      hz_legacy_run secret "${secret_action}" "$@"
+      ;;
+  esac
+}
+
+main() {
+  case "${1:-}" in
+    ''|help|-h|--help)
+      hz_usage
+      exit 0
+      ;;
+    version|--version)
+      hz_print_version
+      exit 0
+      ;;
+    check-env)
+      shift || true
+      exec "${REPO_ROOT}/hz" check-env "$@"
+      ;;
+    report)
+      shift || true
+      case "${1:-}" in
+        html)
+          shift || true
+          hz_cmd_report_html "$@"
+          exit $?
+          ;;
+        *)
+          hz_legacy_run report "$@"
+          ;;
+      esac
+      ;;
+    secret)
+      shift || true
+      hz_cmd_secret "$@"
+      exit $?
+      ;;
+    *)
+      hz_legacy_run "$@"
       ;;
   esac
 }

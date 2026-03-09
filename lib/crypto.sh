@@ -1,83 +1,111 @@
-#!/bin/bash
-set -euo pipefail
+#!/bin/sh
 
-# lib/crypto.sh
-# Phase 5 secret helpers.
-# Encrypted format: HZENC:<single-line-base64>
-#
-# Env:
-# - HZ_SECRET_KEY: passphrase used by OpenSSL enc/decrypt.
+crypto__log_error() {
+  if command -v log_error >/dev/null 2>&1; then
+    log_error "$*"
+  else
+    printf 'ERROR: %s\n' "$*" >&2
+  fi
+}
 
-crypto__log_warn() { command -v log_warn >/dev/null 2>&1 && log_warn "$@" || echo "WARN: $*" >&2; }
-crypto__log_error() { command -v log_error >/dev/null 2>&1 && log_error "$@" || echo "ERROR: $*" >&2; }
+crypto__log_info() {
+  if command -v log_info >/dev/null 2>&1; then
+    log_info "$*"
+  else
+    printf 'INFO: %s\n' "$*"
+  fi
+}
 
-crypto__require_openssl() {
+crypto_require_openssl() {
   command -v openssl >/dev/null 2>&1 || {
     crypto__log_error "openssl not found"
     return 1
   }
 }
 
-crypto__require_key() {
-  [[ -n "${HZ_SECRET_KEY:-}" ]] || {
-    crypto__log_error "HZ_SECRET_KEY is not set"
+crypto__set_passphrase_env() {
+  if [ -n "${HZ_SECRET_PASSPHRASE:-}" ]; then
+    HZ_CRYPTO_PASSPHRASE=${HZ_SECRET_PASSPHRASE}
+  elif [ -n "${HZ_SECRET_KEY:-}" ]; then
+    HZ_CRYPTO_PASSPHRASE=${HZ_SECRET_KEY}
+  else
+    crypto__log_error "HZ_SECRET_PASSPHRASE is not set"
+    return 1
+  fi
+  export HZ_CRYPTO_PASSPHRASE
+}
+
+crypto_require_passphrase() {
+  crypto__set_passphrase_env
+}
+
+crypto_require_pbkdf2() {
+  crypto_require_openssl || return 1
+  HZ_CRYPTO_PASSPHRASE=probe
+  export HZ_CRYPTO_PASSPHRASE
+  printf '' | openssl enc -aes-256-cbc -pbkdf2 -salt -a -A -pass env:HZ_CRYPTO_PASSPHRASE >/dev/null 2>&1 || {
+    crypto__log_error "OpenSSL missing -pbkdf2 support"
     return 1
   }
 }
 
-crypto__require_pbkdf2() {
-  crypto__require_openssl || return 1
-  HZ_SECRET_KEY="probe" openssl enc -aes-256-cbc -pbkdf2 -salt -a -A -pass env:HZ_SECRET_KEY </dev/null >/dev/null 2>&1 || {
-    crypto__log_error "OpenSSL missing -pbkdf2 support (need >=1.1.1)"
-    return 1
-  }
+crypto_is_encrypted_value() {
+  case "${1:-}" in
+    HZENC:*) return 0 ;;
+    *) return 1 ;;
+  esac
 }
 
 crypto_gen_key() {
-  crypto__require_openssl || return 1
+  crypto_require_openssl || return 1
   openssl rand -base64 32
 }
 
-crypto_encrypt_string() {
-  crypto__require_openssl || return 1
-  crypto__require_key || return 1
-  crypto__require_pbkdf2 || return 1
+crypto_encrypt_stdin() {
+  crypto_require_openssl || return 1
+  crypto_require_passphrase || return 1
+  crypto_require_pbkdf2 || return 1
 
-  local plaintext="${1:-}"
-  if [[ -z "$plaintext" ]]; then
-    plaintext="$(cat)"
-  fi
-
-  local cipher=""
-  cipher="$(printf '%s' "$plaintext" | openssl enc -aes-256-cbc -pbkdf2 -salt -a -A -pass env:HZ_SECRET_KEY 2>/dev/null)" || {
+  cipher=$(openssl enc -aes-256-cbc -pbkdf2 -salt -a -A -pass env:HZ_CRYPTO_PASSPHRASE 2>/dev/null) || {
     crypto__log_error "encryption failed"
     return 1
   }
 
-  printf 'HZENC:%s\n' "$cipher"
+  printf 'HZENC:%s\n' "${cipher}"
 }
 
-crypto_decrypt_string() {
-  crypto__require_openssl || return 1
-  crypto__require_key || return 1
-  crypto__require_pbkdf2 || return 1
+crypto_decrypt_stdin() {
+  crypto_require_openssl || return 1
+  crypto_require_passphrase || return 1
+  crypto_require_pbkdf2 || return 1
 
-  local enc="${1:-}"
-  if [[ -z "$enc" ]]; then
-    enc="$(cat)"
-  fi
-
-  [[ "$enc" == HZENC:* ]] || {
+  enc_value=$(cat)
+  crypto_is_encrypted_value "${enc_value}" || {
     crypto__log_error "input is not HZENC:*"
     return 1
   }
 
-  local b64="${enc#HZENC:}"
-  local plain=""
-  plain="$(printf '%s' "$b64" | openssl enc -d -aes-256-cbc -pbkdf2 -a -A -pass env:HZ_SECRET_KEY 2>/dev/null)" || {
-    crypto__log_error "decryption failed (wrong key or corrupted ciphertext)"
+  cipher_text=${enc_value#HZENC:}
+  plain_text=$(printf '%s' "${cipher_text}" | openssl enc -d -aes-256-cbc -pbkdf2 -a -A -pass env:HZ_CRYPTO_PASSPHRASE 2>/dev/null) || {
+    crypto__log_error "decryption failed (wrong passphrase or corrupted ciphertext)"
     return 1
   }
 
-  printf '%s\n' "$plain"
+  printf '%s' "${plain_text}"
+}
+
+crypto_encrypt_string() {
+  if [ "$#" -gt 0 ] && [ -n "${1:-}" ]; then
+    printf '%s' "$1" | crypto_encrypt_stdin
+    return $?
+  fi
+  crypto_encrypt_stdin
+}
+
+crypto_decrypt_string() {
+  if [ "$#" -gt 0 ] && [ -n "${1:-}" ]; then
+    printf '%s' "$1" | crypto_decrypt_stdin
+    return $?
+  fi
+  crypto_decrypt_stdin
 }

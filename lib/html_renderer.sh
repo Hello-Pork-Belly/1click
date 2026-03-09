@@ -1,141 +1,162 @@
-#!/bin/bash
-set -euo pipefail
+#!/bin/sh
 
-# lib/html_renderer.sh
-# Render phase report JSONL into a static HTML file.
-
-html__log_info() { command -v log_info >/dev/null 2>&1 && log_info "$@" || echo "INFO: $*"; }
-html__log_error() { command -v log_error >/dev/null 2>&1 && log_error "$@" || echo "ERROR: $*" >&2; }
-
-html_find_latest_jsonl() {
-  local root latest=""
-  if declare -F hz_repo_root >/dev/null 2>&1; then
-    root="$(hz_repo_root)"
+html__log_error() {
+  if command -v log_error >/dev/null 2>&1; then
+    log_error "$*"
   else
-    root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    printf 'ERROR: %s\n' "$*" >&2
   fi
-
-  [[ -d "${root}/records" ]] || return 1
-
-  latest="$(find "${root}/records" -type f -name "*.report.jsonl" -print0 2>/dev/null | xargs -0 ls -1t 2>/dev/null | head -n 1 || true)"
-  [[ -n "$latest" ]] || return 1
-  printf '%s\n' "$latest"
 }
 
-html_render_report() {
-  local jsonl="${1:-}"
-  local out_html="${2:-}"
-
-  [[ -n "$jsonl" ]] || { html__log_error "missing jsonl path"; return 1; }
-  [[ -f "$jsonl" ]] || { html__log_error "jsonl not found: ${jsonl}"; return 1; }
-  [[ -n "$out_html" ]] || { html__log_error "missing output html path"; return 1; }
-
+html_require_python() {
   command -v python3 >/dev/null 2>&1 || {
     html__log_error "python3 not found"
     return 1
   }
+}
 
-  python3 - "$jsonl" "$out_html" <<'PY'
+html_find_latest_jsonl() {
+  html_root=${HZ_REPO_ROOT:-${REPO_ROOT:-}}
+  if [ -z "${html_root}" ]; then
+    html_root=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+  fi
+
+  [ -d "${html_root}/records" ] || return 1
+
+  latest_jsonl=$(find "${html_root}/records" -type f -name '*.jsonl' -print0 2>/dev/null | xargs -0 ls -1t 2>/dev/null | head -n 1 || true)
+  [ -n "${latest_jsonl}" ] || return 1
+  printf '%s\n' "${latest_jsonl}"
+}
+
+render_jsonl_to_html() {
+  html_input=${1:-}
+  html_output=${2:-}
+
+  [ -n "${html_input}" ] || {
+    html__log_error "missing input path"
+    return 1
+  }
+  [ -f "${html_input}" ] || {
+    html__log_error "input not found: ${html_input}"
+    return 1
+  }
+  [ -n "${html_output}" ] || {
+    html__log_error "missing output path"
+    return 1
+  }
+
+  html_require_python || return 1
+
+  python3 - "${html_input}" "${html_output}" <<'PY'
 import datetime
 import html
 import json
 import sys
+from collections import Counter
+from pathlib import Path
 
-src = sys.argv[1]
-out = sys.argv[2]
-
+src = Path(sys.argv[1])
+out = Path(sys.argv[2])
 rows = []
-with open(src, "r", encoding="utf-8", errors="replace") as f:
-    for line in f:
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            obj = json.loads(line)
-        except Exception:
-            continue
-        rows.append({
-            "target": str(obj.get("target", "")),
-            "status": str(obj.get("status", "")),
-            "duration_s": str(obj.get("duration_s", obj.get("duration", ""))),
-            "message": str(obj.get("message", "")),
-            "logfile": str(obj.get("logfile", obj.get("log", ""))),
-        })
+levels = Counter()
 
-def status_class(status: str) -> str:
-    s = (status or "").upper()
-    if s in {"SUCCESS", "OK", "PASSED"}:
-        return "st-ok"
-    if s in {"FAILURE", "FAILED", "ERROR"}:
-        return "st-bad"
-    if s == "TIMEOUT":
-        return "st-timeout"
-    if s in {"ABORTED", "CANCELLED"}:
-        return "st-abort"
-    return "st-unk"
+for raw_line in src.read_text(encoding="utf-8", errors="replace").splitlines():
+    line = raw_line.strip()
+    if not line:
+        continue
+    try:
+        obj = json.loads(line)
+    except Exception:
+        continue
+    level = str(obj.get("level", ""))
+    row = {
+        "ts": str(obj.get("ts", obj.get("timestamp", ""))),
+        "level": level,
+        "phase": str(obj.get("phase", "")),
+        "step": str(obj.get("step", "")),
+        "status": str(obj.get("status", "")),
+        "message": str(obj.get("msg", obj.get("message", ""))),
+    }
+    rows.append(row)
+    levels[level or "UNKNOWN"] += 1
 
-title = f"Horizon Report - {src}"
-generated_at = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+generated_at = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+title = f"Horizon Execution Report - {src.name}"
 
-doc = []
-doc.append("<!doctype html><html><head><meta charset='utf-8'>")
-doc.append("<meta name='viewport' content='width=device-width, initial-scale=1'>")
-doc.append(f"<title>{html.escape(title)}</title>")
-doc.append(
-    """
-<style>
-  :root{
-    --bg:#0b0f14; --panel:#101826; --text:#e6edf3; --muted:#9aa4af;
-    --ok:#2ea043; --bad:#f85149; --warn:#d29922; --info:#58a6ff; --border:#223044;
-  }
-  body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
-  .wrap{max-width:1100px;margin:0 auto;padding:24px;}
-  .hdr{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px;}
-  h1{font-size:18px;margin:0;}
-  .meta{color:var(--muted);font-size:12px;}
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-  table{width:100%;border-collapse:collapse;}
-  th,td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
-  th{color:var(--muted);text-align:left;font-size:12px;letter-spacing:.03em;text-transform:uppercase;}
-  tr:hover td{background:rgba(255,255,255,.02);}
-  .st{font-weight:700;}
-  .st-ok{color:var(--ok);}
-  .st-bad{color:var(--bad);}
-  .st-timeout{color:var(--warn);}
-  .st-abort{color:var(--info);}
-  .st-unk{color:var(--muted);}
-  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-size:12px;color:var(--muted);}
-  .msg{white-space:pre-wrap;word-break:break-word;}
-  .footer{margin-top:10px;color:var(--muted);font-size:12px;}
-  .pill{display:inline-block;padding:2px 8px;border:1px solid var(--border);border-radius:999px;color:var(--muted);font-size:12px;}
-</style>
-"""
-)
-doc.append("</head><body><div class='wrap'>")
-doc.append("<div class='hdr'>")
-doc.append(f"<div><h1>{html.escape(title)}</h1><div class='meta'>Generated at {html.escape(generated_at)}</div></div>")
-doc.append(f"<div class='pill'>Rows: {len(rows)}</div>")
-doc.append("</div>")
-doc.append("<div class='card'><table>")
-doc.append("<thead><tr><th>Target</th><th>Status</th><th>Duration</th><th>Message</th><th>Log</th></tr></thead><tbody>")
-
-for row in rows:
-    target = html.escape(row["target"])
-    status = html.escape(row["status"])
-    duration = html.escape(row["duration_s"])
-    message = html.escape(row["message"])
-    logfile = html.escape(row["logfile"])
-    cls = status_class(row["status"])
-    log_cell = f"<span class='mono'>{logfile}</span>" if logfile else "<span class='mono'>-</span>"
-    doc.append(
-        f"<tr><td class='mono'>{target}</td><td class='st {cls}'>{status}</td><td class='mono'>{duration}</td><td class='msg'>{message}</td><td>{log_cell}</td></tr>"
+summary_bits = []
+for level in sorted(levels):
+    summary_bits.append(
+        f"<span class='pill'><strong>{html.escape(level)}</strong>: {levels[level]}</span>"
     )
+if not summary_bits:
+    summary_bits.append("<span class='pill'><strong>EMPTY</strong>: 0</span>")
 
-doc.append("</tbody></table></div>")
-doc.append("<div class='footer'>Secrets are never rendered in the dashboard output.</div>")
-doc.append("</div></body></html>")
+entry_rows = []
+for row in rows:
+    entry_rows.append(
+        "<tr>"
+        f"<td>{html.escape(row['ts'])}</td>"
+        f"<td>{html.escape(row['level'])}</td>"
+        f"<td>{html.escape(row['phase'])}</td>"
+        f"<td>{html.escape(row['step'])}</td>"
+        f"<td>{html.escape(row['status'])}</td>"
+        f"<td>{html.escape(row['message'])}</td>"
+        "</tr>"
+    )
+if not entry_rows:
+    entry_rows.append("<tr><td colspan='6'>No entries</td></tr>")
 
-with open(out, "w", encoding="utf-8") as f:
-    f.write("".join(doc))
+doc = f"""<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+  <meta charset=\"utf-8\">
+  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+  <title>{html.escape(title)}</title>
+  <style>
+    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; background: #f5f7fb; color: #172033; }}
+    main {{ max-width: 1120px; margin: 0 auto; padding: 32px 20px 48px; }}
+    h1 {{ margin: 0 0 8px; font-size: 28px; }}
+    .meta {{ color: #5b6578; margin-bottom: 24px; }}
+    .summary {{ display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }}
+    .pill {{ background: #ffffff; border: 1px solid #d7ddea; border-radius: 999px; padding: 8px 12px; font-size: 14px; }}
+    .card {{ background: #ffffff; border: 1px solid #d7ddea; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(18, 28, 45, 0.05); }}
+    table {{ width: 100%; border-collapse: collapse; }}
+    th, td {{ padding: 12px 14px; text-align: left; border-bottom: 1px solid #e6ebf4; vertical-align: top; }}
+    th {{ background: #eef3fb; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #42506a; }}
+    tr:nth-child(even) td {{ background: #fafcff; }}
+    td {{ font-size: 14px; word-break: break-word; }}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>{html.escape(title)}</h1>
+    <div class=\"meta\">Generated: {html.escape(generated_at)}</div>
+    <section class=\"summary\">{''.join(summary_bits)}</section>
+    <section class=\"card\">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Level</th>
+            <th>Phase</th>
+            <th>Step</th>
+            <th>Status</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {''.join(entry_rows)}
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>
+"""
+out.write_text(doc, encoding="utf-8")
 PY
+}
+
+html_render_report() {
+  render_jsonl_to_html "$@"
 }

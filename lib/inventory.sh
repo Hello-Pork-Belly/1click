@@ -1,344 +1,454 @@
-#!/bin/bash
-set -euo pipefail
+#!/bin/sh
+
+inventory__log_debug() {
+  if command -v log_debug >/dev/null 2>&1; then
+    log_debug "$*"
+  fi
+}
+
+inventory__log_info() {
+  if command -v log_info >/dev/null 2>&1; then
+    log_info "$*"
+  else
+    printf 'INFO: %s\n' "$*"
+  fi
+}
+
+inventory__log_warn() {
+  if command -v log_warn >/dev/null 2>&1; then
+    log_warn "$*"
+  else
+    printf 'WARN: %s\n' "$*" >&2
+  fi
+}
+
+inventory__log_error() {
+  if command -v log_error >/dev/null 2>&1; then
+    log_error "$*"
+  else
+    printf 'ERROR: %s\n' "$*" >&2
+  fi
+}
 
 inventory_repo_root() {
-  cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd
+  if [ -n "${HZ_REPO_ROOT:-}" ]; then
+    printf '%s\n' "${HZ_REPO_ROOT}"
+    return 0
+  fi
+  if [ -n "${REPO_ROOT:-}" ]; then
+    printf '%s\n' "${REPO_ROOT}"
+    return 0
+  fi
+  printf '%s\n' "$(pwd)"
 }
 
 inventory_path_all() {
-  echo "$(inventory_repo_root)/inventory/group_vars/all.yml"
+  printf '%s/inventory/group_vars/all.yml\n' "$(inventory_repo_root)"
 }
 
 inventory_path_host() {
-  echo "$(inventory_repo_root)/inventory/hosts/${1}.yml"
+  printf '%s/inventory/hosts/%s.yml\n' "$(inventory_repo_root)" "$1"
 }
 
 inventory__dump_kv_from_yaml() {
-  local file="$1"
+  inventory_file=$1
   if command -v python3 >/dev/null 2>&1; then
-    python3 - "$file" <<'PY'
-import re, sys
+    python3 - "$inventory_file" <<'PY'
+import re
+import sys
 path = sys.argv[1]
 
 def emit(mapping):
-  for k, v in mapping.items():
-    if not isinstance(k, str):
-      continue
-    if not re.match(r'^[A-Z_][A-Z0-9_]*$', k):
-      continue
-    if v is None:
-      s = ""
-    elif isinstance(v, (int, float, bool)):
-      s = str(v)
-    elif isinstance(v, str):
-      s = v
-    else:
-      continue
-    print(f"{k}={s}")
+    for key, value in mapping.items():
+        if not isinstance(key, str):
+            continue
+        if not re.match(r'^[A-Z_][A-Z0-9_]*$', key):
+            continue
+        if value is None:
+            text = ""
+        elif isinstance(value, (int, float, bool)):
+            text = str(value)
+        elif isinstance(value, str):
+            text = value
+        else:
+            continue
+        print(f"{key}={text}")
 
 try:
-  import yaml  # type: ignore
-  with open(path, "r", encoding="utf-8") as f:
-    obj = yaml.safe_load(f)
-  if isinstance(obj, dict):
-    emit(obj)
-  sys.exit(0)
+    import yaml  # type: ignore
+    with open(path, "r", encoding="utf-8") as handle:
+        obj = yaml.safe_load(handle)
+    if isinstance(obj, dict):
+        emit(obj)
+        sys.exit(0)
 except Exception:
-  pass
+    pass
 
 kv = {}
-pat = re.compile(r'^\s*([A-Z_][A-Z0-9_]*)\s*:\s*(.*?)\s*$')
-with open(path, "r", encoding="utf-8") as f:
-  for line in f:
-    line = line.rstrip("\n")
-    if not line or line.lstrip().startswith("#"):
-      continue
-    m = pat.match(line)
-    if not m:
-      continue
-    k, raw = m.group(1), m.group(2)
-    raw = re.split(r'\s+#', raw, maxsplit=1)[0].strip()
-    if len(raw) >= 2 and raw[0] == raw[-1] and raw[0] in ("'", '"'):
-      raw = raw[1:-1]
-    kv[k] = raw
+pattern = re.compile(r'^\s*([A-Z_][A-Z0-9_]*)\s*:\s*(.*?)\s*$')
+with open(path, "r", encoding="utf-8") as handle:
+    for raw_line in handle:
+        line = raw_line.rstrip("\n")
+        if not line or line.lstrip().startswith("#"):
+            continue
+        match = pattern.match(line)
+        if not match:
+            continue
+        key, raw = match.group(1), match.group(2)
+        raw = re.split(r'\s+#', raw, maxsplit=1)[0].strip()
+        if len(raw) >= 2 and raw[0] == raw[-1] and raw[0] in ("'", '"'):
+            raw = raw[1:-1]
+        kv[key] = raw
 emit(kv)
 PY
     return 0
   fi
 
   awk '
-    /^[ \t]*($|#)/ { next }
+    /^[ 	]*($|#)/ { next }
     {
       line=$0
-      sub(/^[ \t]*/, "", line)
+      sub(/^[ 	]*/, "", line)
       split(line, parts, ":")
-      k=parts[1]
-      if (k !~ /^[A-Z_][A-Z0-9_]*$/) next
-      v=substr(line, index(line, ":")+1)
-      sub(/[ \t]+#.*/, "", v)
-      gsub(/^[ \t]+|[ \t]+$/, "", v)
-      if (v ~ /^".*"$/ || v ~ /^'\''.*'\''$/) { v=substr(v,2,length(v)-2) }
-      print k "=" v
+      key=parts[1]
+      if (key !~ /^[A-Z_][A-Z0-9_]*$/) next
+      value=substr(line, index(line, ":") + 1)
+      sub(/[ 	]+#.*/, "", value)
+      gsub(/^[ 	]+|[ 	]+$/, "", value)
+      if (value ~ /^".*"$/ || value ~ /^'\''.*'\''$/) {
+        value=substr(value, 2, length(value)-2)
+      }
+      print key "=" value
     }
-  ' "$file"
+  ' "$inventory_file"
 }
 
-inventory_load_vars() {
-  local host="${1:-}"
-  local all_file host_file
-  local -a files=()
-  local dry="${HZ_DRY_RUN:-0}"
-  local debug="${HZ_DEBUG:-0}"
-  local tracked_keys=" "
-
-  all_file="$(inventory_path_all)"
-  if [[ -f "$all_file" ]]; then
-    files+=("$all_file")
+inventory__mask_kv_line() {
+  if command -v hz_mask_kv_line >/dev/null 2>&1; then
+    hz_mask_kv_line "$1"
   else
-    log_debug "inventory: global not found: ${all_file}"
+    printf '%s\n' "$1"
   fi
+}
 
-  if [[ -n "$host" ]]; then
-    host_file="$(inventory_path_host "$host")"
-    if [[ -f "$host_file" ]]; then
-      files+=("$host_file")
-    else
-      log_warn "inventory: host file not found: ${host_file}"
+inventory_resolve_value() {
+  inventory_value=${1:-}
+  inventory_name=${2:-value}
+
+  if crypto_is_encrypted_value "${inventory_value}"; then
+    if ! command -v crypto_decrypt_string >/dev/null 2>&1; then
+      inventory__log_error "inventory: encrypted value detected for ${inventory_name}, but crypto_decrypt_string is unavailable"
+      return 1
     fi
-  fi
-
-  if [[ "${#files[@]}" -eq 0 ]]; then
-    log_info "inventory: no inventory files to load"
+    if [ -z "${HZ_SECRET_PASSPHRASE:-}" ] && [ -z "${HZ_SECRET_KEY:-}" ]; then
+      inventory__log_error "inventory: encrypted value detected for ${inventory_name}, but HZ_SECRET_PASSPHRASE is not set"
+      return 1
+    fi
+    crypto_decrypt_string "${inventory_value}" || {
+      inventory__log_error "inventory: failed to decrypt value for ${inventory_name}"
+      return 1
+    }
     return 0
   fi
 
-  local f line k v
-  for f in "${files[@]}"; do
-    log_debug "inventory: reading file: ${f}"
-    while IFS= read -r line; do
-      [[ -n "$line" ]] || continue
-      k="${line%%=*}"
-      v="${line#*=}"
+  printf '%s\n' "${inventory_value}"
+}
 
-      # Preserve shell overrides, but allow host yaml to override keys loaded
-      # from global yaml during this same call.
-      if [[ -n "${!k+x}" ]] && [[ "${tracked_keys}" != *" ${k} "* ]]; then
-        [[ "$dry" != "0" ]] && log_info "inventory skip (env override): ${k}"
-        continue
-      fi
+inventory_read_env_file_value() {
+  inventory_file=${1:-${INVENTORY_FILE:-}}
+  inventory_key=${2:-}
 
-      if [[ "$dry" != "0" ]]; then
-        if [[ "$debug" == "1" ]]; then
-          log_debug "inventory would load: $(hz_mask_kv_line "${k}=${v}") (from ${f})"
-        else
-          log_info "inventory would load: ${k} (from ${f})"
-        fi
-        if [[ "${tracked_keys}" != *" ${k} "* ]]; then
-          tracked_keys="${tracked_keys}${k} "
-        fi
-        continue
-      fi
+  [ -n "${inventory_file}" ] || {
+    inventory__log_error "inventory: INVENTORY_FILE is not set"
+    return 1
+  }
+  [ -f "${inventory_file}" ] || {
+    inventory__log_error "inventory: file not found: ${inventory_file}"
+    return 1
+  }
+  [ -n "${inventory_key}" ] || {
+    inventory__log_error "inventory: missing key"
+    return 1
+  }
 
-      export "${k}=${v}"
-      if [[ "$debug" == "1" ]]; then
-        log_debug "inventory loaded: $(hz_mask_kv_line "${k}=${v}") (from ${f})"
-      else
-        log_debug "inventory loaded: ${k} (from ${f})"
-      fi
-      if [[ "${tracked_keys}" != *" ${k} "* ]]; then
-        tracked_keys="${tracked_keys}${k} "
-      fi
-    done < <(inventory__dump_kv_from_yaml "$f" || true)
-  done
+  inventory_raw=$(awk -F '=' -v wanted="${inventory_key}" '
+    /^[[:space:]]*($|#)/ { next }
+    {
+      key=$1
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", key)
+      if (key != wanted) next
+      value=substr($0, index($0, "=") + 1)
+      sub(/[[:space:]]+#.*/, "", value)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      print value
+      exit
+    }
+  ' "${inventory_file}")
 
-  inventory__maybe_decrypt_env || return $?
+  inventory_resolve_value "${inventory_raw}" "${inventory_key}"
 }
 
 inventory__maybe_decrypt_env() {
-  # Phase 5: decrypt encrypted inventory values (HZENC:...) after load.
-  # Fail fast if encrypted values exist but decryption preconditions are missing.
-  local name="" value="" plain=""
+  inventory_names=${1:-}
 
-  while IFS= read -r name; do
-    [[ -n "${name}" ]] || continue
-    [[ "${name}" == "HZ_SECRET_KEY" ]] && continue
-    value="${!name-}"
-    [[ "${value}" == HZENC:* ]] || continue
+  if [ -z "${inventory_names}" ]; then
+    return 0
+  fi
 
-    if ! declare -F crypto_decrypt_string >/dev/null 2>&1; then
-      log_error "inventory: encrypted value detected for ${name}, but crypto_decrypt_string is unavailable"
-      return 1
+  old_ifs=${IFS}
+  IFS=' '
+  set -- ${inventory_names}
+  IFS=${old_ifs}
+
+  for inventory_name in "$@"; do
+    [ -n "${inventory_name}" ] || continue
+    [ "${inventory_name}" = "HZ_SECRET_KEY" ] && continue
+    [ "${inventory_name}" = "HZ_SECRET_PASSPHRASE" ] && continue
+    eval "inventory_value=\${${inventory_name}:-}"
+    if crypto_is_encrypted_value "${inventory_value}"; then
+      inventory_plain=$(inventory_resolve_value "${inventory_value}" "${inventory_name}") || return 1
+      export "${inventory_name}=${inventory_plain}"
+      inventory__log_debug "inventory decrypted: ${inventory_name}"
     fi
+  done
+}
 
-    if [[ -z "${HZ_SECRET_KEY:-}" ]]; then
-      log_error "inventory: encrypted value detected for ${name}, but HZ_SECRET_KEY is not set"
-      return 1
+inventory_load_vars() {
+  inventory_host=${1:-}
+  inventory_files=''
+  inventory_tracked=''
+  inventory_dry=${HZ_DRY_RUN:-0}
+  inventory_debug=${HZ_DEBUG:-0}
+
+  inventory_all_file=$(inventory_path_all)
+  if [ -f "${inventory_all_file}" ]; then
+    inventory_files="${inventory_files} ${inventory_all_file}"
+  else
+    inventory__log_debug "inventory: global not found: ${inventory_all_file}"
+  fi
+
+  if [ -n "${inventory_host}" ]; then
+    inventory_host_file=$(inventory_path_host "${inventory_host}")
+    if [ -f "${inventory_host_file}" ]; then
+      inventory_files="${inventory_files} ${inventory_host_file}"
+    else
+      inventory__log_warn "inventory: host file not found: ${inventory_host_file}"
     fi
+  fi
 
-    plain="$(crypto_decrypt_string "${value}")" || {
-      log_error "inventory: failed to decrypt value for ${name}"
-      return 1
-    }
-    export "${name}=${plain}"
-    log_debug "inventory decrypted: ${name}"
-  done < <(compgen -e)
+  if [ -z "$(printf '%s' "${inventory_files}" | tr -d '[:space:]')" ]; then
+    inventory__log_info "inventory: no inventory files to load"
+    return 0
+  fi
+
+  old_ifs=${IFS}
+  IFS=' '
+  set -- ${inventory_files}
+  IFS=${old_ifs}
+
+  for inventory_file in "$@"; do
+    [ -n "${inventory_file}" ] || continue
+    inventory__log_debug "inventory: reading file: ${inventory_file}"
+    inventory_tmp=$(mktemp "${TMPDIR:-/tmp}/inventory-kv.XXXXXX")
+    if inventory__dump_kv_from_yaml "${inventory_file}" >"${inventory_tmp}" 2>/dev/null; then
+      while IFS= read -r inventory_line || [ -n "${inventory_line}" ]; do
+        [ -n "${inventory_line}" ] || continue
+        inventory_key=${inventory_line%%=*}
+        inventory_value=${inventory_line#*=}
+
+        eval "inventory_existing_flag=\${${inventory_key}+set}"
+        case " ${inventory_tracked} " in
+          *" ${inventory_key} "*) inventory_seen=1 ;;
+          *) inventory_seen=0 ;;
+        esac
+        if [ "${inventory_existing_flag:-}" = "set" ] && [ "${inventory_seen}" = "0" ]; then
+          if [ "${inventory_dry}" != "0" ]; then
+            inventory__log_info "inventory skip (env override): ${inventory_key}"
+          fi
+          continue
+        fi
+
+        if [ "${inventory_dry}" != "0" ]; then
+          if [ "${inventory_debug}" = "1" ]; then
+            inventory__log_debug "inventory would load: $(inventory__mask_kv_line "${inventory_key}=${inventory_value}") (from ${inventory_file})"
+          else
+            inventory__log_info "inventory would load: ${inventory_key} (from ${inventory_file})"
+          fi
+        else
+          export "${inventory_key}=${inventory_value}"
+          if [ "${inventory_debug}" = "1" ]; then
+            inventory__log_debug "inventory loaded: $(inventory__mask_kv_line "${inventory_key}=${inventory_value}") (from ${inventory_file})"
+          else
+            inventory__log_debug "inventory loaded: ${inventory_key} (from ${inventory_file})"
+          fi
+        fi
+
+        case " ${inventory_tracked} " in
+          *" ${inventory_key} "*) : ;;
+          *) inventory_tracked="${inventory_tracked} ${inventory_key}" ;;
+        esac
+      done <"${inventory_tmp}"
+    fi
+    rm -f "${inventory_tmp}"
+  done
+
+  inventory__maybe_decrypt_env "${inventory_tracked}" || return 1
 }
 
 inventory__ssh_args_has_port() {
-  # Detect if HZ_SSH_ARGS already includes a -p option.
-  local s="${HZ_SSH_ARGS:-}"
-  [[ -n "$s" ]] || return 1
-  case " $s " in
-    *" -p "*) return 0 ;;
-    *" -p"* ) return 0 ;; # covers "-p2222" style
+  case " ${HZ_SSH_ARGS:-} " in
+    *" -p "*|*" -p"*) return 0 ;;
     *) return 1 ;;
   esac
 }
 
 inventory_resolve_target() {
-  # Resolve alias -> user@host and export HZ_SSH_KEY/HZ_SSH_ARGS if provided by inventory.
-  # Contract: sets HZ_RESOLVED_TARGET and returns 0 on success.
-  local input="${1:-}"
-  [[ -n "$input" ]] || { log_error "inventory_resolve_target: missing target_input"; return 2; }
+  inventory_input=${1:-}
+  [ -n "${inventory_input}" ] || {
+    inventory__log_error "inventory_resolve_target: missing target_input"
+    return 2
+  }
 
-  export HZ_RESOLVED_TARGET="$input"
+  HZ_RESOLVED_TARGET=${inventory_input}
+  export HZ_RESOLVED_TARGET
 
-  local host_file
-  host_file="$(inventory_path_host "$input")"
-  if [[ ! -f "$host_file" ]]; then
-    # Pass-through
+  inventory_host_file=$(inventory_path_host "${inventory_input}")
+  if [ ! -f "${inventory_host_file}" ]; then
     return 0
   fi
 
-  local host="" user="" port="" key=""
-  local line k v
-  while IFS= read -r line; do
-    [[ -n "$line" ]] || continue
-    k="${line%%=*}"
-    v="${line#*=}"
-    case "$k" in
-      HZ_CONNECTION_HOST|HZ_HOST_ADDR) host="$v" ;;
-      HZ_CONNECTION_USER|HZ_HOST_USER) user="$v" ;;
-      HZ_CONNECTION_PORT|HZ_HOST_PORT) port="$v" ;;
-      HZ_CONNECTION_KEY|HZ_HOST_KEY_PATH) key="$v" ;;
-      *) : ;;
+  inventory_tmp=$(mktemp "${TMPDIR:-/tmp}/inventory-host.XXXXXX")
+  inventory__dump_kv_from_yaml "${inventory_host_file}" >"${inventory_tmp}" 2>/dev/null || true
+
+  inventory_host=''
+  inventory_user=''
+  inventory_port=''
+  inventory_key=''
+
+  while IFS= read -r inventory_line || [ -n "${inventory_line}" ]; do
+    [ -n "${inventory_line}" ] || continue
+    inventory_key_name=${inventory_line%%=*}
+    inventory_value=${inventory_line#*=}
+    case "${inventory_key_name}" in
+      HZ_CONNECTION_HOST|HZ_HOST_ADDR) inventory_host=${inventory_value} ;;
+      HZ_CONNECTION_USER|HZ_HOST_USER) inventory_user=${inventory_value} ;;
+      HZ_CONNECTION_PORT|HZ_HOST_PORT) inventory_port=${inventory_value} ;;
+      HZ_CONNECTION_KEY|HZ_HOST_KEY_PATH) inventory_key=${inventory_value} ;;
     esac
-  done < <(inventory__dump_kv_from_yaml "$host_file" || true)
+  done <"${inventory_tmp}"
+  rm -f "${inventory_tmp}"
 
-  if [[ -z "$host" ]]; then
-    log_error "inventory: host alias '${input}' missing HZ_CONNECTION_HOST (or HZ_HOST_ADDR) in ${host_file}"
+  [ -n "${inventory_host}" ] || {
+    inventory__log_error "inventory: host alias '${inventory_input}' missing HZ_CONNECTION_HOST (or HZ_HOST_ADDR) in ${inventory_host_file}"
     return 1
+  }
+
+  if [ -z "${inventory_user}" ]; then
+    inventory_user=$(whoami 2>/dev/null || printf 'root')
+  fi
+  [ -n "${inventory_port}" ] || inventory_port=22
+
+  HZ_RESOLVED_TARGET=${inventory_user}@${inventory_host}
+  export HZ_RESOLVED_TARGET
+
+  if [ -z "${HZ_SSH_KEY:-}" ] && [ -n "${inventory_key}" ]; then
+    HZ_SSH_KEY=${inventory_key}
+    export HZ_SSH_KEY
   fi
 
-  if [[ -z "$user" ]]; then
-    user="$(whoami 2>/dev/null || true)"
-    [[ -n "$user" ]] || user="root"
-  fi
-
-  if [[ -z "$port" ]]; then
-    port="22"
-  fi
-
-  export HZ_RESOLVED_TARGET="${user}@${host}"
-
-  # Only set SSH key if caller didn't already set it (shell overrides inventory).
-  if [[ -z "${HZ_SSH_KEY:-}" && -n "$key" ]]; then
-    export HZ_SSH_KEY="$key"
-  fi
-
-  # Port handling: append -p <port> only if needed and not already present.
-  if [[ "$port" != "22" ]]; then
-    if ! inventory__ssh_args_has_port; then
-      if [[ -n "${HZ_SSH_ARGS:-}" ]]; then
-        export HZ_SSH_ARGS="${HZ_SSH_ARGS} -p ${port}"
-      else
-        export HZ_SSH_ARGS="-p ${port}"
-      fi
+  if [ "${inventory_port}" != "22" ] && ! inventory__ssh_args_has_port; then
+    if [ -n "${HZ_SSH_ARGS:-}" ]; then
+      HZ_SSH_ARGS="${HZ_SSH_ARGS} -p ${inventory_port}"
+    else
+      HZ_SSH_ARGS="-p ${inventory_port}"
     fi
+    export HZ_SSH_ARGS
   fi
 
-  # Debug log (do not print key path)
-  local key_state="unset"
-  [[ -n "${HZ_SSH_KEY:-}" ]] && key_state="set"
-  log_debug "inventory: resolved target '${input}' -> '${HZ_RESOLVED_TARGET}' (port=${port} key=${key_state})"
+  inventory_key_state=unset
+  if [ -n "${HZ_SSH_KEY:-}" ]; then
+    inventory_key_state=set
+  fi
+  inventory__log_debug "inventory: resolved target '${inventory_input}' -> '${HZ_RESOLVED_TARGET}' (port=${inventory_port} key=${inventory_key_state})"
   return 0
 }
 
-# --- T-025: Group Inventory -----------------------------------------------
-
 inv__repo_root() {
-  if [[ -n "${REPO_ROOT:-}" ]]; then
-    printf '%s\n' "$REPO_ROOT"
-    return 0
-  fi
-  if declare -F hz_repo_root >/dev/null 2>&1; then
-    hz_repo_root
-    return 0
-  fi
-  # Fallback: lib/ is one level under repo root
-  printf '%s\n' "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  inventory_repo_root
 }
 
 inv__err() {
-  if declare -F log_error >/dev/null 2>&1; then
-    log_error "$@"
-  else
-    printf 'ERROR: %s\n' "$*" >&2
-  fi
+  inventory__log_error "$*"
 }
 
 inv__dbg() {
-  if declare -F log_debug >/dev/null 2>&1; then
-    log_debug "$@"
-  fi
+  inventory__log_debug "$*"
 }
 
 inv__parse_group_hosts() {
-  # Parse:
-  # hosts:
-  #   - a
-  #   - b
-  # Stop when next top-level key appears (e.g., vars:)
-  local file="$1"
+  inventory_group_file=$1
   awk '
     BEGIN { in_hosts=0 }
     /^[[:space:]]*hosts:[[:space:]]*$/ { in_hosts=1; next }
-    in_hosts==1 && /^[[:space:]]*-[[:space:]]*/ {
-      v=$0
-      sub(/^[[:space:]]*-[[:space:]]*/, "", v)
-      sub(/[[:space:]]*#.*/, "", v)
-      gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
-      if (v ~ /^".*"$/ || v ~ /^'\''.*'\''$/) { v=substr(v,2,length(v)-2) }
-      if (v != "") print v
+    in_hosts == 1 && /^[[:space:]]*-[[:space:]]*/ {
+      value=$0
+      sub(/^[[:space:]]*-[[:space:]]*/, "", value)
+      sub(/[[:space:]]*#.*/, "", value)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      if (value ~ /^".*"$/ || value ~ /^'\''.*'\''$/) {
+        value=substr(value, 2, length(value)-2)
+      }
+      if (value != "") print value
       next
     }
-    in_hosts==1 && /^[[:space:]]*[A-Za-z0-9_]+:[[:space:]]*/ { exit }
-  ' "$file"
+    in_hosts == 1 && /^[[:space:]]*[A-Za-z0-9_]+:[[:space:]]*/ { exit }
+  ' "${inventory_group_file}"
 }
 
 inventory_resolve_group() {
-  # Usage: inventory_resolve_group @groupname
-  local group_alias="${1:-}"
-  [[ -n "$group_alias" ]] || { inv__err "inventory_resolve_group: missing group alias"; return 1; }
-  [[ "$group_alias" == @* ]] || { inv__err "inventory_resolve_group: group must start with @ (got: $group_alias)"; return 1; }
+  inventory_group_alias=${1:-}
+  [ -n "${inventory_group_alias}" ] || {
+    inv__err "inventory_resolve_group: missing group alias"
+    return 1
+  }
+  case "${inventory_group_alias}" in
+    @*) : ;;
+    *)
+      inv__err "inventory_resolve_group: group must start with @ (got: ${inventory_group_alias})"
+      return 1
+      ;;
+  esac
 
-  local name="${group_alias#@}"
-  [[ -n "$name" ]] || { inv__err "inventory_resolve_group: invalid group alias: $group_alias"; return 1; }
+  inventory_group_name=${inventory_group_alias#@}
+  [ -n "${inventory_group_name}" ] || {
+    inv__err "inventory_resolve_group: invalid group alias: ${inventory_group_alias}"
+    return 1
+  }
 
-  local root file out=""
-  root="$(inv__repo_root)"
-  file="${root}/inventory/groups/${name}.yml"
+  inventory_group_file="$(inv__repo_root)/inventory/groups/${inventory_group_name}.yml"
+  [ -f "${inventory_group_file}" ] || {
+    inv__err "group not found: inventory/groups/${inventory_group_name}.yml"
+    return 1
+  }
 
-  [[ -f "$file" ]] || { inv__err "group not found: inventory/groups/${name}.yml"; return 1; }
+  inv__dbg "inventory: resolving group ${inventory_group_alias} via ${inventory_group_file}"
+  inventory_group_hosts=''
+  inventory_tmp=$(mktemp "${TMPDIR:-/tmp}/inventory-group.XXXXXX")
+  inv__parse_group_hosts "${inventory_group_file}" >"${inventory_tmp}" 2>/dev/null || true
+  while IFS= read -r inventory_host || [ -n "${inventory_host}" ]; do
+    [ -n "${inventory_host}" ] || continue
+    if [ -n "${inventory_group_hosts}" ]; then
+      inventory_group_hosts="${inventory_group_hosts} ${inventory_host}"
+    else
+      inventory_group_hosts=${inventory_host}
+    fi
+  done <"${inventory_tmp}"
+  rm -f "${inventory_tmp}"
 
-  inv__dbg "inventory: resolving group ${group_alias} via ${file}"
+  [ -n "${inventory_group_hosts}" ] || {
+    inv__err "group has no hosts: ${inventory_group_alias}"
+    return 1
+  }
 
-  while IFS= read -r h; do
-    [[ -n "$h" ]] || continue
-    out+="${out:+ }${h}"
-  done < <(inv__parse_group_hosts "$file")
-
-  [[ -n "$out" ]] || { inv__err "group has no hosts: ${group_alias}"; return 1; }
-
-  printf '%s\n' "$out"
+  printf '%s\n' "${inventory_group_hosts}"
 }
