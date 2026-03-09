@@ -27,7 +27,7 @@
 
 二、必要文档（必须导入，作为新仓库的“事实源与门禁合同”）
 
-- Fixed Read Set (18) — see docs/SSOT/START-HERE.md
+- Fixed Read Set (19) — see docs/SSOT/START-HERE.md
 - Core naming:
   - Blueprint = docs/SSOT/一键安装构思.md
   - Playbook = docs/SSOT/一键安装流程机制.md
@@ -43,6 +43,7 @@ B) ROLES 合同（四角色 + 哨兵）
 - docs/SSOT/ROLES/PLANNER.md
 - docs/SSOT/ROLES/EXECUTOR.md（必须包含 Evidence Pack 必填字段：PR URL/head SHA/checks/actions/tag 证据）
 - docs/SSOT/ROLES/AUDITOR.md（常规审计；必须远端核验 + Workflow Hygiene）
+- docs/SSOT/ROLES/INSPECTOR.md（御史：只读治理巡检；只向尚书房汇报）
 
 ## Role labels vs acting app/model / 角色标签与执行体
 
@@ -54,6 +55,23 @@ B) ROLES 合同（四角色 + 哨兵）
 
 - When a concrete app/model change matters for audit traceability, record it in Evidence Pack or JOURNAL instead of redefining the role contract.  
   / 当 concrete app/model 的变化会影响审计追踪时，应写入 Evidence Pack 或 JOURNAL，而不是重定义角色合同。
+
+## Inspector role / 御史角色
+
+- 御史是 narrow read-only governance inspector。  
+  / Inspector / 御史 is a narrow read-only governance inspector.
+
+- 御史只向尚书房汇报；不得 repair、编辑 SSOT、指挥其他角色，或决定 final closure。  
+  / Inspector reports only to 尚书房 and MUST NOT repair, edit SSOT, command other roles, or decide final closure.
+
+- antigravity 是御史的 preferred acting carrier，但御史角色与 carrier/app/model 保持分离。  
+  / antigravity is the preferred acting carrier for Inspector, while the Inspector role remains separate from the carrier/app/model.
+
+- 触发规则保持轻量：primary = after each merge；secondary = every 24 hours。  
+  / Trigger policy remains lightweight: primary = after each merge; secondary = every 24 hours.
+
+- 御史不替代 antigravity pre-merge audit，也不替代 Sentinel routine closeout。  
+  / Inspector does not replace antigravity pre-merge audit or Sentinel routine closeout.
 
 ## Unified Handoff Footer / 统一交接结尾格式
 
@@ -363,7 +381,7 @@ G) RRC 证据落地（执行口径）
 - 降噪要求：last_sha 状态文件 MUST 存储在 git 外部（`~/.cache/1click/handoff_last_sha`），用于“仅在 MAIN_SHA 变化时”触发。
 - 新对话接手顺序 MUST 为：
   1) `docs/SSOT/START-HERE.md`
-  2) Fixed Read Set (18)
+  2) Fixed Read Set (19)
   3) `docs/SSOT/EVIDENCE/*_handoff.md` 中最新文件（按文件名 UTC + main_sha）
 - 读取规则 MUST 使用 SHA-pinned raw（`raw/<MAIN_SHA>/...`）；`/main/` 仅可导航，不得作为验收真值。
 - 历史锚点示例（例如 `MAIN_SHA=42b69e8341162d23191946d5cdd72307cbd67ccf`）仅用于说明格式；每次消费时 MUST 先用本轮 `(1)(2)` 重新确定 then-current `MAIN_SHA`，不得把旧 snapshot 当作当前真值。
