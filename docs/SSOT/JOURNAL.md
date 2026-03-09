@@ -7,7 +7,7 @@ Purpose:
 Rules:
 - This file is appended automatically by repo hooks and/or CI. Humans do not manually edit existing entries.
 - If an entry needs to reference the operator, use the stable identifier: Pork-Belly. Do not use other personal identifiers or app/model labels.
-- Historical `Pork- Belly` should be interpreted as the same operator, but it must not be used for new entries.
+- Historical spaced variants should be interpreted as the same operator, but they must not be used for new entries.
 - Entries must include at least: ts_utc, mode, event, actor, main_head, and, when applicable, pr and merge_commit.
 - When acting app/model traceability matters, use either `event: model-switch` or fill the optional `actor_app`, `model_family`, and `model_version` fields on the relevant entry.
 
@@ -31,7 +31,7 @@ Format (append-only):
 
 - ts_utc: 2026-02-28T10:05:57Z
   mode: routine
-  actor: Pork- Belly
+  actor: Pork-Belly
   role: unknown
   event: git-commit
   main_head: c8070d14c1c38ec9effa438698405b75832fcb7a
@@ -40,13 +40,13 @@ Format (append-only):
   evidence: 
   note: 
 
-- ts_utc: 2026-03-08T08:50:11Z
+- ts_utc: 2026-03-08T08:52:47Z
   mode: routine
-  actor: Pork- Belly
+  actor: Pork-Belly
   role: executor
   event: t1-2-closeout
-  main_head: 87691ecae9761e5f88ff966ba65a6fa5c75506d9
+  main_head: 34b828c46a6b07fb41b97cf8d05c52eef2fc5d97
   pr: #112
-  merge_commit: ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f
+  merge_commit: 34b828c46a6b07fb41b97cf8d05c52eef2fc5d97
   evidence: docs/SSOT/EVIDENCE/T-1.2-closeout-PR109.md
-  note: T-1.2 implementation merged in PR #109; docs-only closeout PR #112 opened after main verification.
+  note: T-1.2 closure_pr=#112 closure_merge_commit=34b828c46a6b07fb41b97cf8d05c52eef2fc5d97; implementation PR #109 merged earlier at ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f after main verification.
