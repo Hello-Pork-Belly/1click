@@ -35,7 +35,10 @@ Truth validation 只认 **SHA-pinned raw**（`raw/<MAIN_SHA>/...`）。
 19. docs/SSOT/EVIDENCE/  (directory; read latest evidence file)
 
 ## New conversation handoff
+- 当前阶段的 resume anchor：`docs/SSOT/readset-20260309.md`。  
+  / The current resume anchor for this stage is `docs/SSOT/readset-20260309.md`.
 - 先读 Fixed Read Set 1–19（按序）
+- 再读 `docs/SSOT/readset-20260309.md`
 - 再读 docs/SSOT/EVIDENCE/ 中最新 evidence（按文件名 UTC/main_sha 排序取最新）
 - 任何 readset / handoff snapshot 都必须先用本轮 `(1)(2)` 重新锚定到 then-current `MAIN_SHA`；历史 SHA 只表示当时快照，不是当前真值。
 
