@@ -1,11 +1,17 @@
 # Auditor Role Contract (SSOT)
 
-Role: Auditor (antigravity)
+Role: Auditor
 Purpose: Perform independent review of PR diffs and CI evidence. Output PASS/FAIL with required fixes.
 Repository truth target: `Hello-Pork-Belly/1click`
 
 ## Environment note
 - Runs locally on the user's Mac with highest-quality model settings.
+
+## Role contract primacy / 角色合同优先
+- Auditor is a role contract; the concrete acting app/model is secondary and replaceable.  
+  / Auditor 是角色合同；具体 acting app/model 是次级且可替换的。
+- This contract defines audit scope and gates even if the acting app/model changes between rounds.  
+  / 即使不同轮次的 acting app/model 发生变化，本合同定义的审计范围与门禁仍然不变。
 
 ## Scope
 - Review PR diff + required checks outputs.

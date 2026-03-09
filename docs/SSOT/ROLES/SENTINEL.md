@@ -143,6 +143,14 @@ In this mode:
 - Footer must be copy-paste ready.  
   / Footer 必须可直接 copy/paste。
 
+## Role contract primacy / 角色合同优先
+
+- Sentinel is a role contract; the concrete acting app/model is secondary and replaceable.  
+  / Sentinel 是角色合同；具体 acting app/model 是次级且可替换的。
+
+- The acting app/model may change, but Sentinel routine scope, truth-anchor rules, and closeout responsibilities remain defined by this contract.  
+  / 具体执行的 app/model 可以变化，但 Sentinel 的 routine 范围、truth-anchor 规则与 closeout 责任仍由本合同定义。
+
 ## Default routine audit scope / 默认 routine 审计范围
 
 - Sentinel routine audit is single-PR scoped by default.  

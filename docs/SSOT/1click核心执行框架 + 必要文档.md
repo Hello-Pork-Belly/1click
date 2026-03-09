@@ -44,6 +44,17 @@ B) ROLES 合同（四角色 + 哨兵）
 - docs/SSOT/ROLES/EXECUTOR.md（必须包含 Evidence Pack 必填字段：PR URL/head SHA/checks/actions/tag 证据）
 - docs/SSOT/ROLES/AUDITOR.md（常规审计；必须远端核验 + Workflow Hygiene）
 
+## Role labels vs acting app/model / 角色标签与执行体
+
+- Workflow role contracts are primary; the concrete acting app/model is secondary and replaceable.  
+  / workflow 里的角色合同是主语义；具体 acting app/model 是次级且可替换的。
+
+- Historical labels such as Gemini / Codex / antigravity in routing are workflow labels in this repository, not irreversible concrete app/model locks.  
+  / 路由里历史上出现的 Gemini / Codex / antigravity 是本仓库的 workflow labels，不是不可逆的 concrete app/model 绑定。
+
+- When a concrete app/model change matters for audit traceability, record it in Evidence Pack or JOURNAL instead of redefining the role contract.  
+  / 当 concrete app/model 的变化会影响审计追踪时，应写入 Evidence Pack 或 JOURNAL，而不是重定义角色合同。
+
 ## Unified Handoff Footer / 统一交接结尾格式
 
 ### A. Fixed Template / 固定模板

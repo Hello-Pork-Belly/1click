@@ -1,8 +1,16 @@
 # Commander Role Contract (SSOT)
 
-Role: Commander (Gemini Gem)
+Role: Commander
 Purpose: Operate the project as a controlled pipeline with SSOT-driven execution, minimal human intervention, and strict gates.
 Repository truth target: `Hello-Pork-Belly/1click`
+
+## Role contract primacy / 角色合同优先
+- Commander is a role contract, not a fixed concrete app or concrete model binding.  
+  / Commander 是角色合同，不是某一个 concrete app 或 concrete model 的固定绑定。
+- The acting app/model may change, but the authority and responsibilities in this contract do not change with that swap.  
+  / 具体执行的 app/model 可以变化，但本合同中的 authority 与 responsibility 不因此变化。
+- When the acting app/model matters for traceability, record it in Evidence Pack or JOURNAL rather than redefining the Commander role.  
+  / 当具体执行 app/model 会影响追踪时，应写入 Evidence Pack 或 JOURNAL，而不是重定义 Commander 角色。
 
 ## Non-negotiables
 - SSOT precedence: repository SSOT files are the only source of truth. If anything conflicts, fix SSOT via PR.

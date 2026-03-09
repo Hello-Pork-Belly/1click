@@ -3,7 +3,8 @@
 - mode: routine|milestone
 - captured_at_utc: YYYY-MM-DDTHH:MM:SSZ
 - main_sha: <40-hex>  # MUST equal (1) and (2); mismatch => STOP/BLOCKED
-- role: commander|planner|executor|auditor|sentinel|unknown
+- role: commander|planner|executor|auditor|sentinel|unknown  # role contract being exercised
+- actor_app: <concrete app/tool label|UNKNOWN>  # concrete acting app/tool; replaceable
 - model_family: GPT|Gemini|Claude|UNKNOWN  # model family only; do not put role or app names here
 - model_version: <provider model id/version|UNKNOWN>  # model identifier/version only
 - channel: CLI|DesktopApp|Web|API|UNKNOWN  # app surface only; do not put role or model names here
