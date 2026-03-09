@@ -2,7 +2,7 @@
 
 This file is the single source of truth for project progress in 1click.
 
-Last updated: 2026-03-08
+Last updated: 2026-03-10
 Owner: Pork-Belly
 
 ## Reality Snapshot A0 (remote)
@@ -150,7 +150,7 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Phase Position
 
-- Current Phase: `VERIFY`
+- Current Phase: `IMPLEMENT`
 - Phase truth source: `docs/PHASES.yml`
 - Progress truth source: `docs/SSOT/STATE.md`
 
@@ -169,6 +169,26 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
   - Governance reference: https://github.com/Hello-Pork-Belly/1click/pull/110
   - Closeout evidence: `docs/SSOT/EVIDENCE/T-1.2-closeout-PR109.md`
 
+- T-037 HTML Reports
+  - Status: Done
+  - Implementation PR: https://github.com/Hello-Pork-Belly/1click/pull/126
+  - Merge commit: https://github.com/Hello-Pork-Belly/1click/commit/9d7da98761ef88f82e5ddcd3418478d6ce6b14d4
+
+- T-038 Secret Management
+  - Status: Done
+  - Implementation PR: https://github.com/Hello-Pork-Belly/1click/pull/126
+  - Merge commit: https://github.com/Hello-Pork-Belly/1click/commit/9d7da98761ef88f82e5ddcd3418478d6ce6b14d4
+
+- T-039 UX Polish & Distribution Readiness
+  - Status: Done
+  - Implementation PR: https://github.com/Hello-Pork-Belly/1click/pull/128
+  - Merge commit: https://github.com/Hello-Pork-Belly/1click/commit/ceab31cada18458ce73775ff8144adf3fdd1be4e
+
+- Phase 5 continuation chain
+  - `T-037/T-038` merged first via PR #126 on `main@9d7da98761ef88f82e5ddcd3418478d6ce6b14d4`.
+  - `T-039` merged next via PR #128 on `main@ceab31cada18458ce73775ff8144adf3fdd1be4e`.
+  - This continuity chain is the current mainline truth for Phase 5.
+
 - A0 snapshot now records merged facts and remote reality including PR #5 anchor and PR #8 governance incident.
 
 - Legacy imported Done/PR history moved out of truth surface:
@@ -181,19 +201,9 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Next
 
-- T-CI-001 Establish CI + Required Checks + Auto-merge Enablement.
-  - DoD (machine-verifiable):
-    - `.github/workflows/ci.yml` exists on main and produces stable PR check name `ci`.
-    - branch protection on `main` requires status check context `ci` (`strict=true`).
-    - repository `allow_auto_merge=true` and `.github/workflows/enable-auto-merge.yml` enables auto-merge (does not bypass checks).
-    - Actions hygiene: successful `ci` runs for PR #37/#38; no red/noise runs in milestone evidence set.
-  - Milestone hard evidence references:
-    - PR #37: https://github.com/Hello-Pork-Belly/1click/pull/37
-    - PR #38: https://github.com/Hello-Pork-Belly/1click/pull/38
-    - post-merge hard truth for milestone snapshot: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`.
-
-- T-A0-001 Keep A0 snapshot current on every milestone (phase change / release tag / security policy change / governance change).
-  - Ordinary docs-only fixes do not force A0 refresh unless they change gates/rules/milestone status.
+- No new implementation task is declared active by this continuity patch.
+- Continuity is re-established through `T-039` on `main@ceab31cada18458ce73775ff8144adf3fdd1be4e`.
+- A fresh Commander Step 0 can now judge the next Phase 5 step from SSOT without relying on chat memory.
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-23T09:30:24Z)
 
@@ -251,6 +261,24 @@ efa1666c9fb605419b5fe46d062b021f0f8a9efd
   - `closure_pr`: `https://github.com/Hello-Pork-Belly/1click/pull/112`
   - `closure_merge_commit`: `ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f (https://github.com/Hello-Pork-Belly/1click/commit/ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f)`
   - `commander_done_declaration`: `Task ID: T-1.2 | DoD satisfied: implementation merged and post-merge verification passed; docs-only closeout PR opened | Related PR(s): https://github.com/Hello-Pork-Belly/1click/pull/109, https://github.com/Hello-Pork-Belly/1click/pull/112 | Merge commit SHA: ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f | Rollback: git revert ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f | Done declared_at: 2026-03-08T08:47:07Z`
+
+- `task_id`: `T-037`
+  - `closed_at`: `2026-03-09T09:17:11Z`
+  - `closure_pr`: `https://github.com/Hello-Pork-Belly/1click/pull/126`
+  - `closure_merge_commit`: `9d7da98761ef88f82e5ddcd3418478d6ce6b14d4 (https://github.com/Hello-Pork-Belly/1click/commit/9d7da98761ef88f82e5ddcd3418478d6ce6b14d4)`
+  - `commander_done_declaration`: `Task ID: T-037 | DoD satisfied: yes | Related PR(s): https://github.com/Hello-Pork-Belly/1click/pull/126 | Merge commit SHA: 9d7da98761ef88f82e5ddcd3418478d6ce6b14d4 | Rollback: git revert 9d7da98761ef88f82e5ddcd3418478d6ce6b14d4 | Done declared_at: 2026-03-09T11:11:16Z`
+
+- `task_id`: `T-038`
+  - `closed_at`: `2026-03-09T09:17:11Z`
+  - `closure_pr`: `https://github.com/Hello-Pork-Belly/1click/pull/126`
+  - `closure_merge_commit`: `9d7da98761ef88f82e5ddcd3418478d6ce6b14d4 (https://github.com/Hello-Pork-Belly/1click/commit/9d7da98761ef88f82e5ddcd3418478d6ce6b14d4)`
+  - `commander_done_declaration`: `Task ID: T-038 | DoD satisfied: yes | Related PR(s): https://github.com/Hello-Pork-Belly/1click/pull/126 | Merge commit SHA: 9d7da98761ef88f82e5ddcd3418478d6ce6b14d4 | Rollback: git revert 9d7da98761ef88f82e5ddcd3418478d6ce6b14d4 | Done declared_at: 2026-03-09T11:11:16Z`
+
+- `task_id`: `T-039`
+  - `closed_at`: `2026-03-09T10:23:54Z`
+  - `closure_pr`: `https://github.com/Hello-Pork-Belly/1click/pull/128`
+  - `closure_merge_commit`: `ceab31cada18458ce73775ff8144adf3fdd1be4e (https://github.com/Hello-Pork-Belly/1click/commit/ceab31cada18458ce73775ff8144adf3fdd1be4e)`
+  - `commander_done_declaration`: `Task ID: T-039 | DoD satisfied: yes | Related PR(s): https://github.com/Hello-Pork-Belly/1click/pull/128 | Merge commit SHA: ceab31cada18458ce73775ff8144adf3fdd1be4e | Rollback: git revert ceab31cada18458ce73775ff8144adf3fdd1be4e | Done declared_at: 2026-03-09T11:11:16Z`
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-25T11:45:15Z)
 mode: routine

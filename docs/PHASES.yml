@@ -18,5 +18,5 @@ phases:
     name: Release
     description: Merge, publish evidence pack, and close loop.
 
-current_phase: VERIFY
-updated_at: 2026-02-20
+current_phase: IMPLEMENT
+updated_at: 2026-03-09
