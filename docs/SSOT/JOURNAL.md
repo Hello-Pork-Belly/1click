@@ -9,13 +9,17 @@ Rules:
 - If an entry needs to reference the operator, use the stable identifier: Pork-Belly. Do not use other personal identifiers or app/model labels.
 - Historical `Pork- Belly` should be interpreted as the same operator, but it must not be used for new entries.
 - Entries must include at least: ts_utc, mode, event, actor, main_head, and, when applicable, pr and merge_commit.
+- When acting app/model traceability matters, use either `event: model-switch` or fill the optional `actor_app`, `model_family`, and `model_version` fields on the relevant entry.
 
 Format (append-only):
 - ts_utc: 0000-00-00T00:00:00Z
   mode: routine|milestone
   actor: Pork-Belly|<other-stable-id>
   role: sentinel|commander|planner|executor|auditor|unknown
-  event: <short verb phrase or task-closeout label>
+  actor_app: <concrete app/tool label|EMPTY>
+  model_family: <GPT|Gemini|Claude|EMPTY>
+  model_version: <provider model id/version|EMPTY>
+  event: <short verb phrase|model-switch|task-closeout label>
   main_head: <40-hex>
   pr: <#n|EMPTY>
   merge_commit: <40-hex|EMPTY>
