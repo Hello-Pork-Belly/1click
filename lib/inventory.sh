@@ -197,6 +197,7 @@ inventory__maybe_decrypt_env() {
 
   old_ifs=${IFS}
   IFS=' '
+  # shellcheck disable=SC2086
   set -- ${inventory_names}
   IFS=${old_ifs}
 
@@ -243,6 +244,7 @@ inventory_load_vars() {
 
   old_ifs=${IFS}
   IFS=' '
+  # shellcheck disable=SC2086
   set -- ${inventory_files}
   IFS=${old_ifs}
 
@@ -365,9 +367,9 @@ inventory_resolve_target() {
     export HZ_SSH_ARGS
   fi
 
-  inventory_key_state=unset
+  inventory_key_state='unset'
   if [ -n "${HZ_SSH_KEY:-}" ]; then
-    inventory_key_state=set
+    inventory_key_state='set'
   fi
   inventory__log_debug "inventory: resolved target '${inventory_input}' -> '${HZ_RESOLVED_TARGET}' (port=${inventory_port} key=${inventory_key_state})"
   return 0
