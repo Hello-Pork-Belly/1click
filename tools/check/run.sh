@@ -8,7 +8,10 @@ esac
 ROOT_DIR=$(CDPATH='' cd -- "${SCRIPT_DIR}/../.." && pwd)
 cd "${ROOT_DIR}"
 
-CHECK_DIRS="tools recipes modules archive/upstream-20260215/oneclick"
+set -- tools recipes modules
+if [ -d "archive/upstream-20260215/oneclick" ]; then
+  set -- "$@" archive/upstream-20260215/oneclick
+fi
 
 run_if_present() {
   label=$1
@@ -23,13 +26,13 @@ run_if_present() {
 }
 
 echo "[check] shell syntax"
-find tools recipes modules archive/upstream-20260215/oneclick -type f -name '*.sh' | sort | while IFS= read -r script_file; do
+find "$@" -type f -name '*.sh' | sort | while IFS= read -r script_file; do
   bash -n "${script_file}"
 done
 
 if command -v shellcheck >/dev/null 2>&1; then
   echo "[check] shellcheck"
-  find ${CHECK_DIRS} -type f -name '*.sh' | sort | while IFS= read -r script_file; do
+  find "$@" -type f -name '*.sh' | sort | while IFS= read -r script_file; do
     case "${script_file}" in
       archive/upstream-20260215/oneclick/*)
         shellcheck -S error "${script_file}"
