@@ -140,6 +140,32 @@ Rollback:
 - `gh api -X PATCH repos/Hello-Pork-Belly/1click -f allow_auto_merge=false`
 - Reconfigure branch protection to remove required context `ci` (or delete protection per admin policy).
 
+## 2026-03-10 — D-016: Post-release truth hierarchy and inspector heartbeat baseline
+Decision:
+- SSOT content truth MUST be read from SHA-pinned raw references; `/main/` pages and GitHub UI views are not admissible content truth sources.
+- Runtime remote reality MUST be proven by Evidence Pack command outputs such as `git ls-remote`, `gh api repos/<repo>/commits/main --jq .sha`, `gh pr view`, and `gh pr checks`.
+- GitHub UI remains weak evidence only and MUST NOT override SSOT or command-verifiable runtime evidence.
+- `docs/SSOT/ROLES/PLANNER.md` and `docs/SSOT/ROLES/EXECUTOR.md` are capability contracts; the concrete acting app/model may change without changing the role contract.
+- `.github/workflows/inspector-heartbeat.yml` is an approved minimal read-only governance heartbeat workflow.
+
+Rationale:
+- Remove the remaining citation-rule ambiguity between SHA-pinned SSOT truth, runtime command evidence, and weak UI evidence.
+- Decouple core execution roles from specific apps/models while keeping role boundaries stable.
+- Activate a minimal governance heartbeat without expanding into a larger automation platform.
+
+Scope:
+- docs/SSOT/DECISIONS.md
+- docs/SSOT/ROLES/PLANNER.md
+- docs/SSOT/ROLES/EXECUTOR.md
+- docs/SSOT/STATE.md
+- docs/SSOT/JOURNAL.md
+- docs/RULES.yml
+- .github/workflows/inspector-heartbeat.yml
+
+Links:
+- docs/SSOT/readset-20260309.md
+- .github/workflows/inspector-heartbeat.yml
+
 ## History / Provenance (source only, not truth)
 - Imported from `Hello-Pork-Belly/horizon-openai` as provenance only; not a source of truth for `1click`.
 - Legacy imported records in this file are **Not applicable to 1click** unless re-ratified by a 1click PR.

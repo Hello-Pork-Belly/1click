@@ -195,6 +195,11 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
   - Merge commit: https://github.com/Hello-Pork-Belly/1click/commit/050f0a651563984f816e2f726962a362b185c5ac
   - Release marker: `VERSION=1.0.0`
 
+- T-041 Post-Release Hardening & End-to-End Verification
+  - Status: Done
+  - Implementation PR: https://github.com/Hello-Pork-Belly/1click/pull/134
+  - Merge commit: https://github.com/Hello-Pork-Belly/1click/commit/26894a84e34772a6ac2935bf0da36b2c05418eca
+
 - Phase 5 continuation chain
   - `T-036` planning provenance was carried by PR #100 on `main@75bc67e926525ff1440f85227288607507ae6814`.
   - `T-037/T-038` merged next via PR #126 on `main@9d7da98761ef88f82e5ddcd3418478d6ce6b14d4`.
@@ -210,16 +215,16 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- T-041 Post-Release Hardening & End-to-End Verification
+- T-042 Meta-Governance Backlog Clearance & INSPECTOR Activation
   - Status: Doing
-  - Scope: installer defensive guards + sandboxed install-to-run smoke verification
-  - Tracking PR: https://github.com/Hello-Pork-Belly/1click/pull/134
+  - Scope: citation-rule coherence + role/app decoupling + minimal historical sync + INSPECTOR heartbeat activation
+  - Tracking PR: https://github.com/Hello-Pork-Belly/1click/pull/136
 
 ## Next
 
-- No new implementation task is declared active by this T-040 ledger closeout.
-- Phase 5 is completed through `T-040` on `main@050f0a651563984f816e2f726962a362b185c5ac`.
-- A fresh Commander Step 0 can now judge the next post-Phase 5 step from SSOT without relying on chat memory.
+- T-042 is the current active post-release meta-governance cleanup step.
+- Phase 6 remains active on `main@26894a84e34772a6ac2935bf0da36b2c05418eca`.
+- A fresh Commander Step 0 can now judge T-042 as the current continuation step from SSOT without relying on chat memory.
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-23T09:30:24Z)
 
@@ -307,6 +312,12 @@ efa1666c9fb605419b5fe46d062b021f0f8a9efd
   - `closure_pr`: `https://github.com/Hello-Pork-Belly/1click/pull/132`
   - `closure_merge_commit`: `050f0a651563984f816e2f726962a362b185c5ac (https://github.com/Hello-Pork-Belly/1click/commit/050f0a651563984f816e2f726962a362b185c5ac)`
   - `commander_done_declaration`: `Task ID: T-040 | DoD satisfied: continuity anchor merged and VERSION=1.0.0 established on main | Related PR(s): https://github.com/Hello-Pork-Belly/1click/pull/126, https://github.com/Hello-Pork-Belly/1click/pull/128, https://github.com/Hello-Pork-Belly/1click/pull/132 | Merge commit SHA: 050f0a651563984f816e2f726962a362b185c5ac | Rollback: git revert 050f0a651563984f816e2f726962a362b185c5ac | Done declared_at: 2026-03-10T07:45:29Z`
+
+- `task_id`: `T-041`
+  - `closed_at`: `2026-03-10T08:35:23Z`
+  - `closure_pr`: `https://github.com/Hello-Pork-Belly/1click/pull/134`
+  - `closure_merge_commit`: `26894a84e34772a6ac2935bf0da36b2c05418eca (https://github.com/Hello-Pork-Belly/1click/commit/26894a84e34772a6ac2935bf0da36b2c05418eca)`
+  - `commander_done_declaration`: `Task ID: T-041 | DoD satisfied: installer defensive guards and sandboxed install-to-run smoke verification landed on main | Related PR(s): https://github.com/Hello-Pork-Belly/1click/pull/134 | Merge commit SHA: 26894a84e34772a6ac2935bf0da36b2c05418eca | Rollback: git revert 26894a84e34772a6ac2935bf0da36b2c05418eca | Done declared_at: 2026-03-10T08:35:23Z`
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-25T11:45:15Z)
 mode: routine

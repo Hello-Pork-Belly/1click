@@ -1,0 +1,24 @@
+name: inspector-heartbeat
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  heartbeat:
+    name: inspector-heartbeat
+    runs-on: ubuntu-latest
+    steps:
+      - name: Emit heartbeat marker
+        run: |
+          echo "heartbeat=inspector"
+          echo "mode=read-only"
+          echo "trigger=${GITHUB_EVENT_NAME}"
+          echo "repo=${GITHUB_REPOSITORY}"

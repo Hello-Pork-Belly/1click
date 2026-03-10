@@ -50,3 +50,14 @@ Format (append-only):
   merge_commit: 34b828c46a6b07fb41b97cf8d05c52eef2fc5d97
   evidence: docs/SSOT/EVIDENCE/T-1.2-closeout-PR109.md
   note: T-1.2 closure_pr=#112 closure_merge_commit=34b828c46a6b07fb41b97cf8d05c52eef2fc5d97; implementation PR #109 merged earlier at ab2a6080124c0d6cb7a9c4c3b753d43aec782e8f after main verification.
+
+- ts_utc: 2026-03-10T08:35:23Z
+  mode: routine
+  actor: Pork-Belly
+  role: executor
+  event: t-041-closeout
+  main_head: 26894a84e34772a6ac2935bf0da36b2c05418eca
+  pr: #134
+  merge_commit: 26894a84e34772a6ac2935bf0da36b2c05418eca
+  evidence: https://github.com/Hello-Pork-Belly/1click/pull/134
+  note: T-041 landed with installer guards and sandboxed install-to-run smoke verification.
