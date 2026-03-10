@@ -200,6 +200,17 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
   - Implementation PR: https://github.com/Hello-Pork-Belly/1click/pull/134
   - Merge commit: https://github.com/Hello-Pork-Belly/1click/commit/26894a84e34772a6ac2935bf0da36b2c05418eca
 
+- T-042 Meta-Governance Backlog Clearance & INSPECTOR Activation
+  - Status: Done
+  - Implementation PR: https://github.com/Hello-Pork-Belly/1click/pull/136
+  - Merge commit: https://github.com/Hello-Pork-Belly/1click/commit/de6f081f4ff7da637810ec7f059315635e54dabe
+
+- T-043 INSPECTOR Heartbeat Runtime Verification & Activation
+  - Status: Done
+  - Verification PR: <current T-043 PR>
+  - Verified run: https://github.com/Hello-Pork-Belly/1click/actions/runs/22895461492
+  - Heartbeat status: Verified / Active on `main@de6f081f4ff7da637810ec7f059315635e54dabe`
+
 - Phase 5 continuation chain
   - `T-036` planning provenance was carried by PR #100 on `main@75bc67e926525ff1440f85227288607507ae6814`.
   - `T-037/T-038` merged next via PR #126 on `main@9d7da98761ef88f82e5ddcd3418478d6ce6b14d4`.
@@ -215,16 +226,13 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- T-042 Meta-Governance Backlog Clearance & INSPECTOR Activation
-  - Status: Doing
-  - Scope: citation-rule coherence + role/app decoupling + minimal historical sync + INSPECTOR heartbeat activation
-  - Tracking PR: https://github.com/Hello-Pork-Belly/1click/pull/136
+- No active implementation task is declared by this T-043 runtime verification closeout.
 
 ## Next
 
-- T-042 is the current active post-release meta-governance cleanup step.
-- Phase 6 remains active on `main@26894a84e34772a6ac2935bf0da36b2c05418eca`.
-- A fresh Commander Step 0 can now judge T-042 as the current continuation step from SSOT without relying on chat memory.
+- INSPECTOR heartbeat is now Verified / Active on `main@de6f081f4ff7da637810ec7f059315635e54dabe`.
+- Phase 6 remains active after T-043 closeout.
+- A fresh Commander Step 0 can now judge the next post-release step from SSOT without relying on chat memory.
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-23T09:30:24Z)
 
