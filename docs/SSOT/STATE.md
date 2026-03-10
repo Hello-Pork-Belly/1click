@@ -218,7 +218,7 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 - T-042 Meta-Governance Backlog Clearance & INSPECTOR Activation
   - Status: Doing
   - Scope: citation-rule coherence + role/app decoupling + minimal historical sync + INSPECTOR heartbeat activation
-  - Tracking PR: <current T-042 PR>
+  - Tracking PR: https://github.com/Hello-Pork-Belly/1click/pull/136
 
 ## Next
 
