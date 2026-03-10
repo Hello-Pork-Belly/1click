@@ -207,7 +207,7 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 - T-043 INSPECTOR Heartbeat Runtime Verification & Activation
   - Status: Done
-  - Verification PR: <current T-043 PR>
+  - Verification PR: https://github.com/Hello-Pork-Belly/1click/pull/138
   - Verified run: https://github.com/Hello-Pork-Belly/1click/actions/runs/22895461492
   - Heartbeat status: Verified / Active on `main@de6f081f4ff7da637810ec7f059315635e54dabe`
 
