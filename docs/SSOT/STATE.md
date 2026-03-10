@@ -210,7 +210,10 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- none
+- T-041 Post-Release Hardening & End-to-End Verification
+  - Status: Doing
+  - Scope: installer defensive guards + sandboxed install-to-run smoke verification
+  - Tracking PR: https://github.com/Hello-Pork-Belly/1click/pull/134
 
 ## Next
 

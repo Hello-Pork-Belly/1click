@@ -7,8 +7,93 @@ case "$0" in
 esac
 REPO_ROOT=$(CDPATH='' cd -- "${SCRIPT_DIR}" && pwd)
 
-PREFIX=${PREFIX:-${HOME:-}/.local}
+if [ "${PREFIX+x}" = x ]; then
+  PREFIX=${PREFIX}
+else
+  PREFIX=${HOME:-}/.local
+fi
 USE_SYSTEM=0
+
+is_writable_dir() {
+  [ -d "$1" ] && [ -w "$1" ]
+}
+
+resolve_prefix() {
+  target=$1
+  [ -n "${target}" ] || return 1
+
+  case "${target}" in
+    /*) abs_target=${target} ;;
+    *) abs_target=$(pwd)/${target} ;;
+  esac
+
+  if [ -e "${abs_target}" ]; then
+    if [ -d "${abs_target}" ]; then
+      (CDPATH='' cd -- "${abs_target}" && pwd -P)
+      return $?
+    fi
+    printf '%s\n' "${abs_target}"
+    return 0
+  fi
+
+  parent=${abs_target%/*}
+  base=${abs_target##*/}
+  [ -n "${parent}" ] || parent=/
+  parent_resolved=$(CDPATH='' cd -- "${parent}" 2>/dev/null && pwd -P) || return 1
+  if [ "${parent_resolved}" = "/" ]; then
+    printf '/%s\n' "${base}"
+  else
+    printf '%s/%s\n' "${parent_resolved}" "${base}"
+  fi
+}
+
+validate_prefix() {
+  [ -n "${PREFIX}" ] || {
+    log_error "prefix must not be empty"
+    exit 1
+  }
+
+  case "${PREFIX}" in
+    /|/bin|/usr/bin|/sbin|/etc|/bin/|/usr/bin/|/sbin/|/etc/)
+      log_error "refusing dangerous prefix: ${PREFIX}"
+      exit 1
+      ;;
+  esac
+
+  PREFIX_RESOLVED=$(resolve_prefix "${PREFIX}") || {
+    log_error "cannot resolve prefix: ${PREFIX}"
+    exit 1
+  }
+
+  case "${PREFIX_RESOLVED}" in
+    /|/bin|/usr/bin|/sbin|/etc)
+      log_error "refusing dangerous prefix: ${PREFIX_RESOLVED}"
+      exit 1
+      ;;
+  esac
+
+  if [ -e "${PREFIX_RESOLVED}" ] && [ ! -d "${PREFIX_RESOLVED}" ]; then
+    log_error "prefix exists and is not a directory: ${PREFIX_RESOLVED}"
+    exit 1
+  fi
+
+  probe_path=${PREFIX_RESOLVED}
+  while [ ! -e "${probe_path}" ]; do
+    next_probe=${probe_path%/*}
+    [ -n "${next_probe}" ] || next_probe=/
+    if [ "${next_probe}" = "${probe_path}" ]; then
+      break
+    fi
+    probe_path=${next_probe}
+  done
+
+  if ! is_writable_dir "${probe_path}"; then
+    log_error "prefix is not writable via existing parent: ${probe_path}"
+    exit 1
+  fi
+
+  PREFIX=${PREFIX_RESOLVED}
+}
 
 usage() {
   cat <<'USAGE'
@@ -102,11 +187,6 @@ report_environment() {
 }
 
 prepare_prefix() {
-  if [ -e "${PREFIX}" ] && [ ! -d "${PREFIX}" ]; then
-    log_error "prefix exists and is not a directory: ${PREFIX}"
-    exit 1
-  fi
-
   BIN_DIR=${PREFIX}/bin
   LIB_DIR=${PREFIX}/lib
   RUNTIME_DIR=${LIB_DIR}/1click
@@ -178,6 +258,7 @@ if [ "${USE_SYSTEM}" -eq 1 ]; then
 fi
 
 report_environment
+validate_prefix
 prepare_prefix
 stage_runtime
 install_runtime
