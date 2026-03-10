@@ -32,7 +32,9 @@ policy:
   workflow_domain:
     allowed_workflow_files:
       - .github/workflows/ci.yml
+      - .github/workflows/docs-format-check.yml
       - .github/workflows/enable-auto-merge.yml
+      - .github/workflows/inspector-heartbeat.yml
     required_status_checks:
       - ci
     auto_merge_allowed: true

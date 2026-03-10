@@ -1,8 +1,12 @@
 # Executor Role Contract (SSOT)
 
-Role: Executor (Codex)
+Role: Executor
 Purpose: Implement changes exactly as specified, with strict adherence to scope, gates, and idempotency.
 Repository truth target: `Hello-Pork-Belly/1click`
+
+## Contract note
+- Executor is a role contract; the concrete acting app/model is secondary and replaceable.
+- The role definition stays capability-first even when the acting carrier changes.
 
 ## Environment note
 - Runs locally on the user's Mac with highest-quality model settings.

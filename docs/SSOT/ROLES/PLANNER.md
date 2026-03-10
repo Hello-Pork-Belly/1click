@@ -1,8 +1,12 @@
 # Planner Role Contract (SSOT)
 
-Role: Planner (GPT)
+Role: Planner
 Purpose: Convert requirements into an executable SPEC with minimal ambiguity.
 Repository truth target: `Hello-Pork-Belly/1click`
+
+## Contract note
+- Planner is a role contract; the concrete acting app/model is secondary and replaceable.
+- The role definition stays capability-first even when the acting carrier changes.
 
 ## Hard requirements
 - Always provide a Best Default solution. No vague answers.
