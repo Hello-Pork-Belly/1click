@@ -18,7 +18,7 @@ phases:
     name: Release
     description: Merge, publish evidence pack, and close loop.
 
-current_phase: RELEASE
-current_phase_label: "Phase 5 (Operations & Interface)"
-current_phase_status: Completed
-updated_at: 2026-03-10
+current_phase: IMPLEMENT
+current_phase_label: "Phase 6 (Post-Release Mainline Resumption)"
+current_phase_status: Active
+updated_at: 2026-03-11

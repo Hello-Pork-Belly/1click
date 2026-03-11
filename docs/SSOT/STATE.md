@@ -226,13 +226,17 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- No active implementation task is declared by this T-043 runtime verification closeout.
+- No implementation PR is active yet after the T-043 runtime verification closeout.
+- The first substantive next task is declared below and becomes active when its implementation PR opens.
 
 ## Next
 
-- INSPECTOR heartbeat is now Verified / Active on `main@de6f081f4ff7da637810ec7f059315635e54dabe`.
-- Phase 6 remains active after T-043 closeout.
-- A fresh Commander Step 0 can now judge the next post-release step from SSOT without relying on chat memory.
+- T-044 LOMP Lite minimum viable delivery
+  - This is the first substantive next task.
+  - Boundary: deliver the first bounded LOMP Lite slice for the two-node topology already prioritized in the blueprint: host runs OLS + WordPress, hub runs MariaDB + Redis, and cross-host access stays on Tailscale.
+  - Required minimum closure surface: install + check + backup/restore verification for the LOMP Lite path; keep LNMP, media/ops expansions, and governance leftovers out of scope.
+- INSPECTOR heartbeat remains Verified / Active; the last live verification was recorded on `main@de6f081f4ff7da637810ec7f059315635e54dabe`.
+- Phase 6 remains active and the next mainline handoff should start from T-044, not from governance leftovers.
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-23T09:30:24Z)
 
