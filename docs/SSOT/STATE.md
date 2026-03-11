@@ -233,8 +233,10 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 - T-044 LOMP Lite minimum viable delivery
   - This is the first substantive next task.
-  - Boundary: deliver the first bounded LOMP Lite slice for the two-node topology already prioritized in the blueprint: host runs OLS + WordPress, hub runs MariaDB + Redis, and cross-host access stays on Tailscale.
-  - Required minimum closure surface: install + check + backup/restore verification for the LOMP Lite path; keep LNMP, media/ops expansions, and governance leftovers out of scope.
+  - Goal: deliver the smallest end-to-end LOMP Lite slice that proves the two-node topology can be installed, checked, and recovered on the current mainline.
+  - Scope boundary: only the already-prioritized two-node LOMP Lite topology is in scope: host runs OLS + WordPress, hub runs MariaDB + Redis, and cross-host access stays on Tailscale.
+  - Scope boundary: keep LNMP variants, media/ops expansions, broader product roadmap work, and governance leftovers out of scope.
+  - Success direction / DoD direction: the LOMP Lite path must have a bounded install surface, a bounded verification/check surface, and a bounded backup/restore verification surface that Planner can turn into a single executable Best Default SPEC without inventing new product direction.
 - INSPECTOR heartbeat remains Verified / Active; the last live verification was recorded on `main@de6f081f4ff7da637810ec7f059315635e54dabe`.
 - Phase 6 remains active and the next mainline handoff should start from T-044, not from governance leftovers.
 
