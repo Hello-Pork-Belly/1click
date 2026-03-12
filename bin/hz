@@ -11,10 +11,22 @@ export HZ_REPO_ROOT=${REPO_ROOT}
 
 # shellcheck source=../lib/crypto.sh
 . "${REPO_ROOT}/lib/crypto.sh"
+# shellcheck source=../lib/inventory.sh
+. "${REPO_ROOT}/lib/inventory.sh"
 # shellcheck source=../lib/completion.sh
 . "${REPO_ROOT}/lib/completion.sh"
 # shellcheck source=../lib/html_renderer.sh
 . "${REPO_ROOT}/lib/html_renderer.sh"
+# shellcheck source=../lib/lomp_lite.sh
+. "${REPO_ROOT}/lib/lomp_lite.sh"
+# shellcheck source=../lib/lomp_lite_install.sh
+. "${REPO_ROOT}/lib/lomp_lite_install.sh"
+# shellcheck source=../lib/lomp_lite_check.sh
+. "${REPO_ROOT}/lib/lomp_lite_check.sh"
+# shellcheck source=../lib/lomp_lite_backup.sh
+. "${REPO_ROOT}/lib/lomp_lite_backup.sh"
+# shellcheck source=../lib/lomp_lite_restore.sh
+. "${REPO_ROOT}/lib/lomp_lite_restore.sh"
 
 hz_print_version() {
   if [ -r "${REPO_ROOT}/VERSION" ]; then
@@ -33,12 +45,17 @@ Usage:
   ./bin/hz check-env
   ./bin/hz completion bash
   ./bin/hz completion zsh
+  ./bin/hz lomp-lite install --role <host|hub> --inventory <file> [--dry-run]
+  ./bin/hz lomp-lite check --role <host|hub> --inventory <file> [--rootfs <dir>]
+  ./bin/hz lomp-lite backup --role <host|hub> --inventory <file> --out <dir> [--rootfs <dir>]
+  ./bin/hz lomp-lite restore --role <host|hub> --inventory <file> --from <dir> [--rootfs <dir>]
   ./bin/hz report html --input <path/to/log.jsonl> --output <path/to/report.html>
   ./bin/hz secret encrypt
   ./bin/hz secret decrypt
 
 Notes:
   - completion bash|zsh prints static completion scripts to stdout.
+  - lomp-lite is the bounded two-node LOMP Lite MVP surface.
   - report html also accepts legacy forms: --latest, positional input, and --out.
   - secret encrypt/decrypt read from stdin by default.
   - other existing hz commands continue through the legacy dispatcher.
@@ -1088,6 +1105,10 @@ EOF
   esac
 }
 
+hz_cmd_lomp_lite() {
+  lomp_lite_dispatch "$@"
+}
+
 main() {
   case "${1:-}" in
     ''|help|-h|--help)
@@ -1123,6 +1144,11 @@ main() {
     completion)
       shift || true
       hz_cmd_completion "$@"
+      exit $?
+      ;;
+    lomp-lite)
+      shift || true
+      hz_cmd_lomp_lite "$@"
       exit $?
       ;;
     *)

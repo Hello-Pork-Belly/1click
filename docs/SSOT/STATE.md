@@ -226,8 +226,8 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- No implementation PR is active yet after the T-043 runtime verification closeout.
-- The first substantive next task is declared below and becomes active when its implementation PR opens.
+- T-044 LOMP Lite minimum viable delivery is now the active implementation task.
+- The current execution tracking anchor is the open T-044 implementation PR.
 
 ## Next
 
