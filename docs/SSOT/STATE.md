@@ -227,7 +227,7 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 ## Doing
 
 - T-044 LOMP Lite minimum viable delivery is now the active implementation task.
-- The current execution tracking anchor is the open T-044 implementation PR.
+- The current execution tracking anchor is PR #146.
 
 ## Next
 
