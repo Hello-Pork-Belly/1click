@@ -157,10 +157,10 @@ lomp_copy_tree() {
   mkdir -p "${dest}"
   if [ -d "${src}" ]; then
     (
-      cd "${src}"
+      cd "${src}" || exit
       tar -cf - .
     ) | (
-      cd "${dest}"
+      cd "${dest}" || exit
       tar -xf -
     )
     return 0
@@ -316,7 +316,7 @@ lomp_parse_common_args() {
   esac
 
   export LOMP_ACTION LOMP_ROLE LOMP_INVENTORY LOMP_ROOTFS LOMP_OUT LOMP_FROM LOMP_DRY_RUN
-  export HZ_DRY_RUN=${LOMP_DRY_RUN}
+  export HZ_DRY_RUN="${LOMP_DRY_RUN}"
   lomp_load_inventory "${LOMP_INVENTORY}"
 }
 
