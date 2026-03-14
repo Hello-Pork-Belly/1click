@@ -226,7 +226,7 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- T-048 LOMP Hub minimum viable delivery is active on branch `codex/feat/t-048-lomp-hub-mvp-v1`; PR link will be attached when the implementation PR opens.
+- T-048 LOMP Hub minimum viable delivery is active in PR #160 (`codex/feat/t-048-lomp-hub-mvp-v1`).
 - The last landed implementation tracking anchor before this execution branch is PR #156.
 
 ## Next
