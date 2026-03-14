@@ -226,19 +226,19 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- T-047 LNMP Standard minimum viable delivery is now the active implementation task.
-- The current execution tracking anchor is PR #156.
+- No implementation PR is active after the T-047 LNMP Standard MVP merge.
+- The last landed implementation tracking anchor is PR #156.
 
 ## Next
 
-- T-047 LNMP Standard minimum viable delivery
-  - This is the first substantive next task after T-046.
-  - Goal: deliver the smallest end-to-end LNMP Standard slice that proves the single-node Nginx + PHP-FPM + WordPress + MariaDB + Redis path can reuse the Lite and Standard maintenance model already proven on the mainline.
-  - Scope boundary: only the already-described LNMP Standard topology is in scope: one node runs Nginx + PHP-FPM + WordPress + MariaDB + Redis together, while reusing the bounded install, backup, restore, and verification model already proven by T-045 and T-046 without introducing a separate Hub dependency.
-  - Scope boundary: keep LOMP Hub expansion, LNMP Hub/shared-Hub work, media/ops additions, broader product roadmap work, and governance leftovers out of scope.
-  - Success direction / DoD direction: the LNMP Standard path must have a bounded install surface, a bounded verification/check surface, and a bounded backup/restore verification surface for the single-node topology while reusing proven Lite and Standard patterns, so Planner can turn it into a single executable Best Default SPEC without inventing new product direction.
+- T-048 LOMP Hub minimum viable delivery
+  - This is the first substantive next task after T-047.
+  - Goal: deliver the smallest end-to-end LOMP Hub slice that proves the centralized Hub machine can install and manage shared MariaDB + Redis plus the minimal hub-main surface as a reusable shared layer on the mainline.
+  - Scope boundary: only the already-described LOMP Hub topology is in scope: a dedicated Hub node owns the shared MariaDB + Redis services and the minimal hub-main surface, while Hub-side Tailscale-only reachability, per-site data isolation, backup/restore, and basic diagnostics are treated as the shared module surface for Lite and Standard reuse.
+  - Scope boundary: keep LNMP Hub entry work, Lite/Standard rework, media/ops additions, broader product roadmap work, and governance leftovers out of scope.
+  - Success direction / DoD direction: the LOMP Hub path must have a bounded install surface, a bounded verification/check surface, and a bounded backup/restore verification surface for the shared hub-data + hub-main slice while establishing the shared module contract that later topology variants can reuse, so Planner can turn it into a single executable Best Default SPEC without inventing new product direction.
 - INSPECTOR heartbeat remains Verified / Active; the last live verification was recorded on `main@de6f081f4ff7da637810ec7f059315635e54dabe`.
-- Phase 6 remains active and the next mainline handoff should start from T-047, not from governance leftovers.
+- Phase 6 remains active and the next mainline handoff should start from T-048, not from governance leftovers.
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-23T09:30:24Z)
 
