@@ -37,6 +37,16 @@ export HZ_REPO_ROOT=${REPO_ROOT}
 . "${REPO_ROOT}/lib/lomp_standard_backup.sh"
 # shellcheck source=../lib/lomp_standard_restore.sh
 . "${REPO_ROOT}/lib/lomp_standard_restore.sh"
+# shellcheck source=../lib/lnmp_standard.sh
+. "${REPO_ROOT}/lib/lnmp_standard.sh"
+# shellcheck source=../lib/lnmp_standard_install.sh
+. "${REPO_ROOT}/lib/lnmp_standard_install.sh"
+# shellcheck source=../lib/lnmp_standard_check.sh
+. "${REPO_ROOT}/lib/lnmp_standard_check.sh"
+# shellcheck source=../lib/lnmp_standard_backup.sh
+. "${REPO_ROOT}/lib/lnmp_standard_backup.sh"
+# shellcheck source=../lib/lnmp_standard_restore.sh
+. "${REPO_ROOT}/lib/lnmp_standard_restore.sh"
 # shellcheck source=../lib/lnmp_lite.sh
 . "${REPO_ROOT}/lib/lnmp_lite.sh"
 # shellcheck source=../lib/lnmp_lite_install.sh
@@ -69,6 +79,10 @@ Usage:
   ./bin/hz lomp-standard check --inventory <file> [--rootfs <dir>]
   ./bin/hz lomp-standard backup --inventory <file> --out <dir> [--rootfs <dir>]
   ./bin/hz lomp-standard restore --inventory <file> --from <dir> [--rootfs <dir>]
+  ./bin/hz lnmp-standard install --inventory <file> [--dry-run]
+  ./bin/hz lnmp-standard check --inventory <file> [--rootfs <dir>]
+  ./bin/hz lnmp-standard backup --inventory <file> --out <dir> [--rootfs <dir>]
+  ./bin/hz lnmp-standard restore --inventory <file> --from <dir> [--rootfs <dir>]
   ./bin/hz lnmp-lite install --role <host|hub> --inventory <file> [--dry-run]
   ./bin/hz lnmp-lite check --role <host|hub> --inventory <file> [--rootfs <dir>]
   ./bin/hz lnmp-lite backup --role <host|hub> --inventory <file> --out <dir> [--rootfs <dir>]
@@ -84,6 +98,7 @@ Usage:
 Notes:
   - completion bash|zsh prints static completion scripts to stdout.
   - lomp-standard is the bounded single-node LOMP Standard MVP surface.
+  - lnmp-standard is the bounded single-node LNMP Standard MVP surface.
   - lnmp-lite is the bounded two-node LNMP Lite MVP surface.
   - lomp-lite is the bounded two-node LOMP Lite MVP surface.
   - report html also accepts legacy forms: --latest, positional input, and --out.
@@ -1143,6 +1158,10 @@ hz_cmd_lomp_standard() {
   lomp_standard_dispatch "$@"
 }
 
+hz_cmd_lnmp_standard() {
+  lnmp_standard_dispatch "$@"
+}
+
 hz_cmd_lnmp_lite() {
   lnmp_lite_dispatch "$@"
 }
@@ -1187,6 +1206,11 @@ main() {
     lomp-standard)
       shift || true
       hz_cmd_lomp_standard "$@"
+      exit $?
+      ;;
+    lnmp-standard)
+      shift || true
+      hz_cmd_lnmp_standard "$@"
       exit $?
       ;;
     lnmp-lite)
