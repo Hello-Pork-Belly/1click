@@ -226,8 +226,8 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- No implementation PR is active after the T-046 LOMP Standard MVP merge.
-- The last landed implementation tracking anchor is PR #152.
+- T-047 LNMP Standard minimum viable delivery is now the active implementation task.
+- The current execution tracking anchor is this T-047 implementation PR.
 
 ## Next
 
