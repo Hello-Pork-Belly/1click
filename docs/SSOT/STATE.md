@@ -226,19 +226,19 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- T-046 LOMP Standard minimum viable delivery is now the active implementation task.
-- The current execution tracking anchor is PR #152.
+- No implementation PR is active after the T-046 LOMP Standard MVP merge.
+- The last landed implementation tracking anchor is PR #152.
 
 ## Next
 
-- T-046 LOMP Standard minimum viable delivery
-  - This is the first substantive next task after T-045.
-  - Goal: deliver the smallest end-to-end LOMP Standard slice that proves the single-node OpenLiteSpeed + WordPress + MariaDB + Redis path can reuse the Lite modules and maintenance model already proven on the mainline.
-  - Scope boundary: only the already-described LOMP Standard topology is in scope: one node runs OpenLiteSpeed + WordPress + MariaDB + Redis together, while reusing the Lite-era backup, restore, and verification model without introducing a separate Hub dependency.
-  - Scope boundary: keep LNMP Standard/Hub variants, LOMP Hub expansion, media/ops additions, broader product roadmap work, and governance leftovers out of scope.
-  - Success direction / DoD direction: the LOMP Standard path must have a bounded install surface, a bounded verification/check surface, and a bounded backup/restore verification surface for the single-node topology while reusing proven Lite patterns, so Planner can turn it into a single executable Best Default SPEC without inventing new product direction.
+- T-047 LNMP Standard minimum viable delivery
+  - This is the first substantive next task after T-046.
+  - Goal: deliver the smallest end-to-end LNMP Standard slice that proves the single-node Nginx + PHP-FPM + WordPress + MariaDB + Redis path can reuse the Lite and Standard maintenance model already proven on the mainline.
+  - Scope boundary: only the already-described LNMP Standard topology is in scope: one node runs Nginx + PHP-FPM + WordPress + MariaDB + Redis together, while reusing the bounded install, backup, restore, and verification model already proven by T-045 and T-046 without introducing a separate Hub dependency.
+  - Scope boundary: keep LOMP Hub expansion, LNMP Hub/shared-Hub work, media/ops additions, broader product roadmap work, and governance leftovers out of scope.
+  - Success direction / DoD direction: the LNMP Standard path must have a bounded install surface, a bounded verification/check surface, and a bounded backup/restore verification surface for the single-node topology while reusing proven Lite and Standard patterns, so Planner can turn it into a single executable Best Default SPEC without inventing new product direction.
 - INSPECTOR heartbeat remains Verified / Active; the last live verification was recorded on `main@de6f081f4ff7da637810ec7f059315635e54dabe`.
-- Phase 6 remains active and the next mainline handoff should start from T-046, not from governance leftovers.
+- Phase 6 remains active and the next mainline handoff should start from T-047, not from governance leftovers.
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-23T09:30:24Z)
 
