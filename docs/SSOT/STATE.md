@@ -226,8 +226,8 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- No implementation PR is active after the T-047 LNMP Standard MVP merge.
-- The last landed implementation tracking anchor is PR #156.
+- T-048 LOMP Hub minimum viable delivery is active on branch `codex/feat/t-048-lomp-hub-mvp-v1`; PR link will be attached when the implementation PR opens.
+- The last landed implementation tracking anchor before this execution branch is PR #156.
 
 ## Next
 
