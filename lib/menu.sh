@@ -6,6 +6,7 @@ Usage:
   ./bin/hz menu
   ./bin/hz menu --help
   ./bin/hz menu --non-interactive <selection>
+  ./bin/hz menu --non-interactive <selection> [--target <tailscale-ip-or-name>]
 
 Selections:
   lomp-lite
@@ -18,6 +19,7 @@ Selections:
 Notes:
   - menu is English-first with Chinese assist.
   - menu is a bounded routing layer; it prints the exact underlying hz command for the chosen surface.
+  - Tailscale-gated surfaces run the bounded tailscale-precheck before dispatch is shown.
   - use --non-interactive in CI or any non-TTY context.
 EOF
 }
@@ -45,7 +47,9 @@ hz_menu_set_selection() {
   HZ_MENU_SELECTION_KEY=$1
   HZ_MENU_SELECTION_LABEL=$2
   HZ_MENU_DISPATCH_COMMAND=$3
+  HZ_MENU_LEGACY_DISPATCH_COMMAND=${4:-}
   export HZ_MENU_SELECTION_KEY HZ_MENU_SELECTION_LABEL HZ_MENU_DISPATCH_COMMAND
+  export HZ_MENU_LEGACY_DISPATCH_COMMAND
 }
 
 hz_menu_resolve_selection() {
@@ -67,7 +71,7 @@ hz_menu_resolve_selection() {
       hz_menu_set_selection lomp-hub "LOMP Hub" "./bin/hz lomp-hub --help"
       ;;
     6|tailscale-precheck|check-env)
-      hz_menu_set_selection tailscale-precheck "Tailscale precheck" "./bin/hz check-env"
+      hz_menu_set_selection tailscale-precheck "Tailscale precheck" "./bin/hz tailscale-precheck" "./bin/hz check-env"
       ;;
     0|exit|quit)
       hz_menu_set_selection exit "Exit" ""
@@ -86,6 +90,30 @@ hz_menu_print_dispatch() {
     return 0
   fi
   printf 'Dispatch: %s\n' "${HZ_MENU_DISPATCH_COMMAND}"
+  if [ -n "${HZ_MENU_LEGACY_DISPATCH_COMMAND:-}" ]; then
+    printf 'Dispatch: %s (legacy broader preflight)\n' "${HZ_MENU_LEGACY_DISPATCH_COMMAND}"
+  fi
+}
+
+hz_menu_selection_requires_tailscale() {
+  case "${HZ_MENU_SELECTION_KEY:-}" in
+    lomp-lite|lnmp-lite|lomp-hub)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+hz_menu_run_tailscale_gate() {
+  if ! hz_menu_selection_requires_tailscale; then
+    return 0
+  fi
+
+  if [ -n "${HZ_MENU_TARGET:-}" ]; then
+    tailscale_precheck_dispatch --target "${HZ_MENU_TARGET}" || return 1
+  fi
 }
 
 hz_menu_non_interactive() {
@@ -96,6 +124,7 @@ hz_menu_non_interactive() {
   }
 
   hz_menu_resolve_selection "${selection}" || return 1
+  hz_menu_run_tailscale_gate || return 1
   hz_menu_print_dispatch
 }
 
@@ -114,11 +143,13 @@ hz_menu_interactive() {
   }
 
   hz_menu_resolve_selection "${selection}" || return 1
+  hz_menu_run_tailscale_gate || return 1
   hz_menu_print_dispatch
 }
 
 hz_menu_dispatch() {
   menu_non_interactive=''
+  HZ_MENU_TARGET=''
 
   while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -128,6 +159,13 @@ hz_menu_dispatch() {
         ;;
       --non-interactive=*)
         menu_non_interactive=${1#--non-interactive=}
+        ;;
+      --target)
+        shift
+        HZ_MENU_TARGET=${1:-}
+        ;;
+      --target=*)
+        HZ_MENU_TARGET=${1#--target=}
         ;;
       --help|-h|help)
         hz_menu_usage
@@ -140,6 +178,8 @@ hz_menu_dispatch() {
     esac
     shift || true
   done
+
+  export HZ_MENU_TARGET
 
   if [ -n "${menu_non_interactive}" ]; then
     hz_menu_non_interactive "${menu_non_interactive}"
