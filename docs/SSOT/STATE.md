@@ -226,7 +226,7 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- T-050 Tailscale precheck minimum viable delivery is now in execution on PR #167.
+- T-050 Tailscale precheck minimum viable delivery is now in execution on PR #168.
 - The last landed implementation tracking anchor is PR #164.
 
 ## Next
