@@ -226,19 +226,19 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- T-048 LOMP Hub minimum viable delivery is active in PR #160 (`codex/feat/t-048-lomp-hub-mvp-v1`).
-- The last landed implementation tracking anchor before this execution branch is PR #156.
+- No implementation PR is active after the T-048 LOMP Hub MVP merge.
+- The last landed implementation tracking anchor is PR #160.
 
 ## Next
 
-- T-048 LOMP Hub minimum viable delivery
-  - This is the first substantive next task after T-047.
-  - Goal: deliver the smallest end-to-end LOMP Hub slice that proves the centralized Hub machine can install and manage shared MariaDB + Redis plus the minimal hub-main surface as a reusable shared layer on the mainline.
-  - Scope boundary: only the already-described LOMP Hub topology is in scope: a dedicated Hub node owns the shared MariaDB + Redis services and the minimal hub-main surface, while Hub-side Tailscale-only reachability, per-site data isolation, backup/restore, and basic diagnostics are treated as the shared module surface for Lite and Standard reuse.
-  - Scope boundary: keep LNMP Hub entry work, Lite/Standard rework, media/ops additions, broader product roadmap work, and governance leftovers out of scope.
-  - Success direction / DoD direction: the LOMP Hub path must have a bounded install surface, a bounded verification/check surface, and a bounded backup/restore verification surface for the shared hub-data + hub-main slice while establishing the shared module contract that later topology variants can reuse, so Planner can turn it into a single executable Best Default SPEC without inventing new product direction.
+- T-049 hz menu minimum viable delivery
+  - This is the first substantive next task after T-048.
+  - Goal: deliver the smallest end-to-end `hz menu` / Wizard slice that proves the current mainline can expose the already-landed LOMP/LNMP execution surfaces through a unified interactive entrypoint consistent with the repo command structure.
+  - Scope boundary: only the menu/UI layer is in scope: English-first / Chinese-assist language choice, bounded category navigation consistent with the SSOT command tree, and routing to already-landed Web surfaces plus the minimal Tailscale precheck entry already required by SSOT.
+  - Scope boundary: keep new application modules, Media/Ops/Check expansions, topology rework, tenant-isolation evidence tightening, broader product roadmap work, and governance leftovers out of scope.
+  - Success direction / DoD direction: the menu path must have a bounded interactive surface, a bounded non-TTY fallback surface, and a bounded routing surface to existing commands so Planner can turn it into a single executable Best Default SPEC without inventing new product direction.
 - INSPECTOR heartbeat remains Verified / Active; the last live verification was recorded on `main@de6f081f4ff7da637810ec7f059315635e54dabe`.
-- Phase 6 remains active and the next mainline handoff should start from T-048, not from governance leftovers.
+- Phase 6 remains active and the next mainline handoff should start from T-049, not from governance leftovers.
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-23T09:30:24Z)
 
