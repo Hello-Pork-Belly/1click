@@ -226,7 +226,7 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- T-049 `hz menu` minimum viable delivery is now in execution on the current feature branch; PR tracking anchor pending.
+- T-049 `hz menu` minimum viable delivery is now in execution in PR #164.
 - The last landed implementation tracking anchor is PR #160.
 
 ## Next
