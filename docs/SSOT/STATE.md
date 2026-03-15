@@ -226,19 +226,19 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- T-050 Tailscale precheck minimum viable delivery is now in execution on PR #168.
-- The last landed implementation tracking anchor is PR #164.
+- No implementation PR is active after the T-050 Tailscale precheck MVP merge.
+- The last landed implementation tracking anchor is PR #168.
 
 ## Next
 
-- T-050 Tailscale precheck minimum viable delivery
-  - This is the first substantive next task after T-049.
-  - Goal: deliver the smallest end-to-end Tailscale precheck slice that proves the current mainline can expose the already-required Tailscale capability as a reusable preflight surface for install status, connectivity, and node information through the existing `hz` / menu structure.
-  - Scope boundary: only the bounded Tailscale capability is in scope: install-status detection, connectivity checks to expected Tailscale peers or addresses, node information output, and a reusable precheck entry that other modules and `hz menu` can call.
-  - Scope boundary: keep new topology work, Cloudflare Tunnel / Zero Trust work, broader Net/Ops/Check expansions, broader product roadmap work, and governance leftovers out of scope.
-  - Success direction / DoD direction: the Tailscale path must have a bounded callable surface and a bounded verification surface that proves install status, peer reachability, and node identity can be checked in a reusable way without inventing a larger remote-management framework, so Planner can turn it into a single executable Best Default SPEC without inventing new product direction.
+- T-051 Cloudflare Tunnel public-exposure minimum viable delivery
+  - This is the first substantive next task after T-050.
+  - Goal: deliver the smallest end-to-end Cloudflare Tunnel slice that proves the current mainline can expose one bounded internal service through a `cloudflared` path plus the minimum paired Zero Trust access boundary already required by SSOT, while keeping Tailscale as the internal management boundary.
+  - Scope boundary: only the already-described Net public-exposure slice is in scope: one bounded Cloudflare Tunnel path, the minimum paired Zero Trust policy boundary already implied by SSOT, strict credential handling through env/secret store, and a reusable install/check/lifecycle surface for that single exposure path.
+  - Scope boundary: keep broader Cloudflare platform work, DNS/CDN tuning, R2/object-storage work, multi-app policy portfolios, broader Net/Ops/Check expansions, new application modules, and governance leftovers out of scope.
+  - Success direction / DoD direction: the Cloudflare path must have a bounded callable surface and a bounded verification surface that proves the tunnel can be established, credentials remain outside git/logs, the paired access boundary is present, and the path can be checked and rolled back without inventing a broader public-edge management framework, so Planner can turn it into a single executable Best Default SPEC without guessing roadmap direction.
 - INSPECTOR heartbeat remains Verified / Active; the last live verification was recorded on `main@de6f081f4ff7da637810ec7f059315635e54dabe`.
-- Phase 6 remains active and the next mainline handoff should start from T-050, not from governance leftovers.
+- Phase 6 remains active and the next mainline handoff should start from T-051, not from governance leftovers.
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-23T09:30:24Z)
 
