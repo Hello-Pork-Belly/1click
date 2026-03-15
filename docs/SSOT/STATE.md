@@ -226,19 +226,19 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- T-049 `hz menu` minimum viable delivery is now in execution in PR #164.
-- The last landed implementation tracking anchor is PR #160.
+- No implementation PR is active after the T-049 `hz menu` MVP merge.
+- The last landed implementation tracking anchor is PR #164.
 
 ## Next
 
-- T-049 hz menu minimum viable delivery
-  - This is the first substantive next task after T-048.
-  - Goal: deliver the smallest end-to-end `hz menu` / Wizard slice that proves the current mainline can expose the already-landed LOMP/LNMP execution surfaces through a unified interactive entrypoint consistent with the repo command structure.
-  - Scope boundary: only the menu/UI layer is in scope: English-first / Chinese-assist language choice, bounded category navigation consistent with the SSOT command tree, and routing to already-landed Web surfaces plus the minimal Tailscale precheck entry already required by SSOT.
-  - Scope boundary: keep new application modules, Media/Ops/Check expansions, topology rework, tenant-isolation evidence tightening, broader product roadmap work, and governance leftovers out of scope.
-  - Success direction / DoD direction: the menu path must have a bounded interactive surface, a bounded non-TTY fallback surface, and a bounded routing surface to existing commands so Planner can turn it into a single executable Best Default SPEC without inventing new product direction.
+- T-050 Tailscale precheck minimum viable delivery
+  - This is the first substantive next task after T-049.
+  - Goal: deliver the smallest end-to-end Tailscale precheck slice that proves the current mainline can expose the already-required Tailscale capability as a reusable preflight surface for install status, connectivity, and node information through the existing `hz` / menu structure.
+  - Scope boundary: only the bounded Tailscale capability is in scope: install-status detection, connectivity checks to expected Tailscale peers or addresses, node information output, and a reusable precheck entry that other modules and `hz menu` can call.
+  - Scope boundary: keep new topology work, Cloudflare Tunnel / Zero Trust work, broader Net/Ops/Check expansions, broader product roadmap work, and governance leftovers out of scope.
+  - Success direction / DoD direction: the Tailscale path must have a bounded callable surface and a bounded verification surface that proves install status, peer reachability, and node identity can be checked in a reusable way without inventing a larger remote-management framework, so Planner can turn it into a single executable Best Default SPEC without inventing new product direction.
 - INSPECTOR heartbeat remains Verified / Active; the last live verification was recorded on `main@de6f081f4ff7da637810ec7f059315635e54dabe`.
-- Phase 6 remains active and the next mainline handoff should start from T-049, not from governance leftovers.
+- Phase 6 remains active and the next mainline handoff should start from T-050, not from governance leftovers.
 
 ## Reality Snapshot RRC-ROUTINE (2026-02-23T09:30:24Z)
 
