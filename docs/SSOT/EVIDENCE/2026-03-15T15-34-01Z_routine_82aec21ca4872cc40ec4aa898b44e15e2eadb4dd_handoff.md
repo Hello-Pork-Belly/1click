@@ -1,0 +1,63 @@
+# Evidence Pack (handoff)
+
+- mode: routine
+- captured_at_utc: 2026-03-15T15:34:01Z
+- main_sha: 82aec21ca4872cc40ec4aa898b44e15e2eadb4dd
+- model_family: UNKNOWN
+- model_version: UNKNOWN
+- channel: UNKNOWN
+- run_elapsed_ms: 3038
+- result: UNKNOWN
+- retries: 0
+- notes: EMPTY
+- phase: TBD
+- next_task: TBD
+- dod: TBD
+
+## (1) git ls-remote refs/heads/main
+```text
+82aec21ca4872cc40ec4aa898b44e15e2eadb4dd	refs/heads/main
+```
+
+## (2) gh api commits/main --jq .sha
+```text
+82aec21ca4872cc40ec4aa898b44e15e2eadb4dd
+```
+
+## Recent merged PRs (list)
+```json
+[{"mergeCommit":{"oid":"82aec21ca4872cc40ec4aa898b44e15e2eadb4dd"},"mergedAt":"2026-03-15T15:15:33Z","number":162,"title":"chore(state): clarify post-T-048 next task","url":"https://github.com/Hello-Pork-Belly/1click/pull/162"},{"mergeCommit":{"oid":"f79b89183dd450b9d72d23252e6c67702729eedc"},"mergedAt":"2026-03-14T11:54:38Z","number":160,"title":"feat(lomp-hub): add T-048 shared hub MVP surface","url":"https://github.com/Hello-Pork-Belly/1click/pull/160"},{"mergeCommit":{"oid":"e2a3f342b7d1a8212037b2976ee678980dd5dc20"},"mergedAt":"2026-03-14T10:55:00Z","number":158,"title":"chore(state): clarify post-T-047 next task","url":"https://github.com/Hello-Pork-Belly/1click/pull/158"}]
+```
+
+## Recent merged PRs (view 1-3)
+
+### PR #162
+```json
+{"mergeCommit":{"oid":"82aec21ca4872cc40ec4aa898b44e15e2eadb4dd"},"mergedAt":"2026-03-15T15:15:33Z","number":162,"state":"MERGED","title":"chore(state): clarify post-T-048 next task","url":"https://github.com/Hello-Pork-Belly/1click/pull/162"}
+```
+
+### PR #160
+```json
+{"mergeCommit":{"oid":"f79b89183dd450b9d72d23252e6c67702729eedc"},"mergedAt":"2026-03-14T11:54:38Z","number":160,"state":"MERGED","title":"feat(lomp-hub): add T-048 shared hub MVP surface","url":"https://github.com/Hello-Pork-Belly/1click/pull/160"}
+```
+
+### PR #158
+```json
+{"mergeCommit":{"oid":"e2a3f342b7d1a8212037b2976ee678980dd5dc20"},"mergedAt":"2026-03-14T10:55:00Z","number":158,"state":"MERGED","title":"chore(state): clarify post-T-047 next task","url":"https://github.com/Hello-Pork-Belly/1click/pull/158"}
+```
+
+## Open PRs (summary)
+```json
+[{"number":161,"title":"docs(evidence): add handoff evidence pack (f79b891)","url":"https://github.com/Hello-Pork-Belly/1click/pull/161"},{"number":159,"title":"docs(evidence): add handoff evidence pack (e2a3f34)","url":"https://github.com/Hello-Pork-Belly/1click/pull/159"},{"number":157,"title":"docs(evidence): add handoff evidence pack (83b5931)","url":"https://github.com/Hello-Pork-Belly/1click/pull/157"},{"number":155,"title":"docs(evidence): add handoff evidence pack (4e713f4)","url":"https://github.com/Hello-Pork-Belly/1click/pull/155"},{"number":153,"title":"docs(evidence): add handoff evidence pack (20d41b9)","url":"https://github.com/Hello-Pork-Belly/1click/pull/153"},{"number":149,"title":"docs(evidence): add handoff evidence pack (27744f8)","url":"https://github.com/Hello-Pork-Belly/1click/pull/149"},{"number":147,"title":"docs(evidence): add handoff evidence pack (866b6ec)","url":"https://github.com/Hello-Pork-Belly/1click/pull/147"},{"number":145,"title":"docs(evidence): add handoff evidence pack (b5e530a)","url":"https://github.com/Hello-Pork-Belly/1click/pull/145"},{"number":143,"title":"docs(evidence): add handoff evidence pack (46000dc)","url":"https://github.com/Hello-Pork-Belly/1click/pull/143"},{"number":141,"title":"docs(evidence): add handoff evidence pack (8fd0d35)","url":"https://github.com/Hello-Pork-Belly/1click/pull/141"},{"number":105,"title":"feat(cli): implement T-1.1 base entrypoint and pre-flight env validation","url":"https://github.com/Hello-Pork-Belly/1click/pull/105"}]
+```
+
+## Local layout (worktree)
+```text
+worktree_root=/Users/freeman/Documents/1click-exec
+exec_worktree=/Users/freeman/Documents/1click-exec/1click
+audit_worktree=
+repo_toplevel=/Users/freeman/Documents/1click-exec/1click
+```
+
+## Next
+- Phase1/Task: TBD
