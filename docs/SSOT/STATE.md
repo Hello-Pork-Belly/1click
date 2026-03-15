@@ -226,7 +226,7 @@ main_head: `daf4b51c260bbfe8184fdec06aa277fb063d54e5`
 
 ## Doing
 
-- No implementation PR is active after the T-048 LOMP Hub MVP merge.
+- T-049 `hz menu` minimum viable delivery is now in execution on the current feature branch; PR tracking anchor pending.
 - The last landed implementation tracking anchor is PR #160.
 
 ## Next
