@@ -67,6 +67,8 @@ export HZ_REPO_ROOT=${REPO_ROOT}
 . "${REPO_ROOT}/lib/lnmp_lite_backup.sh"
 # shellcheck source=../lib/lnmp_lite_restore.sh
 . "${REPO_ROOT}/lib/lnmp_lite_restore.sh"
+# shellcheck source=../lib/tailscale_precheck.sh
+. "${REPO_ROOT}/lib/tailscale_precheck.sh"
 # shellcheck source=../lib/menu.sh
 . "${REPO_ROOT}/lib/menu.sh"
 
@@ -87,6 +89,7 @@ Usage:
   ./bin/hz check-env
   ./bin/hz completion bash
   ./bin/hz completion zsh
+  ./bin/hz tailscale-precheck [--target <tailscale-ip-or-name>]
   ./bin/hz menu [--non-interactive <selection>]
   ./bin/hz lomp-hub install --inventory <file> [--dry-run]
   ./bin/hz lomp-hub check --inventory <file> [--rootfs <dir>]
@@ -114,6 +117,7 @@ Usage:
 
 Notes:
   - completion bash|zsh prints static completion scripts to stdout.
+  - tailscale-precheck is the bounded reusable Tailscale status/connectivity/node-info gate.
   - menu is the bounded interactive entrypoint for the landed Lite, Standard, Hub, and Tailscale precheck surfaces.
   - lomp-hub is the bounded shared Hub MVP surface for MariaDB, Redis, and hub-main.
   - lomp-standard is the bounded single-node LOMP Standard MVP surface.
@@ -1189,6 +1193,10 @@ hz_cmd_lnmp_lite() {
   lnmp_lite_dispatch "$@"
 }
 
+hz_cmd_tailscale_precheck() {
+  tailscale_precheck_dispatch "$@"
+}
+
 hz_cmd_menu() {
   hz_menu_dispatch "$@"
 }
@@ -1228,6 +1236,11 @@ main() {
     completion)
       shift || true
       hz_cmd_completion "$@"
+      exit $?
+      ;;
+    tailscale-precheck)
+      shift || true
+      hz_cmd_tailscale_precheck "$@"
       exit $?
       ;;
     menu)
